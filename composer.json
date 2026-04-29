@@ -40,6 +40,6 @@
                 "Happenv\\LaravelTrueModular\\KernelServiceProvider"
             ]
         }
-    }
+    },
     "$schema": "https://getcomposer.org/schema.json"
 }
