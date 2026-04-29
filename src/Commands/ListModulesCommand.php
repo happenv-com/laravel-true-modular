@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\LaravelTrueModularCommands;
+namespace Happenv\LaravelTrueModular\Commands;
 
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;

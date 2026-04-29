@@ -1,10 +1,12 @@
 <?php
 
-namespace Happenv\LaravelTrueModularCommands;
+namespace Happenv\LaravelTrueModular\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\MigrateMakeCommand;
 use Override;
+
+use function Happenv\LaravelTrueModular\module_path;
 
 class MakeMigrationCommand extends Command
 {

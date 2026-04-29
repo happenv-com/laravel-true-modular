@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\LaravelTrueModularConfig;
+namespace Happenv\LaravelTrueModular\Config;
 
 class ConfigMerger
 {
