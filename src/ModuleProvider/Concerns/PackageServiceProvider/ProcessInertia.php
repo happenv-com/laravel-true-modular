@@ -1,0 +1,33 @@
+<?php
+
+namespace Happenv\LaravelTrueModularModuleProvider\Concerns\PackageServiceProvider;
+
+use Happenv\LaravelTrueModularModuleProvider\ModuleProvider;
+use Illuminate\Support\Str;
+
+/**
+ * @mixin ModuleProvider
+ */
+trait ProcessInertia
+{
+    protected function processInertia(): self
+    {
+        if (! $this->module->hasInertiaComponents) {
+            return $this;
+        }
+
+        $namespace = $this->module->viewNamespace;
+        $directoryName = Str::of($this->moduleView($namespace))->studly()->remove('-')->value();
+        $vendorComponents = $this->module->basePath('/../resources/js/Pages');
+        $appComponents = base_path('resources/js/Pages/' . $directoryName);
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes(
+                [$vendorComponents => $appComponents],
+                $this->moduleView($namespace) . '-inertia-components'
+            );
+        }
+
+        return $this;
+    }
+}

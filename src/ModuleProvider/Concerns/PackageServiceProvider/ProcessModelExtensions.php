@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Happenv\LaravelTrueModularModuleProvider\Concerns\PackageServiceProvider;
+
+use Illuminate\Database\Eloquent\Model;
+use ReflectionClass;
+use ReflectionMethod;
+
+trait ProcessModelExtensions
+{
+    protected function processModelExtensions(): self
+    {
+        if (blank($this->module->modelExtensions)) {
+            return $this;
+        }
+
+        foreach ($this->module->modelExtensions as $model => $extension) {
+            $reflection = new ReflectionClass($extension);
+
+            $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+
+            foreach ($methods as $method) {
+                if ($method->class !== $extension) {
+                    continue;
+                }
+
+                if ($method->isConstructor()) {
+                    continue;
+                }
+
+                $methodName = $method->getName();
+
+                /**
+                 * @var class-string<Model> $model
+                 */
+                assert(\class_exists($model));
+
+                $model::resolveRelationUsing(
+                    $methodName,
+                    fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
+                );
+            }
+        }
+
+        return $this;
+    }
+}

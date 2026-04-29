@@ -1,0 +1,38 @@
+{
+    "name": "happenv-com/laravel-true-modular",
+    "license": "MIT",
+    "type": "library",
+    "version": "0.1",
+    "authors": [
+        {
+            "name": "webard",
+            "email": "b.gajda@webard.me"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^12.0 || ^13.0",
+        "thecodingmachine/safe": "^3.0"
+    },
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.48",
+        "pestphp/pest": "^4.0",
+        "thecodingmachine/phpstan-safe-rule": "^1.2"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Happenv\\LaravelTrueModular\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "pestphp/pest-plugin": true
+        }
+    },
+    "$schema": "https://getcomposer.org/schema.json"
+}
