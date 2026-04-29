@@ -18,7 +18,7 @@
         "pestphp/pest": "^4.0",
         "thecodingmachine/phpstan-safe-rule": "^1.2"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
             "Happenv\\LaravelTrueModular\\": "src/"
