@@ -7,7 +7,6 @@ namespace Happenv\LaravelTrueModular;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
 
@@ -19,14 +18,15 @@ use Safe\Exceptions\JsonException;
  * (dependencies first), while preserving non-modular providers
  * in their original relative positions.
  */
-final readonly class ServiceProviderSorter
+final class ServiceProviderSorter
 {
-    private const string VENDOR_NAMESPACE = 'Myapp\\';
-
-    private const string VENDOR_PACKAGE = 'myapp/';
+    /**
+     * @var array<string, string>|null Cached namespace to module name map
+     */
+    private ?array $namespaceMap = null;
 
     public function __construct(
-        private ModuleTree $moduleTree,
+        private readonly ModuleTree $moduleTree,
     ) {}
 
     /**
@@ -78,30 +78,57 @@ final readonly class ServiceProviderSorter
     /**
      * Get the module package name for a service provider.
      *
-     * @return string|null The module name (e.g., 'myapp/core') or null if not an app provider
+     * @return string|null The module name (e.g., 'vendor/module') or null if not a module provider
+     *
+     * @throws FilesystemException
+     * @throws JsonException
      */
     public function getModuleName(ServiceProvider $provider): ?string
     {
         $className = $provider::class;
+        $namespaceMap = $this->getNamespaceMap();
 
-        if (! str_starts_with($className, self::VENDOR_NAMESPACE)) {
-            return null;
+        // Sort by namespace length (longest first) to match most specific namespace
+        $namespaces = array_keys($namespaceMap);
+        usort($namespaces, fn (string $a, string $b): int => strlen($b) <=> strlen($a));
+
+        foreach ($namespaces as $namespace) {
+            if (str_starts_with($className, $namespace)) {
+                return $namespaceMap[$namespace];
+            }
         }
 
-        // Extract namespace part after 'Myapp\'
-        $namespacePart = substr($className, strlen(self::VENDOR_NAMESPACE));
+        return null;
+    }
 
-        // Get the first segment (module namespace)
-        $moduleNamespace = Str::before($namespacePart, '\\');
-
-        if ($moduleNamespace === '') {
-            return null;
+    /**
+     * Build the namespace to module name map from autoload config.
+     *
+     * @return array<string, string>
+     *
+     * @throws FilesystemException
+     * @throws JsonException
+     */
+    private function getNamespaceMap(): array
+    {
+        if ($this->namespaceMap !== null) {
+            return $this->namespaceMap;
         }
 
-        // Convert PascalCase to kebab-case
-        $moduleSlug = Str::kebab($moduleNamespace);
+        $this->namespaceMap = [];
+        $modules = $this->moduleTree->getAllModules();
 
-        return self::VENDOR_PACKAGE . $moduleSlug;
+        foreach ($modules as $moduleName => $moduleData) {
+            $autoload = $moduleData['composer']['autoload']['psr-4'] ?? [];
+
+            foreach (array_keys($autoload) as $namespace) {
+                // Normalize namespace (ensure it ends with backslash)
+                $normalizedNamespace = rtrim((string) $namespace, '\\') . '\\';
+                $this->namespaceMap[$normalizedNamespace] = $moduleName;
+            }
+        }
+
+        return $this->namespaceMap;
     }
 
     /**
@@ -109,6 +136,9 @@ final readonly class ServiceProviderSorter
      *
      * @param  array<ServiceProvider>  $providers
      * @return array<string, array<ServiceProvider>> Keyed by module name
+     *
+     * @throws FilesystemException
+     * @throws JsonException
      */
     public function groupByModule(array $providers): array
     {

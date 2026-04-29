@@ -213,8 +213,10 @@ final class Application extends FoundationApplication
 
     protected static string $moduleComposerType = 'true-module';
 
-    public static function moduleComposerType(string $type): void {
+    public static function moduleComposerType(string $type): string {
         self::$moduleComposerType = $type;
+
+        return self::class;
     }
 
     public static function getModuleComposerType(): string {

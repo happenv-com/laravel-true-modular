@@ -180,22 +180,40 @@ final readonly class ModuleFileFinder
      * Resolve the fully qualified class name from a file path.
      *
      * @return class-string
+     *
+     * @throws FilesystemException
+     * @throws JsonException
      */
     private function resolveClassName(string $filePath, string $moduleName, string $namespaceSegment): string
     {
         $fileName = pathinfo($filePath, PATHINFO_FILENAME);
+        $namespace = $this->getModuleNamespace($moduleName);
 
-        // Convert module name like "myapp/sale" to namespace "Myapp\Sale"
-        $namespaceParts = explode('/', $moduleName);
-        $namespace = implode('\\', array_map(
-            fn (string $part): string => str_replace(
-                ' ',
-                '',
-                ucwords(str_replace('-', ' ', $part))
-            ),
-            $namespaceParts
-        ));
+        return $namespace . $namespaceSegment . '\\' . $fileName;
+    }
 
-        return $namespace . '\\' . $namespaceSegment . '\\' . $fileName;
+    /**
+     * Get the root namespace for a module from its autoload config.
+     *
+     * @throws FilesystemException
+     * @throws JsonException
+     */
+    private function getModuleNamespace(string $moduleName): string
+    {
+        $modules = $this->moduleTree->getAllModules();
+
+        if (! isset($modules[$moduleName])) {
+            return '';
+        }
+
+        $autoload = $modules[$moduleName]['composer']['autoload']['psr-4'] ?? [];
+
+        // Return the first namespace (typically there's only one)
+        foreach (array_keys($autoload) as $namespace) {
+            // Ensure namespace ends with backslash
+            return rtrim((string) $namespace, '\\') . '\\';
+        }
+
+        return '';
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\ModuleSystem;
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
@@ -17,7 +18,6 @@ use function Safe\json_decode;
  */
 final class ModuleTree
 {
-    private const string VENDOR = 'myapp';
 
     /**
      * @var array<string, array<string, mixed>>|null Cached module data
@@ -77,6 +77,12 @@ final class ModuleTree
                 continue;
             }
 
+            // Filter by module type
+            $expectedType = Application::getModuleComposerType();
+            if (($composer['type'] ?? null) !== $expectedType) {
+                continue;
+            }
+
             $moduleName = $composer['name'];
 
             $this->modules[$moduleName] = [
@@ -122,10 +128,6 @@ final class ModuleTree
         $dependencies = [];
 
         foreach (array_keys($require) as $dependency) {
-            if (! str_starts_with((string) $dependency, self::VENDOR . '/')) {
-                continue;
-            }
-
             // Only include if it's an actual module we know about
             if (! isset($modules[$dependency])) {
                 continue;

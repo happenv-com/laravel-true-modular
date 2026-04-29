@@ -134,10 +134,11 @@ $grouped = $sorter->groupByModule($providers);
 
 ### How Sorting Works
 
-1. **Separate** providers into modules vs others (Laravel, Spatie, etc.)
-2. **Preserve** original order for non-modules providers
-3. **Sort** Module providers using Kahn's topological sort algorithm
-4. **Merge** - other providers first, then sorted Module providers
+1. **Identify** modules by `composer.json` type field (`true-module` by default)
+2. **Separate** providers into modules vs others (Laravel, Spatie, etc.)
+3. **Preserve** original order for non-module providers
+4. **Sort** module providers using Kahn's topological sort algorithm
+5. **Merge** - other providers first, then sorted module providers
 
 ```
 Input:  [Laravel, Filament, Sale, Core, Spatie, Amazon, Pim]
@@ -158,6 +159,64 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(...)
     ->withMiddleware(...)
     ->create();
+```
+
+## Module Detection
+
+Modules are identified by their `composer.json` `type` field. By default, the package looks for packages with `type: "true-module"`.
+
+### Module composer.json
+
+Each module must have the correct type in its `composer.json`:
+
+```json
+{
+    "name": "myapp/sale",
+    "type": "true-module",
+    "require": {
+        "myapp/core": "*",
+        "myapp/pim": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Myapp\\Sale\\": "src/"
+        }
+    }
+}
+```
+
+### Custom Module Type
+
+If you prefer a different type identifier (e.g., for organization-specific naming), you can customize it in `bootstrap/app.php`:
+
+```php
+<?php
+
+use Myapp\Kernel\Application;
+
+return Application::moduleComposerType('acme-module')
+    ::configure(basePath: dirname(__DIR__))
+    ->withRouting(...)
+    ->withMiddleware(...)
+    ->create();
+```
+
+Then your modules would use:
+
+```json
+{
+    "name": "acme/billing",
+    "type": "acme-module"
+}
+```
+
+### Retrieving the Current Type
+
+You can programmatically check the configured module type:
+
+```php
+$type = Application::getModuleComposerType();
+// Returns: 'true-module' (default) or your custom type
 ```
 
 ## Best Practices
@@ -199,6 +258,13 @@ public function boot(): void
     $this->loadRoutesFrom(...);
 }
 ```
+
+### Module Setup Checklist
+
+- [ ] Set `"type": "true-module"` in each module's `composer.json`
+- [ ] Define dependencies in `require` section
+- [ ] Configure PSR-4 autoload namespace
+- [ ] (Optional) Customize type via `Application::moduleComposerType()`
 
 ## Config Extension (`extendConfigs`)
 
