@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular;
 
-use Happenv\LaravelTrueModularCommands\ListModulesCommand;
-use Happenv\LaravelTrueModularCommands\MakeMigrationCommand;
-use Happenv\LaravelTrueModularCommands\SeedModulesCommand;
+use Happenv\LaravelTrueModular\Commands\ListModulesCommand;
+use Happenv\LaravelTrueModular\Commands\MakeMigrationCommand;
+use Happenv\LaravelTrueModular\Commands\SeedModulesCommand;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleFileFinder;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 use Illuminate\Support\ServiceProvider;

@@ -34,5 +34,12 @@
             "pestphp/pest-plugin": true
         }
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Happenv\\LaravelTrueModular\\KernelServiceProvider"
+            ]
+        }
+    }
     "$schema": "https://getcomposer.org/schema.json"
 }
