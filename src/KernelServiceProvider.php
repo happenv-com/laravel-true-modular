@@ -7,8 +7,8 @@ namespace Happenv\LaravelTrueModular;
 use Happenv\LaravelTrueModularCommands\ListModulesCommand;
 use Happenv\LaravelTrueModularCommands\MakeMigrationCommand;
 use Happenv\LaravelTrueModularCommands\SeedModulesCommand;
-use Happenv\LaravelTrueModularModuleSystem\ModuleFileFinder;
-use Happenv\LaravelTrueModularModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleFileFinder;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 use Illuminate\Support\ServiceProvider;
 use Override;
 

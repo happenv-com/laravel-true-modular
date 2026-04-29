@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Happenv\LaravelTrueModularModuleSystem;
+namespace Happenv\LaravelTrueModular\ModuleSystem;
 
-use Happenv\LaravelTrueModularModuleSystem\Exceptions\CircularDependencyException;
+use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
 use Illuminate\Support\Collection;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;

@@ -1,9 +1,9 @@
 <?php
 
-namespace Happenv\LaravelTrueModularModuleProvider\Concerns\PackageServiceProvider;
+namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModularConfig\ConfigMerger;
-use Happenv\LaravelTrueModularModuleProvider\ModuleProvider;
+use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**

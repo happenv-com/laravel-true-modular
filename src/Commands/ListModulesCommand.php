@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModularCommands;
 
-use Happenv\LaravelTrueModularModuleSystem\Exceptions\CircularDependencyException;
-use Happenv\LaravelTrueModularModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
 use Override;

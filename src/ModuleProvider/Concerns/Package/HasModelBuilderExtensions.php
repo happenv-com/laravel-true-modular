@@ -1,8 +1,8 @@
 <?php
 
-namespace Happenv\LaravelTrueModularModuleProvider\Concerns\Package;
+namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package;
 
-use Happenv\LaravelTrueModularModuleProvider\Module;
+use Happenv\LaravelTrueModular\ModuleProvider\Module;
 use InvalidArgumentException;
 use Throwable;
 

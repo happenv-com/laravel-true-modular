@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular;
 
-use Happenv\LaravelTrueModularModuleSystem\Exceptions\CircularDependencyException;
-use Happenv\LaravelTrueModularModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Safe\Exceptions\FilesystemException;

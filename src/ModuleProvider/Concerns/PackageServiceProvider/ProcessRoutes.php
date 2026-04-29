@@ -1,8 +1,8 @@
 <?php
 
-namespace Happenv\LaravelTrueModularModuleProvider\Concerns\PackageServiceProvider;
+namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
-use Happenv\LaravelTrueModularModuleProvider\ModuleProvider;
+use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
 
 /**
  * @mixin ModuleProvider

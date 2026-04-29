@@ -1,10 +1,10 @@
 <?php
 
-namespace Happenv\LaravelTrueModularModuleProvider\Concerns\PackageServiceProvider;
+namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
-use Happenv\LaravelTrueModularModuleProvider\ModuleProvider;
+use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;

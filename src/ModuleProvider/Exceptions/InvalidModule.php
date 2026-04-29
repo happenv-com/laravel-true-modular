@@ -1,6 +1,6 @@
 <?php
 
-namespace Happenv\LaravelTrueModularModuleProvider\Exceptions;
+namespace Happenv\LaravelTrueModular\ModuleProvider\Exceptions;
 
 use Exception;
 

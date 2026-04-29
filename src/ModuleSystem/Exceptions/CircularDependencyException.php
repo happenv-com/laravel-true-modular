@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\LaravelTrueModularModuleSystem\Exceptions;
+namespace Happenv\LaravelTrueModular\ModuleSystem\Exceptions;
 
 use Exception;
 

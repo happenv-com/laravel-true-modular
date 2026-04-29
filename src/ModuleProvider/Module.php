@@ -1,28 +1,28 @@
 <?php
 
-namespace Happenv\LaravelTrueModularModuleProvider;
+namespace Happenv\LaravelTrueModular\ModuleProvider;
 
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasAssets;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasBladeComponents;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasBroadcasts;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasCommands;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasConfigs;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasEventListeners;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasInertia;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasLivewireComponents;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasMigrations;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasModelBuilderExtensions;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasModelExtensions;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasMorphMapDefinitions;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasPermissions;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasRoutes;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasSchedule;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasServiceProviders;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasTranslations;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasViewComposers;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasViews;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasViewSharedData;
-use Happenv\LaravelTrueModularModuleProvider\Concerns\Package\HasVoters;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasAssets;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasBladeComponents;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasBroadcasts;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasCommands;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasConfigs;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasEventListeners;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasInertia;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasLivewireComponents;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasMigrations;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasModelBuilderExtensions;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasModelExtensions;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasMorphMapDefinitions;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasPermissions;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasRoutes;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasSchedule;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasServiceProviders;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasTranslations;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViewComposers;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViews;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViewSharedData;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasVoters;
 use Illuminate\Support\Str;
 
 class Module

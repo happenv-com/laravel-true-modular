@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\LaravelTrueModularModuleProvider\Concerns\PackageServiceProvider;
+namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Closure;
 
