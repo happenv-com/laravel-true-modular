@@ -210,4 +210,14 @@ final class Application extends FoundationApplication
         $this->initializingCallbacks = [];
         $this->initializedCallbacks = [];
     }
+
+    protected static string $moduleComposerType = 'true-module';
+
+    public static function moduleComposerType(string $type): void {
+        self::$moduleComposerType = $type;
+    }
+
+    public static function getModuleComposerType(): string {
+        return self::$moduleComposerType;
+    }
 }
