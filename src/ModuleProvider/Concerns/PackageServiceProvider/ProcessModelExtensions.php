@@ -36,11 +36,17 @@ trait ProcessModelExtensions
                  * @var class-string<Model> $model
                  */
                 assert(\class_exists($model));
+                
+                if(str_starts_with($methodName, 'get') && str_ends_with($methodName, 'Attribute')) {
+                    $model::handleMissingAttributeViolationUsing(fn ($model) =>  new $extension($model)->{$methodName}());
+                } else {
+                    $model::resolveRelationUsing(
+                        $methodName,
+                        fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
+                    );
+                }
 
-                $model::resolveRelationUsing(
-                    $methodName,
-                    fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
-                );
+
             }
         }
 
