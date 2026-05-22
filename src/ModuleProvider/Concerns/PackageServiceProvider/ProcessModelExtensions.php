@@ -7,6 +7,8 @@ namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvi
 use Illuminate\Database\Eloquent\Model;
 use ReflectionClass;
 use ReflectionMethod;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\MissingAttributeException;
 
 trait ProcessModelExtensions
 {
@@ -20,6 +22,10 @@ trait ProcessModelExtensions
             $reflection = new ReflectionClass($extension);
 
             $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+
+
+            // Handle missing attribute violation for the model using the provided extension
+            $model::handleMissingAttributeViolationUsing(fn($model, $key) => $this->handleNamedAttribute($extension, $model, $key));
 
             foreach ($methods as $method) {
                 if ($method->class !== $extension) {
@@ -37,19 +43,47 @@ trait ProcessModelExtensions
                  */
                 assert(\class_exists($model));
                 
-                if(str_starts_with($methodName, 'get') && str_ends_with($methodName, 'Attribute')) {
-                    $model::handleMissingAttributeViolationUsing(fn ($model) =>  new $extension($model)->{$methodName}());
-                } else {
+                // Skip attributes, they are handled by handleMissingAttributeViolationUsing
+                if(
+                    str_starts_with($methodName, 'get')
+                    && str_ends_with($methodName, 'Attribute'))
+                {
+                    continue;
+                }
+
+
                     $model::resolveRelationUsing(
                         $methodName,
                         fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
                     );
-                }
+                
 
 
             }
+
+            
         }
 
         return $this;
+    }
+
+    private function handleNamedAttribute($extension, $model, $key)
+    {
+   
+
+        $methodName = 'get' . Str::studly($key) . 'Attribute';
+
+        $extension = new $extension($model);
+
+
+
+        dump($extension, $methodName, $key);
+
+        if (method_exists($extension, $methodName)) {
+                return new $extension($model)->{$methodName}();
+            }
+            
+            throw new MissingAttributeException($model, $key);
+        
     }
 }
