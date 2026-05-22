@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
-use Illuminate\Database\Eloquent\Model;
-use ReflectionClass;
-use ReflectionMethod;
 
 trait ProcessModelExtensions
 {
@@ -19,30 +16,33 @@ trait ProcessModelExtensions
         foreach ($this->module->modelExtensions as $model => $extension) {
             $this->registerAttributeResolver($model, $extension);
 
-            $methods = (new ReflectionClass($extension))->getMethods(ReflectionMethod::IS_PUBLIC);
-
-            foreach ($methods as $method) {
-                if ($method->class !== $extension || $method->isConstructor()) {
-                    continue;
-                }
-
-                $methodName = $method->getName();
-
-                /** @var class-string<Model> $model */
-                assert(\class_exists($model));
-
-                if (str_starts_with($methodName, 'get') && str_ends_with($methodName, 'Attribute')) {
-                    continue;
-                }
-
-                $model::resolveRelationUsing(
-                    $methodName,
-                    fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
-                );
-            }
+            $this->registerDynamicRelations($model, $extension);
         }
 
         return $this;
+    }
+
+    private function registerDynamicRelations(string $model, string $extension): void
+    {
+        $methods = (new \ReflectionClass($extension))->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach ($methods as $method) {
+            if ($method->class !== $extension || $method->isConstructor()) {
+                continue;
+            }
+
+            $methodName = $method->getName();
+            $methodReturnType = $method->getReturnType();
+
+            if (str_starts_with($methodName, 'get') && str_ends_with($methodName, 'Attribute')) {
+                continue;
+            }
+
+            $model::resolveRelationUsing(
+                $methodName,
+                fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
+            );
+        }
     }
 
     private function registerAttributeResolver(string $model, string $extension): void
