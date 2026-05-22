@@ -17,15 +17,7 @@ trait ProcessModelExtensions
         }
 
         foreach ($this->module->modelExtensions as $model => $extension) {
-            $firstExtensionForModel = ! AttributeResolversBag::has($model);
-
-            AttributeResolversBag::addExtension($model, $extension);
-
-            if ($firstExtensionForModel) {
-                $model::handleMissingAttributeViolationUsing(
-                    fn ($modelInstance, $key) => AttributeResolversBag::resolve($modelInstance, $key)
-                );
-            }
+            $this->registerAttributeResolver($model, $extension);
 
             $methods = (new ReflectionClass($extension))->getMethods(ReflectionMethod::IS_PUBLIC);
 
@@ -51,5 +43,18 @@ trait ProcessModelExtensions
         }
 
         return $this;
+    }
+
+    private function registerAttributeResolver(string $model, string $extension): void
+    {
+        $firstExtensionForModel = ! AttributeResolversBag::has($model);
+
+        AttributeResolversBag::addExtension($model, $extension);
+
+        if ($firstExtensionForModel) {
+            $model::handleMissingAttributeViolationUsing(
+                fn ($modelInstance, $key) => AttributeResolversBag::resolve($modelInstance, $key)
+            );
+        }
     }
 }
