@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait ProcessModelExtensions
 {
@@ -32,9 +33,9 @@ trait ProcessModelExtensions
             }
 
             $methodName = $method->getName();
-            $methodReturnType = $method->getReturnType();
+            $returnType = $method->getReturnType();
 
-            if (str_starts_with($methodName, 'get') && str_ends_with($methodName, 'Attribute')) {
+            if (! $this->isRelationMethod($returnType)) {
                 continue;
             }
 
@@ -43,6 +44,18 @@ trait ProcessModelExtensions
                 fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
             );
         }
+    }
+
+    private function isRelationMethod(?\ReflectionType $returnType): bool
+    {
+        if (! $returnType instanceof \ReflectionNamedType) {
+            return false;
+        }
+
+        $typeName = $returnType->getName();
+
+        return class_exists($typeName)
+            && is_a($typeName, Relation::class, true);
     }
 
     private function registerAttributeResolver(string $model, string $extension): void
