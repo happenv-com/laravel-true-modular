@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use ReflectionClass;
 use ReflectionMethod;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\MissingAttributeException;
 
 trait ProcessModelExtensions
 {
@@ -23,9 +22,15 @@ trait ProcessModelExtensions
 
             $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
+            $firstExtensionForModel = ! AttributeResolversBag::has($model);
 
-            // Handle missing attribute violation for the model using the provided extension
-            $model::handleMissingAttributeViolationUsing(fn($model, $key) => $this->handleNamedAttribute($extension, $model, $key));
+            AttributeResolversBag::add($model, fn ($modelInstance, $key, $notFound) => $this->resolveAttribute($extension, $modelInstance, $key, $notFound));
+
+            if ($firstExtensionForModel) {
+                $model::handleMissingAttributeViolationUsing(
+                    fn ($modelInstance, $key) => AttributeResolversBag::resolve($modelInstance, $key)
+                );
+            }
 
             foreach ($methods as $method) {
                 if ($method->class !== $extension) {
@@ -38,52 +43,33 @@ trait ProcessModelExtensions
 
                 $methodName = $method->getName();
 
-                /**
-                 * @var class-string<Model> $model
-                 */
+                /** @var class-string<Model> $model */
                 assert(\class_exists($model));
-                
-                // Skip attributes, they are handled by handleMissingAttributeViolationUsing
-                if(
-                    str_starts_with($methodName, 'get')
-                    && str_ends_with($methodName, 'Attribute'))
-                {
+
+                if (str_starts_with($methodName, 'get') && str_ends_with($methodName, 'Attribute')) {
                     continue;
                 }
 
-
-                    $model::resolveRelationUsing(
-                        $methodName,
-                        fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
-                    );
-                
-
-
+                $model::resolveRelationUsing(
+                    $methodName,
+                    fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
+                );
             }
-
-            
         }
 
         return $this;
     }
 
-    private function handleNamedAttribute($extension, $model, $key)
+    private function resolveAttribute(string $extension, Model $model, string $key, mixed $notFound): mixed
     {
-   
-
         $methodName = 'get' . Str::studly($key) . 'Attribute';
 
-        $extension = new $extension($model);
+        $instance = new $extension($model);
 
+        if (method_exists($instance, $methodName)) {
+            return $instance->{$methodName}();
+        }
 
-
-        dump($extension, $methodName, $key);
-
-        if (method_exists($extension, $methodName)) {
-                return new $extension($model)->{$methodName}();
-            }
-            
-            throw new MissingAttributeException($model, $key);
-        
+        return $notFound;
     }
 }
