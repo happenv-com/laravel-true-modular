@@ -17,8 +17,8 @@ trait ProcessTranslations
 
         $vendorTranslations = $this->module->basePath('/../resources/lang');
         $appTranslations = (function_exists('lang_path'))
-            ? lang_path('vendor/' . $this->module->shortName())
-            : resource_path('lang/vendor/' . $this->module->shortName());
+            ? lang_path('vendor/'.$this->module->shortName())
+            : resource_path('lang/vendor/'.$this->module->shortName());
 
         $this->loadTranslationsFrom($vendorTranslations, $this->module->shortName());
 
@@ -28,7 +28,7 @@ trait ProcessTranslations
         if ($this->app->runningInConsole()) {
             $this->publishes(
                 [$vendorTranslations => $appTranslations],
-                $this->module->shortName() . '-translations'
+                $this->module->shortName().'-translations'
             );
         }
 

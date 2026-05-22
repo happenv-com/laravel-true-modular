@@ -16,7 +16,8 @@
     "require-dev": {
         "ergebnis/composer-normalize": "^2.48",
         "pestphp/pest": "^4.0",
-        "thecodingmachine/phpstan-safe-rule": "^1.2"
+        "thecodingmachine/phpstan-safe-rule": "^1.2",
+        "laravel/pint": "^1.29"
     },
     "minimum-stability": "stable",
     "autoload": {

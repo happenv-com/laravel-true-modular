@@ -23,7 +23,7 @@ trait HasModelExtensions
      * @throws InvalidArgumentException
      * @throws Throwable
      */
-    public function hasModelExtensions(array | string $model, ?string $extension = null): static
+    public function hasModelExtensions(array|string $model, ?string $extension = null): static
     {
         if (is_array($model)) {
             foreach ($model as $m => $e) {

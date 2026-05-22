@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 class DynamicRelations
 {
     /**
-     * @param class-string $model
-     * @param class-string $extension
+     * @param  class-string  $model
+     * @param  class-string  $extension
      */
     public static function register(string $model, string $extension): void
     {

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleFileFinder;
+use Illuminate\Support\Collection;
 use Myapp\Sale\Database\Seeders\CustomerSeeder;
 use Myapp\Sale\Database\Seeders\OrderSeeder;
-use Illuminate\Support\Collection;
 
 describe('ModuleFileFinder', function (): void {
     describe('findFiles', function (): void {

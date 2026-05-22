@@ -21,9 +21,9 @@ trait ProcessBladeComponents
 
         if ($this->app->runningInConsole()) {
             $vendorComponents = $this->module->basePath('/Components');
-            $appComponents = base_path('app/View/Components/vendor/' . $this->module->shortName());
+            $appComponents = base_path('app/View/Components/vendor/'.$this->module->shortName());
 
-            $this->publishes([$vendorComponents => $appComponents], $this->module->name . '-components');
+            $this->publishes([$vendorComponents => $appComponents], $this->module->name.'-components');
         }
 
         return $this;

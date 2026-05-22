@@ -18,7 +18,6 @@ use function Safe\json_decode;
  */
 final class ModuleTree
 {
-
     /**
      * @var array<string, array<string, mixed>>|null Cached module data
      */
@@ -57,10 +56,10 @@ final class ModuleTree
 
         $this->modules = [];
 
-        $directories = glob($this->appModulesPath . '/*', GLOB_ONLYDIR);
+        $directories = glob($this->appModulesPath.'/*', GLOB_ONLYDIR);
 
         foreach ($directories as $directory) {
-            $composerPath = $directory . '/composer.json';
+            $composerPath = $directory.'/composer.json';
 
             if (! file_exists($composerPath)) {
                 continue;

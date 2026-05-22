@@ -19,7 +19,7 @@ final class CircularDependencyException extends Exception
             $cycles
         );
 
-        $message = 'Circular dependencies detected: ' . implode('; ', $cycleDescriptions);
+        $message = 'Circular dependencies detected: '.implode('; ', $cycleDescriptions);
 
         parent::__construct($message);
     }

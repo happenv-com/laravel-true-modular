@@ -16,9 +16,9 @@ trait ProcessAssets
         }
 
         $vendorAssets = $this->module->basePath('/../resources/dist');
-        $appAssets = public_path('vendor/' . $this->module->shortName());
+        $appAssets = public_path('vendor/'.$this->module->shortName());
 
-        $this->publishes([$vendorAssets => $appAssets], $this->module->shortName() . '-assets');
+        $this->publishes([$vendorAssets => $appAssets], $this->module->shortName().'-assets');
 
         return $this;
     }

@@ -25,12 +25,12 @@ trait ProcessViews
         $namespace = $this->module->viewNamespace;
         $viewsPath = $this->module->basePath('/../resources/views');
         $vendorViews = realpath($viewsPath) ?: $viewsPath;
-        $appViews = base_path('resources/views/vendor/' . $this->moduleView($namespace));
+        $appViews = base_path('resources/views/vendor/'.$this->moduleView($namespace));
 
         $this->loadViewsFrom($vendorViews, $this->module->viewNamespace());
 
         if ($this->app->runningInConsole()) {
-            $this->publishes([$vendorViews => $appViews], $this->moduleView($namespace) . '-views');
+            $this->publishes([$vendorViews => $appViews], $this->moduleView($namespace).'-views');
         }
 
         return $this;

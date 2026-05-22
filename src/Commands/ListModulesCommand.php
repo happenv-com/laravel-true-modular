@@ -56,7 +56,7 @@ class ListModulesCommand extends Command
             $this->error('Circular dependencies detected!');
 
             foreach ($circularDependencyException->cycles as $cycle) {
-                $this->error('  ' . implode(' -> ', $cycle));
+                $this->error('  '.implode(' -> ', $cycle));
             }
 
             return self::FAILURE;
@@ -110,7 +110,7 @@ class ListModulesCommand extends Command
         foreach ($order as $index => $moduleName) {
             $dependencies = $this->moduleTree->getDependencies($moduleName);
             $path = $this->moduleTree->getModulePath($moduleName);
-            $relativePath = str_replace(base_path() . '/', '', $path);
+            $relativePath = str_replace(base_path().'/', '', $path);
 
             $tableData[] = [
                 $index + 1,

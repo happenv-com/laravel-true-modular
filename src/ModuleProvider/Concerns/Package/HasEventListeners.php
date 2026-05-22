@@ -24,7 +24,7 @@ trait HasEventListeners
      *
      * @throws InvalidArgumentException
      */
-    public function hasEventListener(QueuedClosure | callable | string | array $events, QueuedClosure | callable | array | string $listener): static
+    public function hasEventListener(QueuedClosure|callable|string|array $events, QueuedClosure|callable|array|string $listener): static
     {
         $this->eventListeners[] = [
             'events' => $events,

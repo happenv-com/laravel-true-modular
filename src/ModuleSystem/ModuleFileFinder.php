@@ -158,13 +158,13 @@ final readonly class ModuleFileFinder
             return [];
         }
 
-        $fullPath = $modulePath . '/' . $directory;
+        $fullPath = $modulePath.'/'.$directory;
 
         if (! is_dir($fullPath)) {
             return [];
         }
 
-        $files = glob($fullPath . '/' . $pattern);
+        $files = glob($fullPath.'/'.$pattern);
 
         return array_map(
             fn (string $file): array => [
@@ -189,7 +189,7 @@ final readonly class ModuleFileFinder
         $fileName = pathinfo($filePath, PATHINFO_FILENAME);
         $namespace = $this->getModuleNamespace($moduleName);
 
-        return $namespace . $namespaceSegment . '\\' . $fileName;
+        return $namespace.$namespaceSegment.'\\'.$fileName;
     }
 
     /**
@@ -211,7 +211,7 @@ final readonly class ModuleFileFinder
         // Return the first namespace (typically there's only one)
         foreach (array_keys($autoload) as $namespace) {
             // Ensure namespace ends with backslash
-            return rtrim((string) $namespace, '\\') . '\\';
+            return rtrim((string) $namespace, '\\').'\\';
         }
 
         return '';

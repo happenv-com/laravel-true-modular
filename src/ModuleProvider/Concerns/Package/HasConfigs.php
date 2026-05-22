@@ -32,7 +32,7 @@ trait HasConfigs
     /**
      * @param  string|string[]  $config
      */
-    public function hasConfig(array | string $config): static
+    public function hasConfig(array|string $config): static
     {
         if (! is_array($config)) {
             $config = [$config];
@@ -46,7 +46,7 @@ trait HasConfigs
     /**
      * @param  string|string[]  $configToMerge
      */
-    public function mergesConfig(array | string $configToMerge): static
+    public function mergesConfig(array|string $configToMerge): static
     {
         if (is_array($configToMerge)) {
             foreach ($configToMerge as $config) {
@@ -64,7 +64,7 @@ trait HasConfigs
     /**
      * @param  string|string[]  $configToOverwrite
      */
-    public function overwritesConfig(array | string $configToOverwrite): static
+    public function overwritesConfig(array|string $configToOverwrite): static
     {
         if (is_array($configToOverwrite)) {
             foreach ($configToOverwrite as $config) {
@@ -82,7 +82,7 @@ trait HasConfigs
     /**
      * @param  string|string[]  $configToExtend
      */
-    public function extendsConfig(array | string $configToExtend, bool $overwrite = false): static
+    public function extendsConfig(array|string $configToExtend, bool $overwrite = false): static
     {
         if (is_array($configToExtend)) {
             foreach ($configToExtend as $config) {

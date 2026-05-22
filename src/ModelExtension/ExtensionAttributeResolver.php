@@ -27,6 +27,6 @@ class ExtensionAttributeResolver
 
     public function getMethodName(string $key): string
     {
-        return 'get' . Str::studly($key) . 'Attribute';
+        return 'get'.Str::studly($key).'Attribute';
     }
 }

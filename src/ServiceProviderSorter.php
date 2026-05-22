@@ -123,7 +123,7 @@ final class ServiceProviderSorter
 
             foreach (array_keys($autoload) as $namespace) {
                 // Normalize namespace (ensure it ends with backslash)
-                $normalizedNamespace = rtrim((string) $namespace, '\\') . '\\';
+                $normalizedNamespace = rtrim((string) $namespace, '\\').'\\';
                 $this->namespaceMap[$normalizedNamespace] = $moduleName;
             }
         }

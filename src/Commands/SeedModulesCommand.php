@@ -58,7 +58,7 @@ class SeedModulesCommand extends Command
             $this->error('Cannot seed modules: circular dependencies detected!');
 
             foreach ($circularDependencyException->cycles as $cycle) {
-                $this->error('  ' . implode(' -> ', $cycle));
+                $this->error('  '.implode(' -> ', $cycle));
             }
 
             return self::FAILURE;
@@ -103,7 +103,7 @@ class SeedModulesCommand extends Command
                 $index + 1,
                 $moduleName,
                 $dependencies !== [] ? implode(', ', $dependencies) : '-',
-                $seederCount > 0 ? $seederCount . ' seeders' : '-',
+                $seederCount > 0 ? $seederCount.' seeders' : '-',
             ];
         }
 
@@ -130,7 +130,7 @@ class SeedModulesCommand extends Command
             ->toArray();
 
         if ($seeders === []) {
-            $this->warn('No seeders found for module: ' . $moduleName);
+            $this->warn('No seeders found for module: '.$moduleName);
 
             return self::SUCCESS;
         }
@@ -145,7 +145,7 @@ class SeedModulesCommand extends Command
             $seeders = [$specificClass];
         }
 
-        $this->components->info('Seeding module: ' . $moduleName);
+        $this->components->info('Seeding module: '.$moduleName);
 
         foreach ($seeders as $seederClass) {
             $this->runSeeder($seederClass);
@@ -186,7 +186,7 @@ class SeedModulesCommand extends Command
                 }
 
                 $currentModule = $item['module'];
-                $this->info('Seeding module: ' . $currentModule);
+                $this->info('Seeding module: '.$currentModule);
             }
 
             $this->runSeeder($item['class']);

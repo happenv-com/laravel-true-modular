@@ -71,7 +71,7 @@ class Module
             return $this->basePath;
         }
 
-        return $this->basePath . DIRECTORY_SEPARATOR . ltrim($directory, DIRECTORY_SEPARATOR);
+        return $this->basePath.DIRECTORY_SEPARATOR.ltrim($directory, DIRECTORY_SEPARATOR);
     }
 
     public function setBasePath(string $path): static
