@@ -23,7 +23,7 @@ trait HasMorphMapDefinitions
      * @throws InvalidArgumentException
      * @throws Throwable
      */
-    public function hasMorphMap(array | string $key, ?string $class = null): static
+    public function hasMorphMap(array|string $key, ?string $class = null): static
     {
         if (is_array($key)) {
             foreach ($key as $k => $class) {
@@ -35,7 +35,7 @@ trait HasMorphMapDefinitions
 
         throw_unless(is_string($class), InvalidArgumentException::class, 'The class name for morph map definition must be a class-string.');
 
-        $this->morphMapDefinitions[$this->name . '::' . $key] = $class;
+        $this->morphMapDefinitions[$this->name.'::'.$key] = $class;
 
         return $this;
     }

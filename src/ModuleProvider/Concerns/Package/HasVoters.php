@@ -20,7 +20,7 @@ trait HasVoters
      *
      * @throws InvalidArgumentException
      */
-    public function hasVoters(array | string $class): static
+    public function hasVoters(array|string $class): static
     {
         if (is_array($class)) {
             foreach ($class as $voter) {

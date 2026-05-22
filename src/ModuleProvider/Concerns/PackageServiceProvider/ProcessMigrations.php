@@ -48,7 +48,7 @@ trait ProcessMigrations
 
                 $this->publishes(
                     [$vendorMigration => $appMigration],
-                    $this->module->shortName() . '-migrations'
+                    $this->module->shortName().'-migrations'
                 );
             }
 
@@ -70,7 +70,7 @@ trait ProcessMigrations
         $now = Date::now();
         $migrationsPath = trim((string) $this->module->migrationsPath, '/');
 
-        $files = new Filesystem()->files($this->module->basePath('/../' . $migrationsPath));
+        $files = new Filesystem()->files($this->module->basePath('/../'.$migrationsPath));
 
         foreach ($files as $file) {
             $filePath = $file->getPathname();
@@ -80,13 +80,13 @@ trait ProcessMigrations
             if (Str::endsWith($filePath, ['.php', '.php.stub'])) {
                 $appMigration = $this->generateMigrationName($migrationFileName, $now->addSecond());
             } else {
-                $appMigration = database_path('migrations/' . $file->getFilename());
+                $appMigration = database_path('migrations/'.$file->getFilename());
             }
 
             if ($this->app->runningInConsole()) {
                 $this->publishes(
                     [$filePath => $appMigration],
-                    $this->module->shortName() . '-migrations'
+                    $this->module->shortName().'-migrations'
                 );
             }
 
@@ -101,9 +101,9 @@ trait ProcessMigrations
      * @throws FilesystemException
      * @throws PcreException
      */
-    protected function generateMigrationName(string $migrationFileName, Carbon | CarbonImmutable $now): string
+    protected function generateMigrationName(string $migrationFileName, Carbon|CarbonImmutable $now): string
     {
-        $migrationsPath = 'migrations/' . dirname($migrationFileName) . '/';
+        $migrationsPath = 'migrations/'.dirname($migrationFileName).'/';
         $migrationFileName = basename($migrationFileName);
 
         $len = strlen($migrationFileName) + 4;
@@ -113,8 +113,8 @@ trait ProcessMigrations
             $migrationFileName = Str::of($migrationFileName)->afterLast('/');
         }
 
-        foreach (glob(database_path($migrationsPath . '*.php')) as $filename) {
-            if ((substr((string) $filename, -$len) === $migrationFileName . '.php')) {
+        foreach (glob(database_path($migrationsPath.'*.php')) as $filename) {
+            if ((substr((string) $filename, -$len) === $migrationFileName.'.php')) {
                 return $filename;
             }
         }

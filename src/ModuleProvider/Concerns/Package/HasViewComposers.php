@@ -18,7 +18,7 @@ trait HasViewComposers
      * @param  string[]|string  $view
      * @param  callable|class-string  $viewComposer
      */
-    public function hasViewComposer(array | string $view, callable | string $viewComposer): static
+    public function hasViewComposer(array|string $view, callable|string $viewComposer): static
     {
         if (! is_array($view)) {
             $view = [$view];

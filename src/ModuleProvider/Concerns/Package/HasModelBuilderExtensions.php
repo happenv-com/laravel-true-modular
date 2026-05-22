@@ -23,7 +23,7 @@ trait HasModelBuilderExtensions
      * @throws InvalidArgumentException
      * @throws Throwable
      */
-    public function hasModelBuilderExtensions(array | string $builder, ?string $extension = null): static
+    public function hasModelBuilderExtensions(array|string $builder, ?string $extension = null): static
     {
         if (is_array($builder)) {
             foreach ($builder as $b => $e) {

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
-use Illuminate\Database\Eloquent\Model;
-use ReflectionClass;
-use ReflectionMethod;
+use Happenv\LaravelTrueModular\ModelExtension\AttributeResolver;
+use Happenv\LaravelTrueModular\ModelExtension\DynamicRelations;
 
 trait ProcessModelExtensions
 {
@@ -17,31 +16,8 @@ trait ProcessModelExtensions
         }
 
         foreach ($this->module->modelExtensions as $model => $extension) {
-            $reflection = new ReflectionClass($extension);
-
-            $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
-
-            foreach ($methods as $method) {
-                if ($method->class !== $extension) {
-                    continue;
-                }
-
-                if ($method->isConstructor()) {
-                    continue;
-                }
-
-                $methodName = $method->getName();
-
-                /**
-                 * @var class-string<Model> $model
-                 */
-                assert(\class_exists($model));
-
-                $model::resolveRelationUsing(
-                    $methodName,
-                    fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
-                );
-            }
+            resolve(AttributeResolver::class)::register($model, $extension);
+            resolve(DynamicRelations::class)::register($model, $extension);
         }
 
         return $this;

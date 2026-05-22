@@ -21,7 +21,7 @@ trait HasLivewireComponents
      *
      * @throws InvalidArgumentException
      */
-    public function hasLivewireComponents(array | string $name, ?string $class = null): static
+    public function hasLivewireComponents(array|string $name, ?string $class = null): static
     {
         if (is_array($name)) {
             foreach ($name as $n => $class) {

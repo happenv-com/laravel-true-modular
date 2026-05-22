@@ -20,7 +20,7 @@ trait HasPermissions
      *
      * @throws InvalidArgumentException
      */
-    public function hasPermissions(array | string $class): static
+    public function hasPermissions(array|string $class): static
     {
         if (is_array($class)) {
             foreach ($class as $permission) {

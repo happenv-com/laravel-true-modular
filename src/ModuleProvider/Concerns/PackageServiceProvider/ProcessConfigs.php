@@ -51,7 +51,7 @@ trait ProcessConfigs
 
             $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configFileName)));
 
-            $config->set($this->normalizeConfigKey($this->module->shortName() . '::' . $configFileName), require $vendorConfig);
+            $config->set($this->normalizeConfigKey($this->module->shortName().'::'.$configFileName), require $vendorConfig);
         }
 
         return $this;
