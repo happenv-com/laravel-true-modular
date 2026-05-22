@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
+namespace Happenv\LaravelTrueModular\ModelExtension;
 
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Database\Eloquent\Model;
