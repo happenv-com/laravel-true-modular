@@ -9,16 +9,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttributeResolversBag
 {
-    /** @var array<class-string, list<callable>> */
+    /** @var array<class-string, list<ExtensionAttributeResolver>> */
     private static array $resolvers = [];
 
-    private static mixed $notFound = null;
+    private static ?object $sentinel = null;
 
-    public static function add(string $model, callable $resolver): void
+    /** @param class-string $model */
+    public static function addExtension(string $model, string $extension): void
     {
-        self::$resolvers[$model][] = $resolver;
+        self::$resolvers[$model][] = new ExtensionAttributeResolver($extension);
     }
 
+    /** @param class-string $model */
     public static function has(string $model): bool
     {
         return isset(self::$resolvers[$model]);
@@ -29,7 +31,7 @@ class AttributeResolversBag
         $sentinel = self::sentinel();
 
         foreach (self::$resolvers[$model::class] ?? [] as $resolver) {
-            $result = $resolver($model, $key, $sentinel);
+            $result = $resolver->resolve($model, $key, $sentinel);
 
             if ($result !== $sentinel) {
                 return $result;
@@ -39,18 +41,14 @@ class AttributeResolversBag
         throw new MissingAttributeException($model, $key);
     }
 
-    private static function sentinel(): object
-    {
-        if (self::$notFound === null) {
-            self::$notFound = new class {};
-        }
-
-        return self::$notFound;
-    }
-
     public static function flush(): void
     {
         self::$resolvers = [];
-        self::$notFound = null;
+        self::$sentinel = null;
+    }
+
+    private static function sentinel(): object
+    {
+        return self::$sentinel ??= new class {};
     }
 }

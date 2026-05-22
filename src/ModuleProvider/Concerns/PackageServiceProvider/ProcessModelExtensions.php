@@ -7,7 +7,6 @@ namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvi
 use Illuminate\Database\Eloquent\Model;
 use ReflectionClass;
 use ReflectionMethod;
-use Illuminate\Support\Str;
 
 trait ProcessModelExtensions
 {
@@ -18,13 +17,9 @@ trait ProcessModelExtensions
         }
 
         foreach ($this->module->modelExtensions as $model => $extension) {
-            $reflection = new ReflectionClass($extension);
-
-            $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
-
             $firstExtensionForModel = ! AttributeResolversBag::has($model);
 
-            AttributeResolversBag::add($model, fn ($modelInstance, $key, $notFound) => $this->resolveAttribute($extension, $modelInstance, $key, $notFound));
+            AttributeResolversBag::addExtension($model, $extension);
 
             if ($firstExtensionForModel) {
                 $model::handleMissingAttributeViolationUsing(
@@ -32,12 +27,10 @@ trait ProcessModelExtensions
                 );
             }
 
-            foreach ($methods as $method) {
-                if ($method->class !== $extension) {
-                    continue;
-                }
+            $methods = (new ReflectionClass($extension))->getMethods(ReflectionMethod::IS_PUBLIC);
 
-                if ($method->isConstructor()) {
+            foreach ($methods as $method) {
+                if ($method->class !== $extension || $method->isConstructor()) {
                     continue;
                 }
 
@@ -58,18 +51,5 @@ trait ProcessModelExtensions
         }
 
         return $this;
-    }
-
-    private function resolveAttribute(string $extension, Model $model, string $key, mixed $notFound): mixed
-    {
-        $methodName = 'get' . Str::studly($key) . 'Attribute';
-
-        $instance = new $extension($model);
-
-        if (method_exists($instance, $methodName)) {
-            return $instance->{$methodName}();
-        }
-
-        return $notFound;
     }
 }
