@@ -145,12 +145,12 @@ abstract class ModuleProvider extends ServiceProvider
             ->processTranslations()
             ->processViews()
             ->processViewComposers()
-            ->processViewSharedData();
+            ->processViewSharedData()
+            ->processMigrations();
 
         if ($this->app->runningInConsole()) {
             $this
                 ->processSchedules()
-                ->processMigrations()
                 ->processConsoleCommands();
         }
 
