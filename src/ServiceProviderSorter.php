@@ -25,6 +25,14 @@ final class ServiceProviderSorter
      */
     private ?array $namespaceMap = null;
 
+    /**
+     * Cache for sorted namespaces to avoid redundant calculations
+     * during multiple calls to getModuleName.
+     *
+     * @var array<string>|null
+     */
+    private ?array $sortedNamespaces = null;
+
     public function __construct(
         private readonly ModuleTree $moduleTree,
     ) {}
@@ -89,10 +97,14 @@ final class ServiceProviderSorter
         $namespaceMap = $this->getNamespaceMap();
 
         // Sort by namespace length (longest first) to match most specific namespace
-        $namespaces = array_keys($namespaceMap);
-        usort($namespaces, fn (string $a, string $b): int => strlen($b) <=> strlen($a));
+        $this->sortedNamespaces ??= (function () use ($namespaceMap): array {
+            $ns = array_keys($namespaceMap);
+            usort($ns, fn (string $a, string $b): int => strlen($b) <=> strlen($a));
 
-        foreach ($namespaces as $namespace) {
+            return $ns;
+        })();
+
+        foreach ($this->sortedNamespaces as $namespace) {
             if (str_starts_with($className, $namespace)) {
                 return $namespaceMap[$namespace];
             }
