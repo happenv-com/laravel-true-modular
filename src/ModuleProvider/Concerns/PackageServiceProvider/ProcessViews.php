@@ -24,6 +24,14 @@ trait ProcessViews
 
         $namespace = $this->module->viewNamespace;
         $viewsPath = $this->module->basePath('/../resources/views');
+
+        // Guard before Safe\realpath(): it throws on a non-existent path, which
+        // would crash boot for a module that declares hasViews() but ships no
+        // views directory (e.g. an empty, git-untracked dir on a fresh checkout).
+        if ($this->moduleDirectoryMissing($viewsPath, 'views')) {
+            return $this;
+        }
+
         $vendorViews = realpath($viewsPath) ?: $viewsPath;
         $appViews = base_path('resources/views/vendor/'.$this->moduleView($namespace));
 
@@ -42,8 +50,14 @@ trait ProcessViews
             return $this;
         }
 
+        $globalViewsPath = $this->module->basePath('/../resources/views-global');
+
+        if ($this->moduleDirectoryMissing($globalViewsPath, 'global views')) {
+            return $this;
+        }
+
         Config::set('view.paths', array_merge(
-            [$this->module->basePath('/../resources/views-global')],
+            [$globalViewsPath],
             Config::get('view.paths', [])
         ));
 

@@ -2,6 +2,7 @@
 
 namespace Happenv\LaravelTrueModular\ModuleProvider;
 
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\GuardsModulePaths;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\InitializeCallbacks;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\ProcessAssets;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\ProcessBladeComponents;
@@ -35,6 +36,7 @@ use Safe\Exceptions\PcreException;
 
 abstract class ModuleProvider extends ServiceProvider
 {
+    use GuardsModulePaths;
     use InitializeCallbacks;
     use ProcessAssets;
     use ProcessBladeComponents;

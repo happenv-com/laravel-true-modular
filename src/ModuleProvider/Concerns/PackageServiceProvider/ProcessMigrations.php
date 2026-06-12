@@ -69,8 +69,16 @@ trait ProcessMigrations
     {
         $now = Date::now();
         $migrationsPath = trim((string) $this->module->migrationsPath, '/');
+        $migrationsDir = $this->module->basePath('/../'.$migrationsPath);
 
-        $files = new Filesystem()->files($this->module->basePath('/../'.$migrationsPath));
+        // Filesystem::files() throws DirectoryNotFoundException on a missing dir,
+        // which would crash boot for a module that enables discoversMigrations()
+        // but ships no migrations directory (e.g. on a fresh checkout).
+        if ($this->moduleDirectoryMissing($migrationsDir, 'migrations discovery')) {
+            return;
+        }
+
+        $files = new Filesystem()->files($migrationsDir);
 
         foreach ($files as $file) {
             $filePath = $file->getPathname();
