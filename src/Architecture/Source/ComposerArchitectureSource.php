@@ -7,11 +7,11 @@ namespace Happenv\LaravelTrueModular\Architecture\Source;
 use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 
-final class ComposerArchitectureSource implements ArchitectureSource
+final readonly class ComposerArchitectureSource implements ArchitectureSource
 {
     public function __construct(
-        private readonly ModuleTree $moduleTree,
-        private readonly ModuleLocator $locator,
+        private ModuleTree $moduleTree,
+        private ModuleLocator $locator,
     ) {}
 
     public function contribute(): iterable

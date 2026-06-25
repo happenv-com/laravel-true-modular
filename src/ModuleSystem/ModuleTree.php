@@ -67,7 +67,7 @@ final class ModuleTree
 
             $composerContent = file_get_contents($composerPath);
 
-            $composer = json_decode($composerContent, true);
+            $composer = json_decode($composerContent, associative: true);
             if (! is_array($composer)) {
                 continue;
             }
@@ -204,7 +204,7 @@ final class ModuleTree
 
             // For each module that depends on current, reduce its in-degree
             foreach ($graph as $module => $dependencies) {
-                if (in_array($current, $dependencies, true)) {
+                if (in_array($current, $dependencies, strict: true)) {
                     $inDegree[$module]--;
 
                     if ($inDegree[$module] === 0) {
@@ -317,7 +317,7 @@ final class ModuleTree
             if (! isset($visited[$dependency])) {
                 $this->detectCyclesDfs($dependency, $graph, $visited, $recursionStack, $path, $cycles);
             } elseif (isset($recursionStack[$dependency]) && $recursionStack[$dependency]) {
-                $cycleStart = array_search($dependency, $path, true);
+                $cycleStart = array_search($dependency, $path, strict: true);
 
                 if ($cycleStart !== false) {
                     $cycle = array_slice($path, $cycleStart);

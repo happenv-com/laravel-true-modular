@@ -18,13 +18,9 @@ final class GraphAnalyzer
             throw new InvalidArgumentException(sprintf('Unknown module [%s].', $root));
         }
 
-        if ($root !== null) {
-            $nodes = [$root, ...$graph->transitiveDependents($root)];
-        } else {
-            $nodes = $graph->nodes();
-        }
+        $nodes = $root !== null ? [$root, ...$graph->transitiveDependents($root)] : $graph->nodes();
 
-        $nodeSet = array_fill_keys($nodes, true);
+        $nodeSet = array_fill_keys($nodes, value: true);
         $dependents = [];
 
         foreach ($nodes as $node) {

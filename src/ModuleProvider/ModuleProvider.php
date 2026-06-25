@@ -167,9 +167,7 @@ abstract class ModuleProvider extends ServiceProvider
     {
         $reflector = new ReflectionClass(static::class);
 
-        $moduleBaseDir = dirname($reflector->getFileName());
-
-        return $moduleBaseDir;
+        return dirname($reflector->getFileName());
     }
 
     public function moduleView(?string $namespace): ?string

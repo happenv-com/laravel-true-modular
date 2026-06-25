@@ -11,6 +11,7 @@ final readonly class ArchitectureIndex
 {
     /**
      * @param  array<string, ModuleDescriptor>  $modules
+     * @param  DependencyGraph<string>  $graph
      */
     public function __construct(
         private array $modules,
@@ -27,6 +28,9 @@ final readonly class ArchitectureIndex
         return $this->modules[$name] ?? null;
     }
 
+    /**
+     * @return DependencyGraph<string>
+     */
     public function graph(): DependencyGraph
     {
         return $this->graph;

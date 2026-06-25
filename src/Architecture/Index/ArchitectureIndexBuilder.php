@@ -9,13 +9,13 @@ use Happenv\LaravelTrueModular\Architecture\Source\ArchitectureSource;
 use Happenv\LaravelTrueModular\Architecture\Source\DependenciesContribution;
 use Happenv\LaravelTrueModular\Architecture\Source\ModulesContribution;
 
-final class ArchitectureIndexBuilder
+final readonly class ArchitectureIndexBuilder
 {
     /**
      * @param  iterable<ArchitectureSource>  $sources
      */
     public function __construct(
-        private readonly iterable $sources,
+        private iterable $sources,
     ) {}
 
     public function build(): ArchitectureIndex

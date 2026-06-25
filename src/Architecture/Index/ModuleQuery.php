@@ -15,6 +15,7 @@ final readonly class ModuleQuery
 {
     /**
      * @param  array<string, ModuleDescriptor>  $modules
+     * @param  DependencyGraph<string>  $graph
      */
     public function __construct(
         private array $modules,

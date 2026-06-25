@@ -6,7 +6,7 @@ namespace Happenv\LaravelTrueModular\Architecture\Renderer;
 
 use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 
-final class RendererRegistry
+final readonly class RendererRegistry
 {
     /** @var array<ArchitectureRenderer> */
     private array $renderers;
@@ -16,7 +16,7 @@ final class RendererRegistry
      */
     public function __construct(iterable $renderers)
     {
-        $this->renderers = is_array($renderers) ? $renderers : iterator_to_array($renderers, false);
+        $this->renderers = is_array($renderers) ? $renderers : iterator_to_array($renderers, preserve_keys: false);
     }
 
     public function get(string $format, ArchitectureReport $report): ArchitectureRenderer

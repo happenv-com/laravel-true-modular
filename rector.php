@@ -4,8 +4,10 @@ use Rector\Config\RectorConfig;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__ . '/src',
+        __DIR__.'/src',
     ])
+    ->withComposerBased(laravel: true, phpunit: true)
+    ->withPhpVersion(Rector\ValueObject\PhpVersion::PHP_83)
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
@@ -15,6 +17,5 @@ return RectorConfig::configure()
         namedArgs: true,
         instanceOf: true,
         earlyReturn: true,
-        strictBooleans: true
     )
     ->withPhpSets();

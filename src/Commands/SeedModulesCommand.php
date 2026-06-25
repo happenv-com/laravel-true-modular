@@ -136,7 +136,7 @@ class SeedModulesCommand extends Command
         }
 
         if ($specificClass !== null) {
-            if (! in_array($specificClass, $seeders, true)) {
+            if (! in_array($specificClass, $seeders, strict: true)) {
                 $this->error(sprintf("Seeder class '%s' not found in module '%s'", $specificClass, $moduleName));
 
                 return self::FAILURE;
