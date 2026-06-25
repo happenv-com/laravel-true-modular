@@ -15,10 +15,12 @@
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.48",
+        "laravel/pint": "^1.29",
+        "orchestra/testbench": "^11.1",
         "pestphp/pest": "^4.0",
         "thecodingmachine/phpstan-safe-rule": "^1.2",
-        "laravel/pint": "^1.29",
-        "orchestra/testbench": "^11.1"
+        "rector/rector": "^2.5",
+        "larastan/larastan": "^3.10"
     },
     "minimum-stability": "stable",
     "autoload": {
