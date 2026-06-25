@@ -30,10 +30,6 @@ jobs:
             testbench: 10.*
             carbon: 3.*
             collision: 8.*
-          - laravel: 11.*
-            testbench: 9.*
-            carbon: 3.*
-            collision: 8.*
         exclude:
           - laravel: 13.*
             php: 8.2
