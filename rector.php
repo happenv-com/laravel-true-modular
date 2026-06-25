@@ -1,13 +1,14 @@
 <?php
 
 use Rector\Config\RectorConfig;
+use Rector\ValueObject\PhpVersion;
 
 return RectorConfig::configure()
     ->withPaths([
         __DIR__.'/src',
     ])
     ->withComposerBased(laravel: true, phpunit: true)
-    ->withPhpVersion(Rector\ValueObject\PhpVersion::PHP_83)
+    ->withPhpVersion(PhpVersion::PHP_83)
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
