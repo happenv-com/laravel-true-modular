@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular\Architecture\Graph;
 
 /**
- * Pure, module-agnostic dependency graph. Nodes are arbitrary strings.
- *
  * @template TNode of string
  */
 final class DependencyGraph
