@@ -14,6 +14,9 @@ interface ModuleLocator
 
     /**
      * @return array<string, ModuleDescriptor> keyed by composer package
+     *
+     * @throws \Safe\Exceptions\FilesystemException
+     * @throws \Safe\Exceptions\JsonException
      */
     public function all(): array;
 }
