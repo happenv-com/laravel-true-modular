@@ -25,7 +25,7 @@ function whyIndex(): ArchitectureIndex
 }
 
 it('returns the dependency path from a module to its dependency', function (): void {
-    $report = (new WhyAnalyzer())->analyze(whyIndex(), 'amazon', 'core');
+    $report = (new WhyAnalyzer)->analyze(whyIndex(), 'amazon', 'core');
 
     expect($report->from)->toBe('amazon')
         ->and($report->to)->toBe('core')
@@ -33,16 +33,16 @@ it('returns the dependency path from a module to its dependency', function (): v
 });
 
 it('returns null path when no dependency exists', function (): void {
-    $report = (new WhyAnalyzer())->analyze(whyIndex(), 'core', 'amazon');
+    $report = (new WhyAnalyzer)->analyze(whyIndex(), 'core', 'amazon');
 
     expect($report->path)->toBeNull()
         ->and($report->toArray())->toBe(['from' => 'core', 'to' => 'amazon', 'path' => null]);
 });
 
 it('reports the why schema', function (): void {
-    expect((new WhyAnalyzer())->analyze(whyIndex(), 'amazon', 'core')->schemaName())->toBe('why');
+    expect((new WhyAnalyzer)->analyze(whyIndex(), 'amazon', 'core')->schemaName())->toBe('why');
 });
 
 it('throws for unknown endpoints', function (): void {
-    (new WhyAnalyzer())->analyze(whyIndex(), 'amazon', 'nope');
+    (new WhyAnalyzer)->analyze(whyIndex(), 'amazon', 'nope');
 })->throws(InvalidArgumentException::class);

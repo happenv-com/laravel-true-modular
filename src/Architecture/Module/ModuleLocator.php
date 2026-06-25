@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Architecture\Module;
 
+use Safe\Exceptions\FilesystemException;
+use Safe\Exceptions\JsonException;
+
 interface ModuleLocator
 {
     public function byClass(string $class): ?ModuleDescriptor;
@@ -15,8 +18,8 @@ interface ModuleLocator
     /**
      * @return array<string, ModuleDescriptor> keyed by composer package
      *
-     * @throws \Safe\Exceptions\FilesystemException
-     * @throws \Safe\Exceptions\JsonException
+     * @throws FilesystemException
+     * @throws JsonException
      */
     public function all(): array;
 }

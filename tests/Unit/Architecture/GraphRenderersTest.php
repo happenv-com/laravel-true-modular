@@ -22,7 +22,7 @@ function graphReport(): GraphReport
 }
 
 it('renders an ascii tree', function (): void {
-    $text = (new TreeRenderer())->render(graphReport());
+    $text = (new TreeRenderer)->render(graphReport());
 
     expect($text)->toContain('core')
         ->and($text)->toContain('└── pim')
@@ -30,7 +30,7 @@ it('renders an ascii tree', function (): void {
 });
 
 it('renders mermaid edges', function (): void {
-    $text = (new MermaidRenderer())->render(graphReport());
+    $text = (new MermaidRenderer)->render(graphReport());
 
     expect($text)->toContain('graph TD')
         ->and($text)->toContain('core --> pim')
@@ -38,7 +38,7 @@ it('renders mermaid edges', function (): void {
 });
 
 it('renders graphviz dot edges', function (): void {
-    $text = (new DotRenderer())->render(graphReport());
+    $text = (new DotRenderer)->render(graphReport());
 
     expect($text)->toContain('digraph')
         ->and($text)->toContain('"core" -> "pim"');
@@ -47,8 +47,8 @@ it('renders graphviz dot edges', function (): void {
 it('only supports graph reports', function (): void {
     $impact = new ImpactReport('core', [], []);
 
-    expect((new TreeRenderer())->supports($impact))->toBeFalse()
-        ->and((new MermaidRenderer())->supports(graphReport()))->toBeTrue();
+    expect((new TreeRenderer)->supports($impact))->toBeFalse()
+        ->and((new MermaidRenderer)->supports(graphReport()))->toBeTrue();
 });
 
 it('tree renderer handles cyclic dependencies without hanging', function (): void {
@@ -58,7 +58,7 @@ it('tree renderer handles cyclic dependencies without hanging', function (): voi
         root: null,
     );
 
-    $text = (new TreeRenderer())->render($report);
+    $text = (new TreeRenderer)->render($report);
 
     expect($text)->toContain('a')
         ->and($text)->toContain('b');

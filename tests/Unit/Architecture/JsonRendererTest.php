@@ -6,7 +6,7 @@ use Happenv\LaravelTrueModular\Architecture\Renderer\JsonRenderer;
 use Happenv\LaravelTrueModular\Architecture\Report\ImpactReport;
 
 it('wraps the report payload with a schema block', function (): void {
-    $json = (new JsonRenderer())->render(new ImpactReport('core', ['pim'], ['amazon']));
+    $json = (new JsonRenderer)->render(new ImpactReport('core', ['pim'], ['amazon']));
     $decoded = json_decode($json, true);
 
     expect($decoded['schema'])->toBe(['name' => 'impact', 'version' => 1])
@@ -16,7 +16,7 @@ it('wraps the report payload with a schema block', function (): void {
 });
 
 it('reports json as its format and supports any report', function (): void {
-    $renderer = new JsonRenderer();
+    $renderer = new JsonRenderer;
 
     expect($renderer->format())->toBe('json')
         ->and($renderer->supports(new ImpactReport('core', [], [])))->toBeTrue();

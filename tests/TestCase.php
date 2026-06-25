@@ -11,7 +11,13 @@ use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
 {
-    protected function getBasePath(): string
+    /**
+     * Testbench v11 resolves the application base path via this static method
+     * (not getBasePath()). Pointing it at tests/fixtures makes
+     * base_path('app-modules') resolve to the fixture modules, so classes that
+     * use ModuleTree::make()/ModuleFileFinder::make() work in tests.
+     */
+    public static function applicationBasePath(): string
     {
         return __DIR__.'/fixtures';
     }

@@ -25,7 +25,7 @@ function graphIndex(): ArchitectureIndex
 }
 
 it('builds a full dependents graph rooted at leaves', function (): void {
-    $report = (new GraphAnalyzer())->analyze(graphIndex());
+    $report = (new GraphAnalyzer)->analyze(graphIndex());
 
     expect($report->roots)->toBe(['core'])
         ->and($report->dependents['core'])->toBe(['pim'])
@@ -33,7 +33,7 @@ it('builds a full dependents graph rooted at leaves', function (): void {
 });
 
 it('restricts the graph to a given root subtree', function (): void {
-    $report = (new GraphAnalyzer())->analyze(graphIndex(), 'pim');
+    $report = (new GraphAnalyzer)->analyze(graphIndex(), 'pim');
 
     expect($report->root)->toBe('pim')
         ->and($report->roots)->toBe(['pim'])
@@ -42,9 +42,9 @@ it('restricts the graph to a given root subtree', function (): void {
 });
 
 it('reports the graph schema', function (): void {
-    expect((new GraphAnalyzer())->analyze(graphIndex())->schemaName())->toBe('graph');
+    expect((new GraphAnalyzer)->analyze(graphIndex())->schemaName())->toBe('graph');
 });
 
 it('throws for an unknown root', function (): void {
-    (new GraphAnalyzer())->analyze(graphIndex(), 'nope');
+    (new GraphAnalyzer)->analyze(graphIndex(), 'nope');
 })->throws(InvalidArgumentException::class);

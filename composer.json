@@ -32,7 +32,10 @@
     "autoload-dev": {
         "psr-4": {
             "Happenv\\LaravelTrueModular\\Tests\\": "tests/"
-        }
+        },
+        "classmap": [
+            "tests/fixtures/app-modules"
+        ]
     },
     "config": {
         "allow-plugins": {

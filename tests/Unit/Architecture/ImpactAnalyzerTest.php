@@ -26,7 +26,7 @@ function impactIndex(): ArchitectureIndex
 }
 
 it('separates direct and indirect impact', function (): void {
-    $report = (new ImpactAnalyzer())->analyze(impactIndex(), 'core');
+    $report = (new ImpactAnalyzer)->analyze(impactIndex(), 'core');
 
     expect($report->module)->toBe('core')
         ->and($report->direct)->toBe(['pim', 'sale'])
@@ -35,7 +35,7 @@ it('separates direct and indirect impact', function (): void {
 });
 
 it('serializes with the impact schema name', function (): void {
-    $report = (new ImpactAnalyzer())->analyze(impactIndex(), 'core');
+    $report = (new ImpactAnalyzer)->analyze(impactIndex(), 'core');
 
     expect($report->schemaName())->toBe('impact')
         ->and($report->schemaVersion())->toBe(1)
@@ -48,5 +48,5 @@ it('serializes with the impact schema name', function (): void {
 });
 
 it('throws for an unknown module', function (): void {
-    (new ImpactAnalyzer())->analyze(impactIndex(), 'nope');
+    (new ImpactAnalyzer)->analyze(impactIndex(), 'nope');
 })->throws(InvalidArgumentException::class);
