@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Architecture\Analyzer;
 
-use Happenv\LaravelTrueModular\Architecture\Graph\DependencyGraph;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Report\GraphReport;
 use InvalidArgumentException;
