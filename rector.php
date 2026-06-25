@@ -10,8 +10,11 @@ return RectorConfig::configure()
         deadCode: true,
         codeQuality: true,
         typeDeclarations: true,
+        typeDeclarationDocblocks: true,
         privatization: true,
+        namedArgs: true,
+        instanceOf: true,
         earlyReturn: true,
-        strictBooleans: true,
+        strictBooleans: true
     )
     ->withPhpSets();
