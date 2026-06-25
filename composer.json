@@ -17,7 +17,8 @@
         "ergebnis/composer-normalize": "^2.48",
         "pestphp/pest": "^4.0",
         "thecodingmachine/phpstan-safe-rule": "^1.2",
-        "laravel/pint": "^1.29"
+        "laravel/pint": "^1.29",
+        "orchestra/testbench": "^11.1"
     },
     "minimum-stability": "stable",
     "autoload": {
@@ -27,6 +28,11 @@
         "files": [
             "src/helpers.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Happenv\\LaravelTrueModular\\Tests\\": "tests/"
+        }
     },
     "config": {
         "allow-plugins": {
