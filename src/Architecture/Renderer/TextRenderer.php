@@ -71,13 +71,20 @@ final class TextRenderer implements ArchitectureRenderer
     /**
      * @param  array<string, array<string>>  $dependents
      * @param  array<string>  $lines
+     * @param  array<string, true>  $visited
      */
-    private function appendTree(string $node, array $dependents, string $prefix, array &$lines): void
+    private function appendTree(string $node, array $dependents, string $prefix, array &$lines, array $visited = []): void
     {
         $lines[] = $prefix.$node;
 
+        if (isset($visited[$node])) {
+            return;
+        }
+
+        $visited[$node] = true;
+
         foreach ($dependents[$node] ?? [] as $child) {
-            $this->appendTree($child, $dependents, $prefix.'  ', $lines);
+            $this->appendTree($child, $dependents, $prefix.'  ', $lines, $visited);
         }
     }
 
