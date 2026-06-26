@@ -76,7 +76,7 @@ it('registers the module in the root composer.json as a path package', function 
 
     expect($composer['repositories'][0])->toBe(['type' => 'path', 'url' => 'app-modules/*'])
         ->and($composer['require'])->toHaveKey('true-module/blog')
-        ->and($composer['require']['true-module/blog'])->toBe('*');
+        ->and($composer['require']['true-module/blog'])->toBe('1.0.0');
 });
 
 it('kebab-cases multi-word names for the slug and studly-cases the namespace', function (): void {

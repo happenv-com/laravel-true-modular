@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Setup\Steps;
 
+use Happenv\LaravelTrueModular\Application;
+
 use function Safe\json_decode;
 use function Safe\json_encode;
 
@@ -15,10 +17,11 @@ final class ConfigureComposer extends Step
 {
     /**
      * Register {modulesDir}/* as a path repository (prepended, so it takes
-     * priority over packagist) and require the given module package. Leaves the
-     * existing `autoload` untouched — Composer only warns about a missing path.
+     * priority over packagist) and require the given module package at the given
+     * version. Leaves the existing `autoload` untouched — Composer only warns
+     * about a missing path.
      */
-    public function wire(string $modulesDirectory, string $package): void
+    public function wire(string $modulesDirectory, string $package, string $version = Application::DEFAULT_MODULE_VERSION): void
     {
         $path = $this->path('composer.json');
 
@@ -37,7 +40,7 @@ final class ConfigureComposer extends Step
         $composer['repositories'] = $repositories;
 
         $require = is_array($composer['require'] ?? null) ? $composer['require'] : [];
-        $require[$package] = '*';
+        $require[$package] = $version;
         $composer['require'] = $require;
 
         $this->write($path, $composer);

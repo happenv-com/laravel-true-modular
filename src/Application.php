@@ -26,6 +26,9 @@ final class Application extends FoundationApplication
     /** Default root namespace under which modules live (e.g. the core module is `<namespace>\Core`). */
     public const string DEFAULT_MODULES_NAMESPACE = 'TrueModule';
 
+    /** Default version stamped into a scaffolded module's composer.json and root `require`. */
+    public const string DEFAULT_MODULE_VERSION = '1.0.0';
+
     /**
      * The array of initializing callbacks.
      *

@@ -88,12 +88,16 @@ it('converts app/ into a core module', function (): void {
     $moduleComposer = json_decode($this->files->get($this->base.'/packages/core/composer.json'), true);
     expect($moduleComposer['name'])->toBe('true-module/core')
         ->and($moduleComposer['type'])->toBe('acme-module')
+        ->and($moduleComposer['version'])->toBe('1.0.0')
         ->and($moduleComposer['autoload']['psr-4'])->toBe(['TrueModule\\Core\\' => 'src/'])
-        ->and($moduleComposer['extra']['laravel']['providers'])->toBe(['TrueModule\\Core\\Providers\\CoreServiceProvider']);
+        ->and($moduleComposer['extra']['laravel']['providers'])->toBe(['TrueModule\\Core\\CoreServiceProvider']);
 
-    expect($this->files->get($this->base.'/packages/core/src/Providers/CoreServiceProvider.php'))
-        ->toContain('namespace TrueModule\Core\Providers;')
-        ->toContain('extends ModuleProvider');
+    // The provider lives at the root of src/, like every module provider.
+    expect($this->files->get($this->base.'/packages/core/src/CoreServiceProvider.php'))
+        ->toContain('namespace TrueModule\Core;')
+        ->toContain('use TrueModule\Core\Providers\AppServiceProvider;')
+        ->toContain('extends ModuleProvider')
+        ->and($this->files->exists($this->base.'/packages/core/src/Providers/CoreServiceProvider.php'))->toBeFalse();
 
     // report
     expect($report['vendor'])->toBe('true-module')
@@ -108,7 +112,7 @@ it('wires the module as a composer path package without touching autoload', func
 
     expect($composer['autoload']['psr-4'])->toHaveKey('App\\')          // left intact
         ->and($composer['repositories'][0])->toBe(['type' => 'path', 'url' => 'packages/*'])  // prepended
-        ->and($composer['require'])->toHaveKey('true-module/core');
+        ->and($composer['require']['true-module/core'])->toBe('1.0.0');
 });
 
 it('prepends the path repository, preserving existing repositories', function (): void {

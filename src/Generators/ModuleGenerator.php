@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Generators;
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Setup\Steps\ConfigureComposer;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
@@ -18,8 +19,6 @@ use function Safe\json_encode;
  */
 final readonly class ModuleGenerator
 {
-    public const string DEFAULT_VERSION = '1.0.0';
-
     public function __construct(
         private Filesystem $files,
         private string $basePath,
@@ -76,7 +75,7 @@ final readonly class ModuleGenerator
             'namespace' => $moduleNamespace,
             'slug' => $slug,
             'path' => $relativePath,
-            'version' => self::DEFAULT_VERSION,
+            'version' => Application::DEFAULT_MODULE_VERSION,
             'route' => '/'.$slug.'/welcome',
             'files' => $written,
         ];
@@ -87,7 +86,7 @@ final readonly class ModuleGenerator
         $composer = [
             'name' => $package,
             'type' => $composerType,
-            'version' => self::DEFAULT_VERSION,
+            'version' => Application::DEFAULT_MODULE_VERSION,
             'autoload' => ['psr-4' => [$moduleNamespace.'\\' => 'src/']],
             'extra' => ['laravel' => ['providers' => [$moduleNamespace.'\\'.$studly.'ServiceProvider']]],
         ];
@@ -145,7 +144,7 @@ final readonly class ModuleGenerator
 
     private function config(): string
     {
-        $version = self::DEFAULT_VERSION;
+        $version = Application::DEFAULT_MODULE_VERSION;
 
         return <<<PHP
         <?php
