@@ -115,9 +115,11 @@ class ListModulesCommand extends Command
             $tableData[] = [
                 $index + 1,
                 $moduleName,
-                $dependencies !== [] ? implode(', ', $dependencies) : '-',
+                $dependencies !== [] ? implode(PHP_EOL, $dependencies) : '-',
                 $relativePath,
             ];
+
+            $tableData[] = ['-', '-', '-', '-'];
         }
 
         $this->table(

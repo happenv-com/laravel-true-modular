@@ -22,7 +22,7 @@ class SeedModulesCommand extends Command
      * @var string
      */
     #[Override]
-    protected $signature = 'modules:seed
+    protected $signature = 'module:seed
                             {--module= : Seed only a specific module (e.g., myapp/sale)}
                             {--class= : Seed only a specific seeder class}
                             {--show-order : Show the execution order without seeding}';
