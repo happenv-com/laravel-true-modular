@@ -57,6 +57,5 @@
             ]
         }
     },
-    "$schema": "https://getcomposer.org/schema.json",
-    "version": "0.2.99"
+    "$schema": "https://getcomposer.org/schema.json"
 }
