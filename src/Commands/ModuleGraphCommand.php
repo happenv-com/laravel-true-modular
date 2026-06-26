@@ -13,13 +13,11 @@ use Override;
 
 final class ModuleGraphCommand extends AbstractArchitectureCommand
 {
-    #[Override]
     protected $signature = 'module:graph
                             {--root= : Restrict the graph to this module subtree}
                             {--format= : Output format (tree, mermaid, dot, json)}
                             {--schema-version=1 : Machine API schema version}';
 
-    #[Override]
     protected $description = 'Render the module dependency graph (tree, mermaid, dot, json)';
 
     public function __construct(

@@ -8,7 +8,6 @@ use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Setup\TrueModularSetup;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Override;
 use RuntimeException;
 
 use function Laravel\Prompts\confirm;
@@ -16,10 +15,8 @@ use function Laravel\Prompts\text;
 
 class SetupCommand extends Command
 {
-    #[Override]
     protected $signature = 'true-modular:setup';
 
-    #[Override]
     protected $description = 'Prepare the application to run as a modular monolith';
 
     public function handle(): int

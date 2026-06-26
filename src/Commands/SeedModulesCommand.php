@@ -10,7 +10,6 @@ use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Console\Command;
 use Illuminate\Database\Seeder;
 use InvalidArgumentException;
-use Override;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
 
@@ -21,7 +20,6 @@ class SeedModulesCommand extends Command
      *
      * @var string
      */
-    #[Override]
     protected $signature = 'module:seed
                             {--module= : Seed only a specific module (e.g., myapp/sale)}
                             {--class= : Seed only a specific seeder class}
@@ -32,7 +30,6 @@ class SeedModulesCommand extends Command
      *
      * @var string
      */
-    #[Override]
     protected $description = 'Run module seeders in dependency order (dependencies first)';
 
     public function __construct(

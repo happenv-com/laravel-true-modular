@@ -13,14 +13,12 @@ use Override;
 
 final class ModuleWhyCommand extends AbstractArchitectureCommand
 {
-    #[Override]
     protected $signature = 'module:why
                             {from : The dependent module}
                             {to : The dependency module}
                             {--format= : Output format (text, json)}
                             {--schema-version=1 : Machine API schema version}';
 
-    #[Override]
     protected $description = 'Explain why one module depends on another (shortest dependency path)';
 
     public function __construct(

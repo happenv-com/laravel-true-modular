@@ -13,19 +13,16 @@ use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyExcepti
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
-use Override;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
 
 class ListModulesCommand extends Command
 {
-    #[Override]
     protected $signature = 'module:list
                             {--reverse : Show in reverse dependency order (dependents first)}
                             {--simple : Show simple list without table}
                             {--format= : Output format (table, text, json)}';
 
-    #[Override]
     protected $description = 'List all modules in dependency order';
 
     public function __construct(

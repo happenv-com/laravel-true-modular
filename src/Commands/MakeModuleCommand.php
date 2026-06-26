@@ -9,17 +9,14 @@ use Happenv\LaravelTrueModular\Generators\ModuleGenerator;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Process;
-use Override;
 use RuntimeException;
 
 use function Laravel\Prompts\confirm;
 
 class MakeModuleCommand extends Command
 {
-    #[Override]
     protected $signature = 'module:make {name : The module name (e.g. blog)}';
 
-    #[Override]
     protected $description = 'Scaffold a new module under the configured modules directory';
 
     public function handle(): int

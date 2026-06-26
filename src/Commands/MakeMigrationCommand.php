@@ -6,7 +6,6 @@ namespace Happenv\LaravelTrueModular\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\MigrateMakeCommand;
-use Override;
 
 use function Happenv\LaravelTrueModular\module_path;
 
@@ -17,7 +16,6 @@ class MakeMigrationCommand extends Command
      *
      * @var string
      */
-    #[Override]
     protected $signature = 'module:make:migration {module : The name of the module} {name : The name of the migration} {--create= : The table to be created} {--table= : The table to migrate}';
 
     /**
@@ -25,7 +23,6 @@ class MakeMigrationCommand extends Command
      *
      * @var string
      */
-    #[Override]
     protected $description = 'Create a new migration for a module';
 
     /**

@@ -13,13 +13,11 @@ use Override;
 
 final class ModuleImpactCommand extends AbstractArchitectureCommand
 {
-    #[Override]
     protected $signature = 'module:impact
                             {module : The module to analyze}
                             {--format= : Output format (text, json)}
                             {--schema-version=1 : Machine API schema version}';
 
-    #[Override]
     protected $description = 'Show which modules are affected by a change to the given module';
 
     public function __construct(
