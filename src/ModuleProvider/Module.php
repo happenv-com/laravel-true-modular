@@ -24,7 +24,6 @@ use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViews;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViewSharedData;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasVoters;
 use Illuminate\Support\Str;
-use Illuminate\Support\Traits\Macroable;
 
 class Module
 {

@@ -28,7 +28,6 @@ use Happenv\LaravelTrueModular\ModuleProvider\Exceptions\InvalidModule;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\CachesConfiguration;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Traits\Macroable;
 use Override;
 use ReflectionClass;
 use RuntimeException;
