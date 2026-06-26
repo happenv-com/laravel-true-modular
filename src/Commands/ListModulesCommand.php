@@ -20,7 +20,7 @@ class ListModulesCommand extends Command
      * @var string
      */
     #[Override]
-    protected $signature = 'modules:list
+    protected $signature = 'module:list
                             {--reverse : Show in reverse dependency order (dependents first)}
                             {--simple : Show simple list without table}';
 
