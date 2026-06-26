@@ -20,15 +20,15 @@ use function Safe\glob;
 final readonly class ModuleFileFinder
 {
     public function __construct(
-        private ModuleTree $moduleTree,
+        private ModuleRegistry $moduleRegistry,
     ) {}
 
     /**
-     * Create a new instance with default ModuleTree.
+     * Create a new instance with default ModuleRegistry.
      */
     public static function make(): self
     {
-        return new self(ModuleTree::make());
+        return new self(ModuleRegistry::make());
     }
 
     /**
@@ -44,7 +44,7 @@ final readonly class ModuleFileFinder
      */
     public function findFiles(string $directory, string $pattern = '*.php'): Collection
     {
-        $order = $this->moduleTree->getTopologicalOrder();
+        $order = $this->moduleRegistry->getTopologicalOrder();
 
         /** @phpstan-ignore return.type */
         return collect($order)
@@ -64,7 +64,7 @@ final readonly class ModuleFileFinder
      */
     public function findFilesReverse(string $directory, string $pattern = '*.php'): Collection
     {
-        $order = $this->moduleTree->getReverseTopologicalOrder();
+        $order = $this->moduleRegistry->getReverseTopologicalOrder();
 
         /** @phpstan-ignore return.type */
         return collect($order)
@@ -130,7 +130,7 @@ final readonly class ModuleFileFinder
      */
     public function findFilesGroupedByModule(string $directory, string $pattern = '*.php'): Collection
     {
-        $order = $this->moduleTree->getTopologicalOrder();
+        $order = $this->moduleRegistry->getTopologicalOrder();
 
         /** @phpstan-ignore return.type */
         return collect($order)
@@ -152,7 +152,7 @@ final readonly class ModuleFileFinder
      */
     private function getModuleFiles(string $moduleName, string $directory, string $pattern): array
     {
-        $modulePath = $this->moduleTree->getModulePath($moduleName);
+        $modulePath = $this->moduleRegistry->getModulePath($moduleName);
 
         if ($modulePath === null) {
             return [];
@@ -200,20 +200,6 @@ final readonly class ModuleFileFinder
      */
     private function getModuleNamespace(string $moduleName): string
     {
-        $modules = $this->moduleTree->getAllModules();
-
-        if (! isset($modules[$moduleName])) {
-            return '';
-        }
-
-        $autoload = $modules[$moduleName]['composer']['autoload']['psr-4'] ?? [];
-
-        // Return the first namespace (typically there's only one)
-        foreach (array_keys($autoload) as $namespace) {
-            // Ensure namespace ends with backslash
-            return rtrim((string) $namespace, '\\').'\\';
-        }
-
-        return '';
+        return $this->moduleRegistry->getModuleNamespace($moduleName) ?? '';
     }
 }

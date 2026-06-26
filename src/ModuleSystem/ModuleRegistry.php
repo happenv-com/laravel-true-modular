@@ -6,6 +6,7 @@ namespace Happenv\LaravelTrueModular\ModuleSystem;
 
 use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
+use Happenv\LaravelTrueModular\ModuleSystem\Graph\TopologicalSort;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
 
@@ -16,7 +17,7 @@ use function Safe\json_decode;
 /**
  * Discovers modules and resolves their execution order based on composer.json dependencies.
  */
-final class ModuleTree
+final class ModuleRegistry
 {
     /**
      * @var array<string, array<string, mixed>>|null Cached module data
@@ -37,7 +38,7 @@ final class ModuleTree
      */
     public static function make(): self
     {
-        return new self(base_path('app-modules'));
+        return new self(base_path(Application::getModulesDirectory()));
     }
 
     /**
@@ -67,7 +68,7 @@ final class ModuleTree
 
             $composerContent = file_get_contents($composerPath);
 
-            $composer = json_decode($composerContent, true);
+            $composer = json_decode($composerContent, associative: true);
             if (! is_array($composer)) {
                 continue;
             }
@@ -105,6 +106,37 @@ final class ModuleTree
     public function getModuleNames(): array
     {
         return array_keys($this->getAllModules());
+    }
+
+    /**
+     * Get all PSR-4 namespaces declared by a module, each normalized to a
+     * trailing backslash. Empty when the module declares no PSR-4 autoload.
+     *
+     * @return array<string>
+     *
+     * @throws FilesystemException
+     * @throws JsonException
+     */
+    public function getModuleNamespaces(string $moduleName): array
+    {
+        $modules = $this->getAllModules();
+        $autoload = $modules[$moduleName]['composer']['autoload']['psr-4'] ?? [];
+
+        return array_map(
+            static fn (int|string $namespace): string => rtrim((string) $namespace, '\\').'\\',
+            array_keys($autoload),
+        );
+    }
+
+    /**
+     * Get the primary (first) PSR-4 namespace of a module, or null when none is declared.
+     *
+     * @throws FilesystemException
+     * @throws JsonException
+     */
+    public function getModuleNamespace(string $moduleName): ?string
+    {
+        return $this->getModuleNamespaces($moduleName)[0] ?? null;
     }
 
     /**
@@ -177,51 +209,13 @@ final class ModuleTree
      */
     public function getTopologicalOrder(): array
     {
-        $graph = $this->getDependencyGraph();
+        $order = TopologicalSort::order($this->getDependencyGraph());
 
-        // Calculate in-degree for each node
-        // If A depends on B, then A has an in-degree from B (B must come before A)
-        $inDegree = array_fill_keys(array_keys($graph), 0);
-
-        foreach ($graph as $module => $dependencies) {
-            // Each dependency adds to the in-degree of the dependent module
-            $inDegree[$module] = count($dependencies);
+        if ($order === null) {
+            throw new CircularDependencyException($this->detectCircularDependencies());
         }
 
-        // Queue with nodes having no dependencies (in-degree 0)
-        $queue = [];
-        foreach ($inDegree as $module => $degree) {
-            if ($degree === 0) {
-                $queue[] = $module;
-            }
-        }
-
-        $result = [];
-
-        while ($queue !== []) {
-            $current = array_shift($queue);
-            $result[] = $current;
-
-            // For each module that depends on current, reduce its in-degree
-            foreach ($graph as $module => $dependencies) {
-                if (in_array($current, $dependencies, true)) {
-                    $inDegree[$module]--;
-
-                    if ($inDegree[$module] === 0) {
-                        $queue[] = $module;
-                    }
-                }
-            }
-        }
-
-        // If not all nodes are processed, there's a cycle
-        if (count($result) !== count($graph)) {
-            $cycles = $this->detectCircularDependencies();
-
-            throw new CircularDependencyException($cycles);
-        }
-
-        return $result;
+        return $order;
     }
 
     /**
@@ -254,18 +248,7 @@ final class ModuleTree
      */
     public function detectCircularDependencies(): array
     {
-        $graph = $this->getDependencyGraph();
-        $cycles = [];
-        $visited = [];
-        $recursionStack = [];
-
-        foreach (array_keys($graph) as $module) {
-            if (! isset($visited[$module])) {
-                $this->detectCyclesDfs($module, $graph, $visited, $recursionStack, [], $cycles);
-            }
-        }
-
-        return $this->uniqueCycles($cycles);
+        return TopologicalSort::cycles($this->getDependencyGraph());
     }
 
     /**
@@ -288,87 +271,5 @@ final class ModuleTree
     {
         $this->modules = null;
         $this->dependencyGraph = null;
-    }
-
-    /**
-     * @param  array<string, array<string>>  $graph
-     * @param  array<string, bool>  $visited
-     * @param  array<string, bool>  $recursionStack
-     * @param  array<string>  $path
-     * @param  array<array<string>>  $cycles
-     */
-    private function detectCyclesDfs(
-        string $current,
-        array $graph,
-        array &$visited,
-        array &$recursionStack,
-        array $path,
-        array &$cycles,
-    ): void {
-        $visited[$current] = true;
-        $recursionStack[$current] = true;
-        $path[] = $current;
-
-        foreach ($graph[$current] ?? [] as $dependency) {
-            if ($dependency === $current) {
-                continue;
-            }
-
-            if (! isset($visited[$dependency])) {
-                $this->detectCyclesDfs($dependency, $graph, $visited, $recursionStack, $path, $cycles);
-            } elseif (isset($recursionStack[$dependency]) && $recursionStack[$dependency]) {
-                $cycleStart = array_search($dependency, $path, true);
-
-                if ($cycleStart !== false) {
-                    $cycle = array_slice($path, $cycleStart);
-                    $cycle[] = $dependency;
-                    $cycles[] = $cycle;
-                }
-            }
-        }
-
-        $recursionStack[$current] = false;
-    }
-
-    /**
-     * Remove duplicate cycles by normalizing them.
-     *
-     * @param  array<array<string>>  $cycles
-     * @return array<array<string>>
-     */
-    private function uniqueCycles(array $cycles): array
-    {
-        $normalized = [];
-
-        foreach ($cycles as $cycle) {
-            $cycleWithoutDuplicate = array_slice($cycle, 0, -1);
-
-            if ($cycleWithoutDuplicate === []) {
-                continue;
-            }
-
-            $minIndex = 0;
-            $minValue = $cycleWithoutDuplicate[0];
-
-            foreach ($cycleWithoutDuplicate as $index => $value) {
-                if ($value < $minValue) {
-                    $minValue = $value;
-                    $minIndex = $index;
-                }
-            }
-
-            $normalizedCycle = array_merge(
-                array_slice($cycleWithoutDuplicate, $minIndex),
-                array_slice($cycleWithoutDuplicate, 0, $minIndex)
-            );
-
-            $key = implode(' -> ', $normalizedCycle);
-
-            if (! isset($normalized[$key])) {
-                $normalized[$key] = $cycle;
-            }
-        }
-
-        return array_values($normalized);
     }
 }

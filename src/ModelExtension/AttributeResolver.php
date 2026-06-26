@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\ModelExtension;
 
+use Illuminate\Database\Eloquent\Model;
+
 class AttributeResolver
 {
     /**
@@ -18,7 +20,7 @@ class AttributeResolver
 
         if ($firstExtensionForModel) {
             $model::handleMissingAttributeViolationUsing(
-                fn ($modelInstance, $key) => AttributeResolversBag::resolve($modelInstance, $key)
+                fn (Model $modelInstance, string $key): mixed => AttributeResolversBag::resolve($modelInstance, $key)
             );
         }
     }

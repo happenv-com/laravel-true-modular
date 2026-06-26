@@ -17,10 +17,12 @@ class DynamicRelations
         $methods = (new \ReflectionClass($extension))->getMethods(\ReflectionMethod::IS_PUBLIC);
 
         foreach ($methods as $method) {
-            if ($method->class !== $extension || $method->isConstructor()) {
+            if ($method->class !== $extension) {
                 continue;
             }
-
+            if ($method->isConstructor()) {
+                continue;
+            }
             if (! self::isRelationMethod($method->getReturnType())) {
                 continue;
             }
@@ -43,6 +45,6 @@ class DynamicRelations
         $typeName = $returnType->getName();
 
         return class_exists($typeName)
-            && is_a($typeName, Relation::class, true);
+            && is_a($typeName, Relation::class, allow_string: true);
     }
 }

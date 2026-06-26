@@ -9,7 +9,7 @@ use Happenv\LaravelTrueModular\ModelExtension\DynamicRelations;
 
 trait ProcessModelExtensions
 {
-    protected function processModelExtensions(): self
+    protected function processModelExtensions(): static
     {
         if (blank($this->module->modelExtensions)) {
             return $this;

@@ -1,0 +1,6 @@
+{
+    "name": "myapp/amazon",
+    "type": "true-module",
+    "require": { "myapp/sale": "*" },
+    "autoload": { "psr-4": { "Myapp\\Amazon\\": "src/" } }
+}

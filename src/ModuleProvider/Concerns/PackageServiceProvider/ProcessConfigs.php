@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\Config\ConfigMerger;
@@ -14,7 +16,7 @@ trait ProcessConfigs
     /**
      * @throws BindingResolutionException
      */
-    public function overwriteConfigs(): self
+    public function overwriteConfigs(): static
     {
         if (blank($this->module->configsToOverwrite)) {
             return $this;
@@ -23,7 +25,7 @@ trait ProcessConfigs
         $config = $this->app->make('config');
 
         foreach ($this->module->configsToOverwrite as $configToOverwrite) {
-            $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configToOverwrite)));
+            $vendorConfig = $this->module->vendorPath('config/'.$this->normalizeConfigPath($configToOverwrite).'.php');
 
             // $this->replaceConfigRecursivelyFrom($vendorConfig, $configToOverwrite);
 
@@ -39,7 +41,7 @@ trait ProcessConfigs
     /**
      * @throws BindingResolutionException
      */
-    public function processConfigs(): self
+    public function processConfigs(): static
     {
         if (blank($this->module->configs)) {
             return $this;
@@ -49,7 +51,7 @@ trait ProcessConfigs
 
         foreach ($this->module->configs as $configFileName) {
 
-            $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configFileName)));
+            $vendorConfig = $this->module->vendorPath('config/'.$this->normalizeConfigPath($configFileName).'.php');
 
             $config->set($this->normalizeConfigKey($this->module->shortName().'::'.$configFileName), require $vendorConfig);
         }
@@ -57,7 +59,7 @@ trait ProcessConfigs
         return $this;
     }
 
-    public function mergeConfigs(): self
+    public function mergeConfigs(): static
     {
         if (blank($this->module->configsToMerge)) {
             return $this;
@@ -65,7 +67,7 @@ trait ProcessConfigs
 
         foreach ($this->module->configsToMerge as $configFileName) {
 
-            $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configFileName)));
+            $vendorConfig = $this->module->vendorPath('config/'.$this->normalizeConfigPath($configFileName).'.php');
 
             $this->mergeConfigFrom($vendorConfig, $configFileName);
         }
@@ -76,7 +78,7 @@ trait ProcessConfigs
     /**
      * @throws BindingResolutionException
      */
-    public function extendConfigs(): self
+    public function extendConfigs(): static
     {
         if (blank($this->module->configsToExtend)) {
             return $this;
@@ -85,7 +87,7 @@ trait ProcessConfigs
         foreach ($this->module->configsToExtend as $configToExtend) {
             [$configFileName, $overwrite] = $configToExtend;
 
-            $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configFileName)));
+            $vendorConfig = $this->module->vendorPath('config/'.$this->normalizeConfigPath($configFileName).'.php');
 
             $this->mergeRecursiveConfigFrom($vendorConfig, $configFileName, $overwrite);
         }

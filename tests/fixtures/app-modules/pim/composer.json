@@ -1,0 +1,6 @@
+{
+    "name": "myapp/pim",
+    "type": "true-module",
+    "require": { "myapp/core": "*" },
+    "autoload": { "psr-4": { "Myapp\\Pim\\": "src/" } }
+}

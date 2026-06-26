@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular;
 
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
+use Happenv\LaravelTrueModular\ModuleSystem\NamespaceMatcher;
 use Illuminate\Support\ServiceProvider;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
@@ -25,16 +26,8 @@ final class ServiceProviderSorter
      */
     private ?array $namespaceMap = null;
 
-    /**
-     * Cache for sorted namespaces to avoid redundant calculations
-     * during multiple calls to getModuleName.
-     *
-     * @var array<string>|null
-     */
-    private ?array $sortedNamespaces = null;
-
     public function __construct(
-        private readonly ModuleTree $moduleTree,
+        private readonly ModuleRegistry $moduleRegistry,
     ) {}
 
     /**
@@ -49,7 +42,7 @@ final class ServiceProviderSorter
      */
     public function sort(array $providers): array
     {
-        $topologicalOrder = $this->moduleTree->getTopologicalOrder();
+        $topologicalOrder = $this->moduleRegistry->getTopologicalOrder();
         $moduleOrderMap = array_flip($topologicalOrder);
 
         // Separate app module providers from others
@@ -93,24 +86,7 @@ final class ServiceProviderSorter
      */
     public function getModuleName(ServiceProvider $provider): ?string
     {
-        $className = $provider::class;
-        $namespaceMap = $this->getNamespaceMap();
-
-        // Sort by namespace length (longest first) to match most specific namespace
-        $this->sortedNamespaces ??= (function () use ($namespaceMap): array {
-            $ns = array_keys($namespaceMap);
-            usort($ns, fn (string $a, string $b): int => strlen($b) <=> strlen($a));
-
-            return $ns;
-        })();
-
-        foreach ($this->sortedNamespaces as $namespace) {
-            if (str_starts_with($className, $namespace)) {
-                return $namespaceMap[$namespace];
-            }
-        }
-
-        return null;
+        return NamespaceMatcher::longestPrefix($provider::class, $this->getNamespaceMap());
     }
 
     /**
@@ -128,15 +104,10 @@ final class ServiceProviderSorter
         }
 
         $this->namespaceMap = [];
-        $modules = $this->moduleTree->getAllModules();
 
-        foreach ($modules as $moduleName => $moduleData) {
-            $autoload = $moduleData['composer']['autoload']['psr-4'] ?? [];
-
-            foreach (array_keys($autoload) as $namespace) {
-                // Normalize namespace (ensure it ends with backslash)
-                $normalizedNamespace = rtrim((string) $namespace, '\\').'\\';
-                $this->namespaceMap[$normalizedNamespace] = $moduleName;
+        foreach (array_keys($this->moduleRegistry->getAllModules()) as $moduleName) {
+            foreach ($this->moduleRegistry->getModuleNamespaces($moduleName) as $namespace) {
+                $this->namespaceMap[$namespace] = $moduleName;
             }
         }
 

@@ -4,7 +4,20 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Config;
 
-class ConfigMerger
+/**
+ * Recursive config merge with three deliberate, value-type-dependent strategies:
+ *
+ *  - **Lists** (sequential arrays): unioned and de-duplicated
+ *    (`array_unique(..., SORT_REGULAR)`) regardless of $overwrite — module and
+ *    host list entries are always combined, never replaced.
+ *  - **Associative arrays**: merged recursively, carrying $overwrite down.
+ *  - **Scalars / type mismatches**: the host value wins unless $overwrite is
+ *    true, in which case the extending value replaces it.
+ *
+ * Keys are `ksort`ed at every level, so the merged result is ordered
+ * deterministically by key rather than by insertion order.
+ */
+final class ConfigMerger implements ConfigMergerContract
 {
     /**
      * @param  array<array-key, mixed>  $original

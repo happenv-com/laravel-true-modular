@@ -17,6 +17,15 @@ use TypeError;
 
 final class Application extends FoundationApplication
 {
+    /** Default Composer package `type` used to identify modules. */
+    public const string DEFAULT_COMPOSER_TYPE = 'true-module';
+
+    /** Default directory (relative to the base path) scanned for modules. */
+    public const string DEFAULT_MODULES_DIRECTORY = 'app-modules';
+
+    /** Default root namespace under which modules live (e.g. the core module is `<namespace>\Core`). */
+    public const string DEFAULT_MODULES_NAMESPACE = 'TrueModule';
+
     /**
      * The array of initializing callbacks.
      *
@@ -103,8 +112,6 @@ final class Application extends FoundationApplication
             return;
         }
 
-        // dump($this->serviceProviders);
-
         // Sort service providers according to module dependency order
         $sorter = $this->resolve(ServiceProviderSorter::class);
         $this->serviceProviders = $sorter->sort($this->serviceProviders);
@@ -149,10 +156,6 @@ final class Application extends FoundationApplication
         }
     }
 
-    /**
-     * @throws ReflectionException
-     * @throws TypeError
-     */
     /**
      * @throws InvalidArgumentException
      * @throws ReflectionException
@@ -211,17 +214,48 @@ final class Application extends FoundationApplication
         $this->initializedCallbacks = [];
     }
 
-    protected static string $moduleComposerType = 'true-module';
+    private static string $moduleComposerType = self::DEFAULT_COMPOSER_TYPE;
 
-    public static function moduleComposerType(string $type): string
+    public static function moduleComposerType(string $type): void
     {
         self::$moduleComposerType = $type;
-
-        return self::class;
     }
 
     public static function getModuleComposerType(): string
     {
         return self::$moduleComposerType;
+    }
+
+    private static string $modulesDirectory = self::DEFAULT_MODULES_DIRECTORY;
+
+    /**
+     * Set the directory (relative to the application base path) scanned for modules.
+     * Call before configure(), or use the fluent {@see ModularApplication} wrapper.
+     */
+    public static function modulesDirectory(string $directory): void
+    {
+        self::$modulesDirectory = $directory;
+    }
+
+    public static function getModulesDirectory(): string
+    {
+        return self::$modulesDirectory;
+    }
+
+    private static string $modulesNamespace = self::DEFAULT_MODULES_NAMESPACE;
+
+    /**
+     * Set the root namespace under which modules live (e.g. the core module is
+     * `<namespace>\Core`). Used when scaffolding modules (e.g. `true-modular:setup`).
+     * Call before configure(), or use the fluent {@see ModularApplication} wrapper.
+     */
+    public static function modulesNamespace(string $namespace): void
+    {
+        self::$modulesNamespace = trim($namespace, '\\');
+    }
+
+    public static function getModulesNamespace(): string
+    {
+        return self::$modulesNamespace;
     }
 }

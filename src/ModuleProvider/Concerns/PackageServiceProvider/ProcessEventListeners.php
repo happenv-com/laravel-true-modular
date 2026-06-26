@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -14,7 +16,7 @@ trait ProcessEventListeners
     /**
      * @throws RuntimeException
      */
-    protected function processEventListeners(): self
+    protected function processEventListeners(): static
     {
         if (blank($this->module->eventListeners)) {
             return $this;

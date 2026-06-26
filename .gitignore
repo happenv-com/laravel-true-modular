@@ -2,3 +2,9 @@
 /node_modules
 /composer.lock
 .DS_Store
+/build
+# Testbench-generated cache/artifacts for the test fixture app (base_path = tests/fixtures)
+/tests/fixtures/bootstrap/cache/*.php
+/tests/fixtures/storage/framework/**/*.php
+/tests/fixtures/storage/logs/*.log
+.claude/settings.local.json

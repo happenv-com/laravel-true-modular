@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package;
 
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\Support\MergesFlattened;
 use Happenv\LaravelTrueModular\ModuleProvider\Module;
 
 /**
@@ -9,6 +12,8 @@ use Happenv\LaravelTrueModular\ModuleProvider\Module;
  */
 trait HasMigrations
 {
+    use MergesFlattened;
+
     public bool $runsMigrations = false;
 
     public bool $discoversMigrations = false;
@@ -36,10 +41,7 @@ trait HasMigrations
 
     public function hasMigrations(string ...$migrationFileNames): static
     {
-        $this->migrationFileNames = array_merge(
-            $this->migrationFileNames,
-            collect($migrationFileNames)->flatten()->toArray()
-        );
+        $this->migrationFileNames = $this->mergeFlattened($this->migrationFileNames, $migrationFileNames);
 
         return $this;
     }

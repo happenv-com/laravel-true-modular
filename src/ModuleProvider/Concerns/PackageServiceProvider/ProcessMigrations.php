@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Carbon\Carbon;
@@ -25,7 +27,7 @@ trait ProcessMigrations
      * @throws PcreException
      * @throws RuntimeException
      */
-    protected function processMigrations(): self
+    protected function processMigrations(): static
     {
         if ($this->module->discoversMigrations) {
             $this->discoverModuleMigrations();
@@ -36,7 +38,7 @@ trait ProcessMigrations
         $now = Date::now();
 
         foreach ($this->module->migrationFileNames as $migrationFileName) {
-            $vendorMigration = $this->module->basePath(sprintf('/../database/migrations/%s.php', $migrationFileName));
+            $vendorMigration = $this->module->vendorPath('database/migrations/'.$migrationFileName.'.php');
 
             // Support for the .stub file extension
             if (! file_exists($vendorMigration)) {
@@ -69,7 +71,7 @@ trait ProcessMigrations
     {
         $now = Date::now();
         $migrationsPath = trim((string) $this->module->migrationsPath, '/');
-        $migrationsDir = $this->module->basePath('/../'.$migrationsPath);
+        $migrationsDir = $this->module->vendorPath($migrationsPath);
 
         // Filesystem::files() throws DirectoryNotFoundException on a missing dir,
         // which would crash boot for a module that enables discoversMigrations()

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -10,7 +12,7 @@ use Webard\LaravelAccessControl\PermissionRegistry;
  */
 trait ProcessPermissions
 {
-    protected function processPermissions(): self
+    protected function processPermissions(): static
     {
         if (blank($this->module->permissions)) {
             return $this;

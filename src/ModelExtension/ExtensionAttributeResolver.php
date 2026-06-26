@@ -25,7 +25,7 @@ class ExtensionAttributeResolver
         return $notFound;
     }
 
-    public function getMethodName(string $key): string
+    private function getMethodName(string $key): string
     {
         return 'get'.Str::studly($key).'Attribute';
     }

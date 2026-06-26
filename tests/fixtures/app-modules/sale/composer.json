@@ -1,0 +1,6 @@
+{
+    "name": "myapp/sale",
+    "type": "true-module",
+    "require": { "myapp/core": "*", "myapp/pim": "*" },
+    "autoload": { "psr-4": { "Myapp\\Sale\\": "src/" } }
+}

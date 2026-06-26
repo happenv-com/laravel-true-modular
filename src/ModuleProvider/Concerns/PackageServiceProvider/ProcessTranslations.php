@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -9,13 +11,13 @@ use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
  */
 trait ProcessTranslations
 {
-    protected function processTranslations(): self
+    protected function processTranslations(): static
     {
         if (! $this->module->hasTranslations) {
             return $this;
         }
 
-        $vendorTranslations = $this->module->basePath('/../resources/lang');
+        $vendorTranslations = $this->module->vendorPath('resources/lang');
         $appTranslations = (function_exists('lang_path'))
             ? lang_path('vendor/'.$this->module->shortName())
             : resource_path('lang/vendor/'.$this->module->shortName());

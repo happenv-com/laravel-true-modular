@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -10,21 +12,21 @@ use Illuminate\Support\Str;
  */
 trait ProcessInertia
 {
-    protected function processInertia(): self
+    protected function processInertia(): static
     {
         if (! $this->module->hasInertiaComponents) {
             return $this;
         }
 
-        $namespace = $this->module->viewNamespace;
-        $directoryName = Str::of($this->moduleView($namespace))->studly()->remove('-')->value();
-        $vendorComponents = $this->module->basePath('/../resources/js/Pages');
+        $namespace = $this->module->inertiaNamespace ?? $this->module->shortName();
+        $directoryName = Str::of($namespace)->studly()->remove('-')->value();
+        $vendorComponents = $this->module->vendorPath('resources/js/Pages');
         $appComponents = base_path('resources/js/Pages/'.$directoryName);
 
         if ($this->app->runningInConsole()) {
             $this->publishes(
                 [$vendorComponents => $appComponents],
-                $this->moduleView($namespace).'-inertia-components'
+                $namespace.'-inertia-components'
             );
         }
 

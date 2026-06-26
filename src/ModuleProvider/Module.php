@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasAssets;
@@ -79,5 +81,15 @@ class Module
         $this->basePath = $path;
 
         return $this;
+    }
+
+    /**
+     * Resolve a path inside the module package root (one level above the
+     * provider's `src/` directory), where shipped resources live:
+     * `config/`, `routes/`, `database/`, `resources/`, etc.
+     */
+    public function vendorPath(string $relative = ''): string
+    {
+        return $this->basePath('/../'.ltrim($relative, '/'));
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -14,7 +16,7 @@ trait ProcessViewSharedData
     /**
      * @throws RuntimeException
      */
-    protected function processViewSharedData(): self
+    protected function processViewSharedData(): static
     {
         if (blank($this->module->sharedViewData)) {
             return $this;

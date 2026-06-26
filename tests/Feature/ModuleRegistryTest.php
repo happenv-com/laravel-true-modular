@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 
-describe('ModuleTree', function (): void {
+describe('ModuleRegistry', function (): void {
     describe('getAllModules', function (): void {
         it('discovers all modules in app-modules directory', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $modules = $tree->getAllModules();
 
             expect($modules)->toBeArray()
@@ -18,7 +18,7 @@ describe('ModuleTree', function (): void {
         });
 
         it('returns module data with name, path, and composer', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $modules = $tree->getAllModules();
 
             $coreModule = $modules['myapp/core'];
@@ -33,7 +33,7 @@ describe('ModuleTree', function (): void {
 
     describe('getModuleNames', function (): void {
         it('returns array of module names', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $names = $tree->getModuleNames();
 
             expect($names)->toBeArray()
@@ -44,7 +44,7 @@ describe('ModuleTree', function (): void {
 
     describe('getDependencies', function (): void {
         it('returns dependencies for a module', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $dependencies = $tree->getDependencies('myapp/sale');
 
             expect($dependencies)->toBeArray()
@@ -52,7 +52,7 @@ describe('ModuleTree', function (): void {
         });
 
         it('returns empty array for module without dependencies', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $dependencies = $tree->getDependencies('myapp/kernel');
 
             // Core has no myapp/* dependencies (only external packages)
@@ -61,7 +61,7 @@ describe('ModuleTree', function (): void {
         });
 
         it('returns empty array for unknown module', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $dependencies = $tree->getDependencies('myapp/nonexistent');
 
             expect($dependencies)->toBeArray()
@@ -71,7 +71,7 @@ describe('ModuleTree', function (): void {
 
     describe('getDependencyGraph', function (): void {
         it('returns complete dependency graph', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $graph = $tree->getDependencyGraph();
 
             expect($graph)->toBeArray()
@@ -82,7 +82,7 @@ describe('ModuleTree', function (): void {
 
     describe('getTopologicalOrder', function (): void {
         it('returns modules in dependency order (dependencies first)', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $order = $tree->getTopologicalOrder();
 
             expect($order)->toBeArray()
@@ -97,17 +97,28 @@ describe('ModuleTree', function (): void {
         });
 
         it('places modules with no dependencies first', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $order = $tree->getTopologicalOrder();
 
             // Core has no module dependencies, should be first
             expect($order[0])->toBe('myapp/kernel');
         });
+
+        it('produces the exact dependency-first order for the fixtures', function (): void {
+            // Pins the resolved order so the topological-sort engine cannot drift.
+            expect(ModuleRegistry::make()->getTopologicalOrder())->toBe([
+                'myapp/kernel',
+                'myapp/core',
+                'myapp/pim',
+                'myapp/sale',
+                'myapp/amazon',
+            ]);
+        });
     });
 
     describe('getReverseTopologicalOrder', function (): void {
         it('returns modules in reverse dependency order (dependents first)', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $order = $tree->getReverseTopologicalOrder();
 
             expect($order)->toBeArray()
@@ -122,7 +133,7 @@ describe('ModuleTree', function (): void {
         });
 
         it('places modules with no dependencies last', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $order = $tree->getReverseTopologicalOrder();
 
             // Core has no module dependencies, should be last
@@ -130,7 +141,7 @@ describe('ModuleTree', function (): void {
         });
 
         it('is the exact reverse of getTopologicalOrder', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
 
             $topological = $tree->getTopologicalOrder();
             $reverse = $tree->getReverseTopologicalOrder();
@@ -141,7 +152,7 @@ describe('ModuleTree', function (): void {
 
     describe('detectCircularDependencies', function (): void {
         it('returns empty array when no circular dependencies exist', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $cycles = $tree->detectCircularDependencies();
 
             expect($cycles)->toBeArray()
@@ -151,7 +162,7 @@ describe('ModuleTree', function (): void {
 
     describe('getModulePath', function (): void {
         it('returns path for existing module', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $path = $tree->getModulePath('myapp/core');
 
             expect($path)->not->toBeNull()
@@ -159,7 +170,7 @@ describe('ModuleTree', function (): void {
         });
 
         it('returns null for unknown module', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
             $path = $tree->getModulePath('myapp/nonexistent');
 
             expect($path)->toBeNull();
@@ -168,7 +179,7 @@ describe('ModuleTree', function (): void {
 
     describe('clearCache', function (): void {
         it('clears internal cache', function (): void {
-            $tree = ModuleTree::make();
+            $tree = ModuleRegistry::make();
 
             // Call twice to populate cache
             $modules1 = $tree->getAllModules();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -15,7 +17,7 @@ trait ProcessAssets
             return $this;
         }
 
-        $vendorAssets = $this->module->basePath('/../resources/dist');
+        $vendorAssets = $this->module->vendorPath('resources/dist');
         $appAssets = public_path('vendor/'.$this->module->shortName());
 
         $this->publishes([$vendorAssets => $appAssets], $this->module->shortName().'-assets');

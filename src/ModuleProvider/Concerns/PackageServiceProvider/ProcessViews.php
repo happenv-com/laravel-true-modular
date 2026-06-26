@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -16,14 +18,14 @@ trait ProcessViews
     /**
      * @throws FilesystemException
      */
-    protected function processViews(): self
+    protected function processViews(): static
     {
         if (! $this->module->hasViews) {
             return $this;
         }
 
         $namespace = $this->module->viewNamespace;
-        $viewsPath = $this->module->basePath('/../resources/views');
+        $viewsPath = $this->module->vendorPath('resources/views');
 
         // Guard before Safe\realpath(): it throws on a non-existent path, which
         // would crash boot for a module that declares hasViews() but ships no
@@ -44,13 +46,13 @@ trait ProcessViews
         return $this;
     }
 
-    protected function processGlobalViews(): self
+    protected function processGlobalViews(): static
     {
         if (! $this->module->hasGlobalViews) {
             return $this;
         }
 
-        $globalViewsPath = $this->module->basePath('/../resources/views-global');
+        $globalViewsPath = $this->module->vendorPath('resources/views-global');
 
         if ($this->moduleDirectoryMissing($globalViewsPath, 'global views')) {
             return $this;

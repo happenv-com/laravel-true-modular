@@ -1,0 +1,7 @@
+{
+    "name": "myapp/core",
+    "type": "true-module",
+    "version": "1.0.0",
+    "require": { "myapp/kernel": "*" },
+    "autoload": { "psr-4": { "Myapp\\Core\\": "src/" } }
+}

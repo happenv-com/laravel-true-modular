@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 trait ProcessMorphMapDefinitions
 {
-    protected function processMorphMapDefinitions(): self
+    protected function processMorphMapDefinitions(): static
     {
         if (blank($this->module->morphMapDefinitions)) {
             return $this;

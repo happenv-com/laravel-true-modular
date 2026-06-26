@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\GuardsModulePaths;
@@ -65,7 +67,7 @@ abstract class ModuleProvider extends ServiceProvider
 
     /** @throws InvalidModule */
     #[Override]
-    final public function register(): ModuleProvider
+    final public function register(): static
     {
         $this->registeringModule();
 
@@ -97,7 +99,7 @@ abstract class ModuleProvider extends ServiceProvider
      * @throws BindingResolutionException
      * @throws RuntimeException
      */
-    final public function initialize(): ModuleProvider
+    final public function initialize(): static
     {
         $this->initializingModule();
 
@@ -133,7 +135,7 @@ abstract class ModuleProvider extends ServiceProvider
      * @throws PcreException
      * @throws RuntimeException
      */
-    final public function boot(): ModuleProvider
+    final public function boot(): static
     {
         $this->bootingModule();
 
@@ -167,9 +169,7 @@ abstract class ModuleProvider extends ServiceProvider
     {
         $reflector = new ReflectionClass(static::class);
 
-        $moduleBaseDir = dirname($reflector->getFileName());
-
-        return $moduleBaseDir;
+        return dirname($reflector->getFileName());
     }
 
     public function moduleView(?string $namespace): ?string

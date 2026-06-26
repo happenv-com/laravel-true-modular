@@ -9,15 +9,23 @@
         }
     ],
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "laravel/framework": "^12.0 || ^13.0",
         "thecodingmachine/safe": "^3.0"
     },
     "require-dev": {
+        "webard/laravel-access-control": "^1.0",
         "ergebnis/composer-normalize": "^2.48",
+        "laravel/pint": "^1.29",
+        "orchestra/testbench": "^11.1",
         "pestphp/pest": "^4.0",
         "thecodingmachine/phpstan-safe-rule": "^1.2",
-        "laravel/pint": "^1.29"
+        "rector/rector": "^2.5",
+        "larastan/larastan": "^3.10",
+        "livewire/livewire": "^3.0"
+    },
+    "suggest": {
+        "webard/laravel-access-control": ""
     },
     "minimum-stability": "stable",
     "autoload": {
@@ -26,6 +34,14 @@
         },
         "files": [
             "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Happenv\\LaravelTrueModular\\Tests\\": "tests/"
+        },
+        "classmap": [
+            "tests/fixtures/app-modules"
         ]
     },
     "config": {
@@ -41,5 +57,6 @@
             ]
         }
     },
-    "$schema": "https://getcomposer.org/schema.json"
+    "$schema": "https://getcomposer.org/schema.json",
+    "version": "0.2.99"
 }

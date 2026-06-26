@@ -1,78 +1,80 @@
-# Model Extensions
+# Model extensions
 
-Model extensions allow modules to add relations and attributes to existing Eloquent models without modifying the original class.
+Model extensions let one module add **attributes** and **relations** to an Eloquent model that
+*belongs to another module* — without editing that model's class. This is how a downstream module
+(say `billing`) augments an upstream model (say `catalog`'s `Product`) while keeping the dependency
+arrow pointing the right way (`billing` → `catalog`).
 
-## Registration
+## Declaring an extension
+
+In the augmenting module's provider, declare which extension class augments which model:
 
 ```php
-$this->module->hasModelExtensions([
-    User::class => UserExtension::class,
-]);
+public function configureModule(Module $module): void
+{
+    $module
+        ->name('acme/billing')
+        ->hasModelExtensions(Product::class, ProductBillingExtension::class);
+
+    // or many at once:
+    $module->hasModelExtensions([
+        Product::class => ProductBillingExtension::class,
+        Order::class   => OrderBillingExtension::class,
+    ]);
+}
 ```
 
-Multiple modules can register extensions for the same model. All extensions are applied — there is no overwriting.
+Both the model and extension class names are validated at declaration time — a non-existent class
+throws `InvalidArgumentException`.
 
-## Writing an Extension
+## Writing the extension class
 
-An extension must extend `Happenv\LaravelTrueModular\ModelExtension\ModelExtension`. The base class provides `$this->model` with the model instance injected via the constructor.
+Extend `ModelExtension`; the target model instance is injected as `$this->model`:
 
 ```php
 use Happenv\LaravelTrueModular\ModelExtension\ModelExtension;
-
-class UserExtension extends ModelExtension
-{
-}
-```
-
----
-
-## Relations
-
-Define a public method with a return type that extends `Illuminate\Database\Eloquent\Relations\Relation`. The method body uses `$this->model` exactly as you would use `$this` inside an Eloquent model.
-
-```php
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-public function orders(): HasMany
+final class ProductBillingExtension extends ModelExtension
 {
-    return $this->model->hasMany(Order::class);
-}
+    // Attribute: a get{Studly}Attribute method, like a classic Eloquent accessor.
+    public function getFormattedPriceAttribute(): string
+    {
+        return Money::format($this->model->price);
+    }
 
-public function allegroCredentialsChannels(): HasMany
-{
-    return $this->model->hasMany(AllegroCredentialsChannel::class, 'channel_id');
-}
-```
-
-The return type is required — it is used to detect relation methods. Methods without a `Relation` return type are ignored.
-
----
-
-## Attributes
-
-Only old-style accessors are currently supported. The method must follow the `get{Name}Attribute` naming convention.
-
-```php
-public function getFullNameAttribute(): string
-{
-    return $this->model->first_name . ' ' . $this->model->last_name;
+    // Relation: any public method whose return type is an Eloquent Relation.
+    public function invoices(): HasMany
+    {
+        return $this->model->hasMany(Invoice::class);
+    }
 }
 ```
 
-Accessing `$user->full_name` will call `getFullNameAttribute()` on the first extension that defines it.
+`$product->formatted_price` and `$product->invoices` now work as if defined on `Product` itself.
 
-#### Not supported
+## How it resolves (the `initialize` phase)
 
-- New-style accessors returning `Illuminate\Database\Eloquent\Casts\Attribute`
-- Mutators / setters
+`processModelExtensions()` runs in the **initialize** phase — after every module is registered but
+before any boots — so extensions are wired before the models are used. For each declared pair it
+registers two mechanisms:
 
----
+- **Attributes** — `AttributeResolver::register()` installs a missing-attribute handler on the model
+  the first time it is extended. When an undeclared attribute is read, each registered extension is
+  asked for a `get{Studly}Attribute` method; the first that has one wins. A unique sentinel object
+  distinguishes "resolved to `null`" from "not provided" — comparing against `null` would conflate
+  the two. The registry (`AttributeResolversBag`) is static because Eloquent's hook has no container
+  access.
 
-## Internals
+- **Relations** — `DynamicRelations::register()` reflects over the extension's public methods and,
+  for each one whose return type is an Eloquent `Relation`, calls `Model::resolveRelationUsing()`.
 
-| Class | Responsibility |
-|---|---|
-| `AttributeResolver` | Registers a single `handleMissingAttributeViolationUsing` handler per model that delegates to the bag |
-| `AttributeResolversBag` | Static registry of `ExtensionAttributeResolver` instances per model, tried in registration order |
-| `ExtensionAttributeResolver` | Checks a single extension for the accessor method and returns the value or a sentinel |
-| `DynamicRelations` | Uses reflection to find methods with a `Relation` return type and registers them via `resolveRelationUsing` |
+There is also `hasModelBuilderExtensions()` (and `processModelBuilderExtensions()`), which extends an
+Eloquent **builder/query** rather than a model — same lifecycle phase, declared the same way.
+
+## Why this is the right tool
+
+Putting the extension in the downstream module keeps the dependency direction correct: the module
+that *knows about* the new behaviour depends on the one that owns the model, never the reverse. See
+[best-practices.md](best-practices.md) and [anti-patterns.md](anti-patterns.md) for the dependency-
+direction rules this preserves.
