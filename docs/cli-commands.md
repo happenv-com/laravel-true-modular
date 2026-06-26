@@ -87,6 +87,7 @@ message rather than producing empty output. Renderers are resolved from the cont
 | Command | Purpose |
 | --- | --- |
 | `true-modular:setup` | Interactively prepare the app to run as a modular monolith (see below). |
+| `module:make {name}` | Scaffold a new module under the configured directory/namespace (see below). |
 | `module:list` | List modules in dependency order (`--reverse`, `--simple`, `--format=table\|text\|json`). |
 | `module:seed` | Seed module database seeders in dependency order (`--module`, `--class`, `--show-order`). |
 | `module:make:migration {module} {name}` | Scaffold a migration inside a module (`--create`, `--table`). |
@@ -122,4 +123,31 @@ It leaves the root `composer.json` `autoload` untouched (the stale `"App\\": "ap
 Composer warn), but offers to remove that entry for you. After conversion the command prints any files
 that still reference `App\` (e.g. under `tests/`) and reminds you to run `composer update {vendor}/core`
 followed by `composer dump-autoload`. The command aborts without changes if `{modules-dir}/core`
+already exists.
+
+### `module:make {name}`
+
+Scaffold a new module under the configured modules directory and namespace
+(`Application::modulesDirectory()` / `modulesNamespace()`, or their `ModularApplication` wrappers). The
+name is kebab-cased for the slug/package and studly-cased for the namespace — `module:make BlogPosts`
+produces the package `{vendor}/blog-posts` with namespace `{namespace}\BlogPosts`.
+
+For `php artisan module:make blog` (defaults `app-modules` / `TrueModule`) it writes:
+
+```
+app-modules/blog/
+├── composer.json                                  # name true-module/blog, type true-module, version 1.0.0
+├── config/blog.php                                # ['version' => '1.0.0']
+├── routes/web.php                                 # GET /blog/welcome -> WelcomeModuleController
+└── src/
+    ├── BlogServiceProvider.php                    # ->name('blog')->hasConfig('blog')->hasRoutes('web')
+    └── Http/Controllers/WelcomeModuleController.php
+```
+
+The controller returns `config('blog::blog.version')`, so hitting `/blog/welcome` renders the module's
+version (`1.0.0` by default — set in both `composer.json` and `config/blog.php`).
+
+It then registers the module in the root `composer.json` (prepends the `{modules-dir}/*` path repository
+if missing and `require`s the new package) and offers to run `composer update {vendor}/{slug}` for you to
+install it and auto-discover its provider. The command aborts without changes if the module directory
 already exists.

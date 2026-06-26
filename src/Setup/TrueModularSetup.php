@@ -69,7 +69,7 @@ final readonly class TrueModularSetup
         (new ScaffoldCoreModule($this->files, $this->basePath))->scaffold($modulePath, $srcPath, $vendor, $composerType, $moduleNamespace);
 
         // 4. Wire the module as a Composer path package
-        (new ConfigureComposer($this->files, $this->basePath))->wire($modulesDirectory, $vendor);
+        (new ConfigureComposer($this->files, $this->basePath))->wire($modulesDirectory, $vendor.'/core');
 
         // 5. Empty bootstrap/providers.php (the module provider auto-discovers)
         (new EmptyBootstrapProviders($this->files, $this->basePath))->empty();
