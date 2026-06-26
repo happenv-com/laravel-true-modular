@@ -14,7 +14,7 @@
         "thecodingmachine/safe": "^3.0"
     },
     "require-dev": {
-        "webard/laravel-access-control": "^1.0",
+        "happenv-com/laravel-access-control": "^2.0",
         "ergebnis/composer-normalize": "^2.48",
         "laravel/pint": "^1.29",
         "orchestra/testbench": "^11.1",
@@ -25,7 +25,7 @@
         "livewire/livewire": "^3.0"
     },
     "suggest": {
-        "webard/laravel-access-control": ""
+        "happenv-com/laravel-access-control": ""
     },
     "minimum-stability": "stable",
     "autoload": {

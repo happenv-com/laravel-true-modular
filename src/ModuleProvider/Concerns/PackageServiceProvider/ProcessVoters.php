@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
+use Happenv\LaravelAccessControl\VoterRegistry;
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
-use Webard\LaravelAccessControl\VoterRegistry;
 
 /**
  * @mixin ModuleProvider
