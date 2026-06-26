@@ -20,7 +20,7 @@ final class ScanLeftoverReferences extends Step
         $excluded = [...self::EXCLUSIONS, $modulesDirectory];
 
         foreach ($this->files->directories($this->basePath) as $directory) {
-            if (in_array(basename($directory), $excluded, strict: true)) {
+            if (in_array(basename((string) $directory), $excluded, strict: true)) {
                 continue;
             }
 

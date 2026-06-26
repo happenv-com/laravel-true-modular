@@ -123,7 +123,7 @@ final class ModuleRegistry
         $autoload = $modules[$moduleName]['composer']['autoload']['psr-4'] ?? [];
 
         return array_map(
-            static fn ($namespace): string => rtrim((string) $namespace, '\\').'\\',
+            static fn (int|string $namespace): string => rtrim((string) $namespace, '\\').'\\',
             array_keys($autoload),
         );
     }

@@ -27,7 +27,7 @@ final class ConfigureComposer extends Step
         }
 
         /** @var array<string, mixed> $composer */
-        $composer = json_decode($this->files->get($path), true);
+        $composer = json_decode($this->files->get($path), associative: true);
 
         $repositories = is_array($composer['repositories'] ?? null) ? array_values($composer['repositories']) : [];
         $url = $modulesDirectory.'/*';
@@ -58,7 +58,7 @@ final class ConfigureComposer extends Step
         }
 
         /** @var array<string, mixed> $composer */
-        $composer = json_decode($this->files->get($path), true);
+        $composer = json_decode($this->files->get($path), associative: true);
 
         $autoload = is_array($composer['autoload'] ?? null) ? $composer['autoload'] : [];
         $psr4 = is_array($autoload['psr-4'] ?? null) ? $autoload['psr-4'] : [];

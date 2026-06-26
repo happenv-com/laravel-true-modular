@@ -6,6 +6,7 @@ namespace Happenv\LaravelTrueModular\Commands;
 
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
+use Happenv\LaravelTrueModular\Architecture\Module\ModuleDescriptor;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Report\ModulesReport;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
@@ -139,7 +140,7 @@ class ListModulesCommand extends Command
             $rows[] = [
                 'name' => $moduleName,
                 'dependencies' => $index->graph()->dependencies($moduleName),
-                'path' => $descriptor === null ? '' : str_replace(base_path().'/', '', $descriptor->path),
+                'path' => $descriptor instanceof ModuleDescriptor ? str_replace(base_path().'/', '', $descriptor->path) : '',
             ];
         }
 
