@@ -81,7 +81,7 @@ it('returns null topological order for a cyclic graph', function (): void {
 it('reports distinct cycles, empty when acyclic', function (): void {
     expect(graphFixture()->cycles())->toBe([]);
 
-    $cycles = new DependencyGraph(['a' => ['b'], 'b' => ['a']])->cycles();
+    $cycles = (new DependencyGraph(['a' => ['b'], 'b' => ['a']]))->cycles();
 
     expect($cycles)->toHaveCount(1)
         ->and($cycles[0])->toContain('a', 'b');
