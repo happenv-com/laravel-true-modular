@@ -37,7 +37,6 @@ use Safe\Exceptions\PcreException;
 
 abstract class ModuleProvider extends ServiceProvider
 {
-    use Macroable;
     use GuardsModulePaths;
     use InitializeCallbacks;
     use ProcessAssets;

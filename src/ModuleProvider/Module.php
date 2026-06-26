@@ -28,7 +28,6 @@ use Illuminate\Support\Traits\Macroable;
 
 class Module
 {
-    use Macroable;
     use HasAssets;
     use HasBladeComponents;
     use HasBroadcasts;
