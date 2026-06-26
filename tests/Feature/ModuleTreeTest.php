@@ -103,6 +103,17 @@ describe('ModuleTree', function (): void {
             // Core has no module dependencies, should be first
             expect($order[0])->toBe('myapp/kernel');
         });
+
+        it('produces the exact dependency-first order for the fixtures', function (): void {
+            // Pins the resolved order so the topological-sort engine cannot drift.
+            expect(ModuleTree::make()->getTopologicalOrder())->toBe([
+                'myapp/kernel',
+                'myapp/core',
+                'myapp/pim',
+                'myapp/sale',
+                'myapp/amazon',
+            ]);
+        });
     });
 
     describe('getReverseTopologicalOrder', function (): void {

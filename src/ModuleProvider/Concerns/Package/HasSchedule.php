@@ -2,6 +2,7 @@
 
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package;
 
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\Support\MergesFlattened;
 use Happenv\LaravelTrueModular\ModuleProvider\Module;
 
 /**
@@ -9,6 +10,8 @@ use Happenv\LaravelTrueModular\ModuleProvider\Module;
  */
 trait HasSchedule
 {
+    use MergesFlattened;
+
     /**
      * @var string[]
      */
@@ -23,10 +26,7 @@ trait HasSchedule
 
     public function hasSchedules(string ...$scheduleFileNames): static
     {
-        $this->scheduleFileNames = array_merge(
-            $this->scheduleFileNames,
-            collect($scheduleFileNames)->flatten()->toArray()
-        );
+        $this->scheduleFileNames = $this->mergeFlattened($this->scheduleFileNames, $scheduleFileNames);
 
         return $this;
     }

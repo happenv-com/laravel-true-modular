@@ -6,15 +6,12 @@ namespace Happenv\LaravelTrueModular\Architecture\Analyzer;
 
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Report\ImpactReport;
-use InvalidArgumentException;
 
 final class ImpactAnalyzer
 {
     public function analyze(ArchitectureIndex $index, string $module): ImpactReport
     {
-        if (! $index->has($module)) {
-            throw new InvalidArgumentException(sprintf('Unknown module [%s].', $module));
-        }
+        $index->assertKnown($module);
 
         $graph = $index->graph();
 

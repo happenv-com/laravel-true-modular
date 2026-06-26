@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular;
 
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Foundation\Application as FoundationApplication;
@@ -223,5 +224,23 @@ final class Application extends FoundationApplication
     public static function getModuleComposerType(): string
     {
         return self::$moduleComposerType;
+    }
+
+    private static string $modulesDirectory = ModuleTree::DEFAULT_DIRECTORY;
+
+    /**
+     * Set the directory (relative to the application base path) scanned for modules.
+     * Chainable before configure(), like {@see moduleComposerType()}.
+     */
+    public static function modulesDirectory(string $directory): string
+    {
+        self::$modulesDirectory = $directory;
+
+        return self::class;
+    }
+
+    public static function getModulesDirectory(): string
+    {
+        return self::$modulesDirectory;
     }
 }

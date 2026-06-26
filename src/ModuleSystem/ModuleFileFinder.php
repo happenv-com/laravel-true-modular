@@ -200,20 +200,6 @@ final readonly class ModuleFileFinder
      */
     private function getModuleNamespace(string $moduleName): string
     {
-        $modules = $this->moduleTree->getAllModules();
-
-        if (! isset($modules[$moduleName])) {
-            return '';
-        }
-
-        $autoload = $modules[$moduleName]['composer']['autoload']['psr-4'] ?? [];
-
-        // Return the first namespace (typically there's only one)
-        foreach (array_keys($autoload) as $namespace) {
-            // Ensure namespace ends with backslash
-            return rtrim((string) $namespace, '\\').'\\';
-        }
-
-        return '';
+        return $this->moduleTree->getModuleNamespace($moduleName) ?? '';
     }
 }

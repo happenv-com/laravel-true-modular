@@ -18,7 +18,7 @@ trait ProcessSchedules
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             foreach ($this->module->scheduleFileNames as $scheduleFileName) {
-                require_once $this->module->basePath(sprintf('/../routes/%s.php', $scheduleFileName));
+                require_once $this->module->vendorPath('routes/'.$scheduleFileName.'.php');
             }
         });
 

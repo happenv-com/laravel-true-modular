@@ -9,13 +9,13 @@ use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
  */
 trait ProcessAssets
 {
-    protected function processAssets(): static
+    protected function processAssets(): self
     {
         if (! $this->module->hasAssets || ! $this->app->runningInConsole()) {
             return $this;
         }
 
-        $vendorAssets = $this->module->basePath('/../resources/dist');
+        $vendorAssets = $this->module->vendorPath('resources/dist');
         $appAssets = public_path('vendor/'.$this->module->shortName());
 
         $this->publishes([$vendorAssets => $appAssets], $this->module->shortName().'-assets');

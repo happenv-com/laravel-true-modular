@@ -16,7 +16,7 @@ trait ProcessBroadcasts
         }
 
         foreach ($this->module->broadcastFileNames as $broadcastFileName) {
-            require_once $this->module->basePath(sprintf('/../routes/%s.php', $broadcastFileName));
+            require_once $this->module->vendorPath('routes/'.$broadcastFileName.'.php');
         }
 
         return $this;

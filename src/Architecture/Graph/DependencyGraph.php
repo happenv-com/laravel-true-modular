@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Architecture\Graph;
 
+use Happenv\LaravelTrueModular\ModuleSystem\Graph\TopologicalSort;
+
 /**
  * @template TNode of string
  */
@@ -70,6 +72,28 @@ final class DependencyGraph
     public function transitiveDependents(string $node): array
     {
         return $this->reachable($node, $this->reverse());
+    }
+
+    /**
+     * Nodes in dependency order (dependencies before dependents), or null when
+     * the graph contains a cycle. Ties break alphabetically (adjacency is
+     * normalized in the constructor).
+     *
+     * @return array<string>|null
+     */
+    public function topologicalOrder(): ?array
+    {
+        return TopologicalSort::order($this->adjacency);
+    }
+
+    /**
+     * Distinct dependency cycles, empty when the graph is acyclic.
+     *
+     * @return array<array<string>>
+     */
+    public function cycles(): array
+    {
+        return TopologicalSort::cycles($this->adjacency);
     }
 
     public function fanIn(string $node): int

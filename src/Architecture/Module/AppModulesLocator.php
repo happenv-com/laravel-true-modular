@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular\Architecture\Module;
 
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\NamespaceMatcher;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
 
@@ -20,24 +21,15 @@ final class AppModulesLocator implements ModuleLocator
 
     public function byClass(string $class): ?ModuleDescriptor
     {
-        $class = ltrim($class, '\\');
-        $best = null;
-        $bestLength = -1;
+        $namespaceMap = [];
 
         foreach ($this->all() as $descriptor) {
-            $namespace = $descriptor->namespace;
-
-            if ($namespace === null) {
-                continue;
-            }
-
-            if (str_starts_with($class, $namespace) && strlen($namespace) > $bestLength) {
-                $best = $descriptor;
-                $bestLength = strlen($namespace);
+            if ($descriptor->namespace !== null) {
+                $namespaceMap[$descriptor->namespace] = $descriptor;
             }
         }
 
-        return $best;
+        return NamespaceMatcher::longestPrefix(ltrim($class, '\\'), $namespaceMap);
     }
 
     public function byPath(string $path): ?ModuleDescriptor
@@ -81,8 +73,7 @@ final class AppModulesLocator implements ModuleLocator
             $composer = $data['composer'];
             $shortName = $this->shortName($name);
 
-            $psr4 = $composer['autoload']['psr-4'] ?? [];
-            $namespace = $psr4 === [] ? null : $this->normalizeNamespace((string) array_key_first($psr4));
+            $namespace = $this->moduleTree->getModuleNamespace($name);
 
             $providers = $composer['extra']['laravel']['providers'] ?? [];
 
@@ -108,11 +99,6 @@ final class AppModulesLocator implements ModuleLocator
         $position = strrpos($package, '/');
 
         return $position === false ? $package : substr($package, $position + 1);
-    }
-
-    private function normalizeNamespace(string $namespace): string
-    {
-        return rtrim($namespace, '\\').'\\';
     }
 
     private function normalize(string $path): string

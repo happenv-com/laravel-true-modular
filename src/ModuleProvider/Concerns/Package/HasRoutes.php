@@ -2,6 +2,7 @@
 
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package;
 
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\Support\MergesFlattened;
 use Happenv\LaravelTrueModular\ModuleProvider\Module;
 
 /**
@@ -9,6 +10,8 @@ use Happenv\LaravelTrueModular\ModuleProvider\Module;
  */
 trait HasRoutes
 {
+    use MergesFlattened;
+
     /**
      * @var string[]
      */
@@ -23,10 +26,7 @@ trait HasRoutes
 
     public function hasRoutes(string ...$routeFileNames): static
     {
-        $this->routeFileNames = array_merge(
-            $this->routeFileNames,
-            collect($routeFileNames)->flatten()->toArray()
-        );
+        $this->routeFileNames = $this->mergeFlattened($this->routeFileNames, $routeFileNames);
 
         return $this;
     }

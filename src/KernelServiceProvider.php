@@ -8,11 +8,13 @@ use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Module\AppModulesLocator;
 use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
 use Happenv\LaravelTrueModular\Architecture\Renderer\DotRenderer;
+use Happenv\LaravelTrueModular\Architecture\Renderer\GraphTextRenderer;
+use Happenv\LaravelTrueModular\Architecture\Renderer\ImpactTextRenderer;
 use Happenv\LaravelTrueModular\Architecture\Renderer\JsonRenderer;
 use Happenv\LaravelTrueModular\Architecture\Renderer\MermaidRenderer;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
-use Happenv\LaravelTrueModular\Architecture\Renderer\TextRenderer;
 use Happenv\LaravelTrueModular\Architecture\Renderer\TreeRenderer;
+use Happenv\LaravelTrueModular\Architecture\Renderer\WhyTextRenderer;
 use Happenv\LaravelTrueModular\Architecture\Source\ComposerArchitectureSource;
 use Happenv\LaravelTrueModular\Commands\ListModulesCommand;
 use Happenv\LaravelTrueModular\Commands\MakeMigrationCommand;
@@ -65,15 +67,21 @@ class KernelServiceProvider extends ServiceProvider
             ),
         );
 
+        $this->app->tag([
+            GraphTextRenderer::class,
+            ImpactTextRenderer::class,
+            WhyTextRenderer::class,
+            JsonRenderer::class,
+            TreeRenderer::class,
+            MermaidRenderer::class,
+            DotRenderer::class,
+        ], 'architecture.renderers');
+
         $this->app->singleton(
             RendererRegistry::class,
-            static fn (Application $app): RendererRegistry => new RendererRegistry([
-                $app->make(TextRenderer::class),
-                $app->make(JsonRenderer::class),
-                $app->make(TreeRenderer::class),
-                $app->make(MermaidRenderer::class),
-                $app->make(DotRenderer::class),
-            ]),
+            static fn (Application $app): RendererRegistry => new RendererRegistry(
+                $app->tagged('architecture.renderers'),
+            ),
         );
     }
 }

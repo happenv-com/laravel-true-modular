@@ -6,17 +6,16 @@ namespace Happenv\LaravelTrueModular\Architecture\Analyzer;
 
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Report\GraphReport;
-use InvalidArgumentException;
 
 final class GraphAnalyzer
 {
     public function analyze(ArchitectureIndex $index, ?string $root = null): GraphReport
     {
-        $graph = $index->graph();
-
-        if ($root !== null && ! $graph->has($root)) {
-            throw new InvalidArgumentException(sprintf('Unknown module [%s].', $root));
+        if ($root !== null) {
+            $index->assertKnown($root);
         }
+
+        $graph = $index->graph();
 
         $nodes = $root !== null ? [$root, ...$graph->transitiveDependents($root)] : $graph->nodes();
 

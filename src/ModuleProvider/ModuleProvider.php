@@ -28,6 +28,7 @@ use Happenv\LaravelTrueModular\ModuleProvider\Exceptions\InvalidModule;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\CachesConfiguration;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Traits\Macroable;
 use Override;
 use ReflectionClass;
 use RuntimeException;
@@ -36,6 +37,7 @@ use Safe\Exceptions\PcreException;
 
 abstract class ModuleProvider extends ServiceProvider
 {
+    use Macroable;
     use GuardsModulePaths;
     use InitializeCallbacks;
     use ProcessAssets;

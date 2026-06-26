@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular\Commands;
 
 use Happenv\LaravelTrueModular\Architecture\Analyzer\WhyAnalyzer;
+use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
-use Happenv\LaravelTrueModular\Commands\Concerns\RendersArchitectureReport;
-use Illuminate\Console\Command;
-use InvalidArgumentException;
+use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 use Override;
 
-final class ModuleWhyCommand extends Command
+final class ModuleWhyCommand extends AbstractArchitectureCommand
 {
-    use RendersArchitectureReport;
-
     #[Override]
     protected $signature = 'module:why
                             {from : The dependent module}
@@ -27,26 +24,26 @@ final class ModuleWhyCommand extends Command
     protected $description = 'Explain why one module depends on another (shortest dependency path)';
 
     public function __construct(
-        private readonly ArchitectureIndexBuilder $builder,
+        ArchitectureIndexBuilder $builder,
         private readonly WhyAnalyzer $analyzer,
-        protected RendererRegistry $renderers,
+        RendererRegistry $renderers,
     ) {
-        parent::__construct();
+        parent::__construct($builder, $renderers);
     }
 
-    public function handle(): int
+    #[Override]
+    protected function buildReport(ArchitectureIndex $index): ArchitectureReport
     {
-        $from = (string) $this->argument('from');
-        $to = (string) $this->argument('to');
+        return $this->analyzer->analyze(
+            $index,
+            (string) $this->argument('from'),
+            (string) $this->argument('to'),
+        );
+    }
 
-        try {
-            $report = $this->analyzer->analyze($this->builder->build(), $from, $to);
-        } catch (InvalidArgumentException $exception) {
-            $this->error($exception->getMessage());
-
-            return self::FAILURE;
-        }
-
-        return $this->output($report, 'text');
+    #[Override]
+    protected function defaultFormat(): string
+    {
+        return 'text';
     }
 }

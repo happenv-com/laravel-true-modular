@@ -23,7 +23,7 @@ trait ProcessConfigs
         $config = $this->app->make('config');
 
         foreach ($this->module->configsToOverwrite as $configToOverwrite) {
-            $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configToOverwrite)));
+            $vendorConfig = $this->module->vendorPath('config/'.$this->normalizeConfigPath($configToOverwrite).'.php');
 
             // $this->replaceConfigRecursivelyFrom($vendorConfig, $configToOverwrite);
 
@@ -49,7 +49,7 @@ trait ProcessConfigs
 
         foreach ($this->module->configs as $configFileName) {
 
-            $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configFileName)));
+            $vendorConfig = $this->module->vendorPath('config/'.$this->normalizeConfigPath($configFileName).'.php');
 
             $config->set($this->normalizeConfigKey($this->module->shortName().'::'.$configFileName), require $vendorConfig);
         }
@@ -65,7 +65,7 @@ trait ProcessConfigs
 
         foreach ($this->module->configsToMerge as $configFileName) {
 
-            $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configFileName)));
+            $vendorConfig = $this->module->vendorPath('config/'.$this->normalizeConfigPath($configFileName).'.php');
 
             $this->mergeConfigFrom($vendorConfig, $configFileName);
         }
@@ -85,7 +85,7 @@ trait ProcessConfigs
         foreach ($this->module->configsToExtend as $configToExtend) {
             [$configFileName, $overwrite] = $configToExtend;
 
-            $vendorConfig = $this->module->basePath(sprintf('/../config/%s.php', $this->normalizeConfigPath($configFileName)));
+            $vendorConfig = $this->module->vendorPath('config/'.$this->normalizeConfigPath($configFileName).'.php');
 
             $this->mergeRecursiveConfigFrom($vendorConfig, $configFileName, $overwrite);
         }

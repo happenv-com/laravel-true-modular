@@ -18,7 +18,7 @@ trait ProcessInertia
 
         $namespace = $this->module->viewNamespace;
         $directoryName = Str::of($this->moduleView($namespace))->studly()->remove('-')->value();
-        $vendorComponents = $this->module->basePath('/../resources/js/Pages');
+        $vendorComponents = $this->module->vendorPath('resources/js/Pages');
         $appComponents = base_path('resources/js/Pages/'.$directoryName);
 
         if ($this->app->runningInConsole()) {

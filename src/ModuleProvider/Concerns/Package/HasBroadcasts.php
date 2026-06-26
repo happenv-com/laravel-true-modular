@@ -2,6 +2,7 @@
 
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package;
 
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\Support\MergesFlattened;
 use Happenv\LaravelTrueModular\ModuleProvider\Module;
 
 /**
@@ -9,6 +10,8 @@ use Happenv\LaravelTrueModular\ModuleProvider\Module;
  */
 trait HasBroadcasts
 {
+    use MergesFlattened;
+
     /**
      * @var string[]
      */
@@ -23,10 +26,7 @@ trait HasBroadcasts
 
     public function hasBroadcastChannels(string ...$broadcastFileNames): static
     {
-        $this->broadcastFileNames = array_merge(
-            $this->broadcastFileNames,
-            collect($broadcastFileNames)->flatten()->toArray()
-        );
+        $this->broadcastFileNames = $this->mergeFlattened($this->broadcastFileNames, $broadcastFileNames);
 
         return $this;
     }

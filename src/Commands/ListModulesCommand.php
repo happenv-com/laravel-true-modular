@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Commands;
 
+use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
+use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
+use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
+use Happenv\LaravelTrueModular\Architecture\Report\ModulesReport;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 use Illuminate\Console\Command;
@@ -14,33 +18,24 @@ use Safe\Exceptions\JsonException;
 
 class ListModulesCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     #[Override]
     protected $signature = 'module:list
                             {--reverse : Show in reverse dependency order (dependents first)}
-                            {--simple : Show simple list without table}';
+                            {--simple : Show simple list without table}
+                            {--format= : Output format (table, json)}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     #[Override]
     protected $description = 'List all modules in dependency order';
 
     public function __construct(
         private readonly ModuleTree $moduleTree,
+        private readonly ArchitectureIndexBuilder $builder,
+        private readonly RendererRegistry $renderers,
     ) {
         parent::__construct();
     }
 
     /**
-     * Execute the console command.
-     *
      * @throws CircularDependencyException
      * @throws FilesystemException
      * @throws InvalidArgumentException
@@ -62,11 +57,29 @@ class ListModulesCommand extends Command
             return self::FAILURE;
         }
 
-        if ($this->option('simple')) {
-            return $this->showSimpleList($order);
+        $index = $this->builder->build();
+
+        if ($this->option('format') === 'json') {
+            return $this->renderJson($order, $index);
         }
 
-        return $this->showTable($order);
+        return $this->option('simple')
+            ? $this->showSimpleList($order)
+            : $this->showTable($order, $index);
+    }
+
+    /**
+     * @param  array<string>  $order
+     *
+     * @throws InvalidArgumentException
+     */
+    private function renderJson(array $order, ArchitectureIndex $index): int
+    {
+        $report = new ModulesReport($this->rows($order, $index), (bool) $this->option('reverse'));
+
+        $this->line($this->renderers->get('json', $report)->render($report));
+
+        return self::SUCCESS;
     }
 
     /**
@@ -92,14 +105,7 @@ class ListModulesCommand extends Command
      *
      * @throws InvalidArgumentException
      */
-    /**
-     * @param  array<string>  $order
-     *
-     * @throws FilesystemException
-     * @throws InvalidArgumentException
-     * @throws JsonException
-     */
-    private function showTable(array $order): int
+    private function showTable(array $order, ArchitectureIndex $index): int
     {
         $direction = $this->option('reverse') ? 'dependents first' : 'dependencies first';
         $this->components->info(sprintf('Modules (%s):', $direction));
@@ -107,16 +113,12 @@ class ListModulesCommand extends Command
 
         $tableData = [];
 
-        foreach ($order as $index => $moduleName) {
-            $dependencies = $this->moduleTree->getDependencies($moduleName);
-            $path = $this->moduleTree->getModulePath($moduleName);
-            $relativePath = str_replace(base_path().'/', '', $path);
-
+        foreach ($this->rows($order, $index) as $position => $row) {
             $tableData[] = [
-                $index + 1,
-                $moduleName,
-                $dependencies !== [] ? implode(PHP_EOL, $dependencies) : '-',
-                $relativePath,
+                $position + 1,
+                $row['name'],
+                $row['dependencies'] !== [] ? implode(PHP_EOL, $row['dependencies']) : '-',
+                $row['path'],
             ];
 
             $tableData[] = ['-', '-', '-', '-'];
@@ -130,5 +132,29 @@ class ListModulesCommand extends Command
         $this->components->info(sprintf('Total: %d modules', count($order)));
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Build ordered rows sourced from the architecture index (dependencies and
+     * path), keeping a single description of each module's data.
+     *
+     * @param  array<string>  $order
+     * @return list<array{name: string, dependencies: array<string>, path: string}>
+     */
+    private function rows(array $order, ArchitectureIndex $index): array
+    {
+        $rows = [];
+
+        foreach ($order as $moduleName) {
+            $descriptor = $index->module($moduleName);
+
+            $rows[] = [
+                'name' => $moduleName,
+                'dependencies' => $index->graph()->dependencies($moduleName),
+                'path' => $descriptor === null ? '' : str_replace(base_path().'/', '', $descriptor->path),
+            ];
+        }
+
+        return $rows;
     }
 }

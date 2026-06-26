@@ -7,3 +7,4 @@
 /tests/fixtures/bootstrap/cache/*.php
 /tests/fixtures/storage/framework/**/*.php
 /tests/fixtures/storage/logs/*.log
+.claude/settings.local.json

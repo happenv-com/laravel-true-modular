@@ -7,6 +7,15 @@ namespace Happenv\LaravelTrueModular\ModelExtension;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Process-wide registry of attribute resolvers keyed by model class. State is
+ * static because resolution is triggered from Eloquent's missing-attribute hook,
+ * which has no access to the container — {@see flush()} exists so tests can reset it.
+ *
+ * The sentinel is a unique object used to distinguish "an extension resolved this
+ * attribute to null" from "no extension provided this attribute"; comparing against
+ * null would conflate the two.
+ */
 class AttributeResolversBag
 {
     /** @var array<class-string, list<ExtensionAttributeResolver>> */

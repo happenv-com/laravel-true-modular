@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Architecture\Renderer;
 
+use Happenv\LaravelTrueModular\Architecture\Renderer\Support\EmitsGraphEdges;
 use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 use Happenv\LaravelTrueModular\Architecture\Report\GraphReport;
 
 final class MermaidRenderer implements ArchitectureRenderer
 {
+    use EmitsGraphEdges;
+
     public function format(): string
     {
         return 'mermaid';
@@ -22,14 +25,8 @@ final class MermaidRenderer implements ArchitectureRenderer
     public function render(ArchitectureReport $report): string
     {
         /** @var GraphReport $report */
-        $lines = ['graph TD', ''];
+        $edges = $this->edges($report, static fn (string $from, string $to): string => sprintf('%s --> %s', $from, $to));
 
-        foreach ($report->dependents as $node => $dependents) {
-            foreach ($dependents as $dependent) {
-                $lines[] = sprintf('%s --> %s', $node, $dependent);
-            }
-        }
-
-        return implode("\n", $lines);
+        return implode("\n", ['graph TD', '', ...$edges]);
     }
 }

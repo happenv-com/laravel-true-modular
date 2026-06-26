@@ -6,12 +6,10 @@ namespace Happenv\LaravelTrueModular;
 
 if (! function_exists('module_path')) {
     /**
-     * Get the path to the base of the install.
-     *
-     * @param  string  $path
+     * Get the path to a file within a module's directory.
      */
-    function module_path(string $module, $path = ''): string
+    function module_path(string $module, string $path = ''): string
     {
-        return app()->basePath(sprintf('app-modules/%s/%s', $module, $path));
+        return app()->basePath(sprintf('%s/%s/%s', Application::getModulesDirectory(), $module, $path));
     }
 }

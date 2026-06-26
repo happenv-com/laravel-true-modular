@@ -62,3 +62,27 @@ it('does not loop on cycles', function (): void {
     expect($graph->transitiveDependencies('a'))->toBe(['a', 'b'])
         ->and($graph->dependencyDepth('a'))->toBeGreaterThanOrEqual(0);
 });
+
+it('orders nodes with dependencies before dependents', function (): void {
+    $order = graphFixture()->topologicalOrder();
+
+    expect($order)->not->toBeNull()
+        ->and($order[0])->toBe('kernel')
+        ->and(array_search('core', $order, true))->toBeLessThan(array_search('sale', $order, true))
+        ->and(array_search('pim', $order, true))->toBeLessThan(array_search('sale', $order, true));
+});
+
+it('returns null topological order for a cyclic graph', function (): void {
+    $graph = new DependencyGraph(['a' => ['b'], 'b' => ['a']]);
+
+    expect($graph->topologicalOrder())->toBeNull();
+});
+
+it('reports distinct cycles, empty when acyclic', function (): void {
+    expect(graphFixture()->cycles())->toBe([]);
+
+    $cycles = new DependencyGraph(['a' => ['b'], 'b' => ['a']])->cycles();
+
+    expect($cycles)->toHaveCount(1)
+        ->and($cycles[0])->toContain('a', 'b');
+});

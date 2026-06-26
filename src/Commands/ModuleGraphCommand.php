@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular\Commands;
 
 use Happenv\LaravelTrueModular\Architecture\Analyzer\GraphAnalyzer;
+use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
-use Happenv\LaravelTrueModular\Commands\Concerns\RendersArchitectureReport;
-use Illuminate\Console\Command;
-use InvalidArgumentException;
+use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 use Override;
 
-final class ModuleGraphCommand extends Command
+final class ModuleGraphCommand extends AbstractArchitectureCommand
 {
-    use RendersArchitectureReport;
-
     #[Override]
     protected $signature = 'module:graph
                             {--root= : Restrict the graph to this module subtree}
@@ -26,26 +23,24 @@ final class ModuleGraphCommand extends Command
     protected $description = 'Render the module dependency graph (tree, mermaid, dot, json)';
 
     public function __construct(
-        private readonly ArchitectureIndexBuilder $builder,
+        ArchitectureIndexBuilder $builder,
         private readonly GraphAnalyzer $analyzer,
-        protected RendererRegistry $renderers,
+        RendererRegistry $renderers,
     ) {
-        parent::__construct();
+        parent::__construct($builder, $renderers);
     }
 
-    public function handle(): int
+    #[Override]
+    protected function buildReport(ArchitectureIndex $index): ArchitectureReport
     {
         $root = $this->option('root');
-        $root = $root === null ? null : (string) $root;
 
-        try {
-            $report = $this->analyzer->analyze($this->builder->build(), $root);
-        } catch (InvalidArgumentException $exception) {
-            $this->error($exception->getMessage());
+        return $this->analyzer->analyze($index, $root === null ? null : (string) $root);
+    }
 
-            return self::FAILURE;
-        }
-
-        return $this->output($report, 'tree');
+    #[Override]
+    protected function defaultFormat(): string
+    {
+        return 'tree';
     }
 }

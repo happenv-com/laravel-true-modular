@@ -23,7 +23,7 @@ trait ProcessViews
         }
 
         $namespace = $this->module->viewNamespace;
-        $viewsPath = $this->module->basePath('/../resources/views');
+        $viewsPath = $this->module->vendorPath('resources/views');
 
         // Guard before Safe\realpath(): it throws on a non-existent path, which
         // would crash boot for a module that declares hasViews() but ships no
@@ -50,7 +50,7 @@ trait ProcessViews
             return $this;
         }
 
-        $globalViewsPath = $this->module->basePath('/../resources/views-global');
+        $globalViewsPath = $this->module->vendorPath('resources/views-global');
 
         if ($this->moduleDirectoryMissing($globalViewsPath, 'global views')) {
             return $this;

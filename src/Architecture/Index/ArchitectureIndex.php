@@ -6,6 +6,7 @@ namespace Happenv\LaravelTrueModular\Architecture\Index;
 
 use Happenv\LaravelTrueModular\Architecture\Graph\DependencyGraph;
 use Happenv\LaravelTrueModular\Architecture\Module\ModuleDescriptor;
+use InvalidArgumentException;
 
 final readonly class ArchitectureIndex
 {
@@ -39,6 +40,16 @@ final readonly class ArchitectureIndex
     public function has(string $name): bool
     {
         return isset($this->modules[$name]);
+    }
+
+    /**
+     * @throws InvalidArgumentException when the module is not part of the index
+     */
+    public function assertKnown(string $name): void
+    {
+        if (! $this->has($name)) {
+            throw new InvalidArgumentException(sprintf('Unknown module [%s].', $name));
+        }
     }
 
     /**

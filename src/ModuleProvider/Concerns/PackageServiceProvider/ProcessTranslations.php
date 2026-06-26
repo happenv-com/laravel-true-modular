@@ -15,7 +15,7 @@ trait ProcessTranslations
             return $this;
         }
 
-        $vendorTranslations = $this->module->basePath('/../resources/lang');
+        $vendorTranslations = $this->module->vendorPath('resources/lang');
         $appTranslations = (function_exists('lang_path'))
             ? lang_path('vendor/'.$this->module->shortName())
             : resource_path('lang/vendor/'.$this->module->shortName());

@@ -24,9 +24,11 @@ use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViews;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViewSharedData;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasVoters;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Macroable;
 
 class Module
 {
+    use Macroable;
     use HasAssets;
     use HasBladeComponents;
     use HasBroadcasts;
@@ -79,5 +81,15 @@ class Module
         $this->basePath = $path;
 
         return $this;
+    }
+
+    /**
+     * Resolve a path inside the module package root (one level above the
+     * provider's `src/` directory), where shipped resources live:
+     * `config/`, `routes/`, `database/`, `resources/`, etc.
+     */
+    public function vendorPath(string $relative = ''): string
+    {
+        return $this->basePath('/../'.ltrim($relative, '/'));
     }
 }

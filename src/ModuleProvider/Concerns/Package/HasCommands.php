@@ -2,6 +2,7 @@
 
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package;
 
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\Support\MergesFlattened;
 use Happenv\LaravelTrueModular\ModuleProvider\Module;
 
 /**
@@ -9,6 +10,8 @@ use Happenv\LaravelTrueModular\ModuleProvider\Module;
  */
 trait HasCommands
 {
+    use MergesFlattened;
+
     /**
      * @var string[]
      */
@@ -28,10 +31,7 @@ trait HasCommands
 
     public function hasCommands(string ...$commandClassNames): static
     {
-        $this->commands = array_merge(
-            $this->commands,
-            collect($commandClassNames)->flatten()->toArray()
-        );
+        $this->commands = $this->mergeFlattened($this->commands, $commandClassNames);
 
         return $this;
     }
@@ -45,10 +45,7 @@ trait HasCommands
 
     public function hasConsoleCommands(string ...$commandClassNames): static
     {
-        $this->consoleCommands = array_merge(
-            $this->consoleCommands,
-            collect($commandClassNames)->flatten()->toArray()
-        );
+        $this->consoleCommands = $this->mergeFlattened($this->consoleCommands, $commandClassNames);
 
         return $this;
     }

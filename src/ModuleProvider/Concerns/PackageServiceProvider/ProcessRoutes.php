@@ -16,13 +16,7 @@ trait ProcessRoutes
         }
 
         foreach ($this->module->routeFileNames as $routeFileName) {
-            $this->loadRoutesFrom(
-                sprintf(
-                    '%s%s.php',
-                    $this->module->basePath('/../routes/'),
-                    $routeFileName
-                )
-            );
+            $this->loadRoutesFrom($this->module->vendorPath('routes/'.$routeFileName.'.php'));
         }
 
         return $this;

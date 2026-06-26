@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular\Commands;
 
 use Happenv\LaravelTrueModular\Architecture\Analyzer\ImpactAnalyzer;
+use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
-use Happenv\LaravelTrueModular\Commands\Concerns\RendersArchitectureReport;
-use Illuminate\Console\Command;
-use InvalidArgumentException;
+use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 use Override;
 
-final class ModuleImpactCommand extends Command
+final class ModuleImpactCommand extends AbstractArchitectureCommand
 {
-    use RendersArchitectureReport;
-
     #[Override]
     protected $signature = 'module:impact
                             {module : The module to analyze}
@@ -26,25 +23,22 @@ final class ModuleImpactCommand extends Command
     protected $description = 'Show which modules are affected by a change to the given module';
 
     public function __construct(
-        private readonly ArchitectureIndexBuilder $builder,
+        ArchitectureIndexBuilder $builder,
         private readonly ImpactAnalyzer $analyzer,
-        protected RendererRegistry $renderers,
+        RendererRegistry $renderers,
     ) {
-        parent::__construct();
+        parent::__construct($builder, $renderers);
     }
 
-    public function handle(): int
+    #[Override]
+    protected function buildReport(ArchitectureIndex $index): ArchitectureReport
     {
-        $module = (string) $this->argument('module');
+        return $this->analyzer->analyze($index, (string) $this->argument('module'));
+    }
 
-        try {
-            $report = $this->analyzer->analyze($this->builder->build(), $module);
-        } catch (InvalidArgumentException $exception) {
-            $this->error($exception->getMessage());
-
-            return self::FAILURE;
-        }
-
-        return $this->output($report, 'text');
+    #[Override]
+    protected function defaultFormat(): string
+    {
+        return 'text';
     }
 }

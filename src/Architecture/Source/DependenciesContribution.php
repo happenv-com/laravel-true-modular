@@ -10,4 +10,9 @@ final readonly class DependenciesContribution implements ArchitectureContributio
      * @param  array<string, array<string>>  $edges  node => direct dependencies
      */
     public function __construct(public array $edges) {}
+
+    public function applyTo(MutableArchitectureIndex $index): void
+    {
+        $index->addDependencies($this->edges);
+    }
 }
