@@ -24,9 +24,16 @@ abstract class Step
         return $this->basePath.'/'.ltrim($relative, '/');
     }
 
-    /** Path relative to the application base, with leading separator stripped. */
+    /**
+     * Path relative to the application base, normalized to forward slashes with
+     * the leading separator stripped — so results are stable on Windows, where
+     * SplFileInfo paths use backslashes.
+     */
     protected function relative(string $absolute): string
     {
-        return ltrim(str_replace($this->basePath, '', $absolute), '/');
+        $base = str_replace('\\', '/', $this->basePath);
+        $path = str_replace('\\', '/', $absolute);
+
+        return ltrim(str_replace($base, '', $path), '/');
     }
 }
