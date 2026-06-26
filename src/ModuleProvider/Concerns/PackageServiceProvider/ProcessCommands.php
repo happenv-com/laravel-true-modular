@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -9,7 +11,7 @@ use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
  */
 trait ProcessCommands
 {
-    protected function processCommands(): self
+    protected function processCommands(): static
     {
         if (blank($this->module->commands)) {
             return $this;
@@ -20,7 +22,7 @@ trait ProcessCommands
         return $this;
     }
 
-    protected function processConsoleCommands(): self
+    protected function processConsoleCommands(): static
     {
         if (blank($this->module->consoleCommands) || ! $this->app->runningInConsole()) {
             return $this;

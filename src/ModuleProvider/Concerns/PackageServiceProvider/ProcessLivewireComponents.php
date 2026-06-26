@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -14,7 +16,7 @@ trait ProcessLivewireComponents
     /**
      * @throws RuntimeException
      */
-    protected function processLivewireComponents(): self
+    protected function processLivewireComponents(): static
     {
         if (blank($this->module->livewireComponents)) {
             return $this;

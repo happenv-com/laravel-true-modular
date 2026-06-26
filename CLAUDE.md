@@ -17,7 +17,7 @@ PHP 8.4+, Laravel 12/13. Requires `thecodingmachine/safe` (use `Safe\` functions
 ```bash
 composer install                       # install deps
 vendor/bin/pest                        # run all tests (Pest 4)
-vendor/bin/pest tests/Feature/ModuleTreeTest.php   # single file
+vendor/bin/pest tests/Feature/ModuleRegistryTest.php   # single file
 vendor/bin/pest --filter "sorts providers"          # single test by name
 vendor/bin/pest --testsuite Unit       # Unit or Feature suite (see phpunit.xml)
 vendor/bin/pint                        # format (auto-runs in CI on push)
@@ -43,11 +43,11 @@ The module Composer type is `true-module` by default; override before `configure
 
 - **`src/ModuleProvider/`** — the runtime base class a module's own `ServiceProvider` extends. `ModuleProvider` is `abstract`; a module implements `configureModule(Module $module)` to declare its features fluently. The `Module` value object (`ModuleProvider/Module.php`) and the provider each compose ~20 traits in lockstep: every feature is a pair — a `Concerns/Package/Has*.php` trait (holds the declared config on `Module`) and a `Concerns/PackageServiceProvider/Process*.php` trait (consumes it during the lifecycle). **To add a module feature, add both traits and wire the `process*()` call into the right phase** in `ModuleProvider::register/initialize/boot()`. Config processing is skipped when `configurationIsCached()`.
 
-- **`src/Architecture/`** + **`src/ModuleSystem/`** — read-only analysis of the module graph for the CLI commands. `ModuleSystem/ModuleTree` scans `base_path('app-modules')` for `composer.json` files and builds the dependency tree (throws `CircularDependencyException` on cycles). `Architecture/` builds an immutable `ArchitectureIndex` from tagged `ArchitectureSource`s (sources are container-tagged `'architecture.sources'`), queried by the analyzers (`GraphAnalyzer`, `ImpactAnalyzer`, `WhyAnalyzer`) and emitted through pluggable renderers (`text`, `json`, `tree`, `mermaid`, `dot`) registered in `RendererRegistry`.
+- **`src/Architecture/`** + **`src/ModuleSystem/`** — read-only analysis of the module graph for the CLI commands. `ModuleSystem/ModuleRegistry` scans `base_path('app-modules')` for `composer.json` files and builds the dependency tree (throws `CircularDependencyException` on cycles). `Architecture/` builds an immutable `ArchitectureIndex` from tagged `ArchitectureSource`s (sources are container-tagged `'architecture.sources'`), queried by the analyzers (`GraphAnalyzer`, `ImpactAnalyzer`, `WhyAnalyzer`) and emitted through pluggable renderers (`text`, `json`, `tree`, `mermaid`, `dot`) registered in `RendererRegistry`.
 
 ### Wiring
 
-`KernelServiceProvider` is the package entrypoint (auto-discovered via `extra.laravel.providers`). It binds `ModuleTree`, `ModuleFileFinder`, `ModuleLocator`, the architecture index/sources, and `RendererRegistry`, and registers the console commands in `initialize()`. To add an architecture data source, bind it and add it to the `'architecture.sources'` tag. To add a renderer, add it to the `RendererRegistry` list and implement `ArchitectureRenderer`.
+`KernelServiceProvider` is the package entrypoint (auto-discovered via `extra.laravel.providers`). It binds `ModuleRegistry`, `ModuleFileFinder`, `ModuleLocator`, the architecture index/sources, and `RendererRegistry`, and registers the console commands in `initialize()`. To add an architecture data source, bind it and add it to the `'architecture.sources'` tag. To add a renderer, add it to the `RendererRegistry` list and implement `ArchitectureRenderer`.
 
 `ModelExtension/` lets one module add attributes/relations to another module's Eloquent model (`processModelExtensions` / `processModelBuilderExtensions` run in `initialize()`).
 
@@ -55,4 +55,4 @@ The module Composer type is `true-module` by default; override before `configure
 
 ## Testing
 
-Tests use `orchestra/testbench` (Pest). `tests/TestCase.php` points `applicationBasePath()` at `tests/fixtures/`, so `base_path('app-modules')` resolves to `tests/fixtures/app-modules/` — a set of fixture modules (`kernel`, `core`, `pim`, `sale`, `amazon`) with real `composer.json` dep declarations used to exercise the sorter and graph. `getEnvironmentSetUp` rebinds `ModuleTree` to that fixture path. Add new fixture modules there (and to the `classmap` autoload in `composer.json`) when testing graph/lifecycle behavior. Pest's `appModulesFixture()` helper (tests/Pest.php) returns that path.
+Tests use `orchestra/testbench` (Pest). `tests/TestCase.php` points `applicationBasePath()` at `tests/fixtures/`, so `base_path('app-modules')` resolves to `tests/fixtures/app-modules/` — a set of fixture modules (`kernel`, `core`, `pim`, `sale`, `amazon`) with real `composer.json` dep declarations used to exercise the sorter and graph. `getEnvironmentSetUp` rebinds `ModuleRegistry` to that fixture path. Add new fixture modules there (and to the `classmap` autoload in `composer.json`) when testing graph/lifecycle behavior. Pest's `appModulesFixture()` helper (tests/Pest.php) returns that path.

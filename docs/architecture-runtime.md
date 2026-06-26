@@ -44,7 +44,7 @@ module composer type, call `Application::moduleComposerType('acme-module')` befo
 
 `ServiceProviderSorter` partitions providers into module providers and everything else. Non-module
 providers keep their original relative order and run **first**; module providers are sorted into
-topological order (dependencies before dependents) using `ModuleTree`'s order. A provider is matched
+topological order (dependencies before dependents) using `ModuleRegistry`'s order. A provider is matched
 to its module by longest PSR-4 namespace prefix (`NamespaceMatcher`). See
 [module-dependencies.md](module-dependencies.md) for the ordering itself.
 

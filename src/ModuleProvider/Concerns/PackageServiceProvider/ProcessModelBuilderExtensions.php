@@ -6,7 +6,7 @@ namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvi
 
 trait ProcessModelBuilderExtensions
 {
-    protected function processModelBuilderExtensions(): self
+    protected function processModelBuilderExtensions(): static
     {
         if (blank($this->module->modelBuilderExtensions)) {
             return $this;

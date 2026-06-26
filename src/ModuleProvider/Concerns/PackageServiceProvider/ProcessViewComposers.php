@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -14,7 +16,7 @@ trait ProcessViewComposers
     /**
      * @throws RuntimeException
      */
-    protected function processViewComposers(): self
+    protected function processViewComposers(): static
     {
         if (blank($this->module->viewComposers)) {
             return $this;

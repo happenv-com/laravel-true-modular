@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\GuardsModulePaths;
@@ -28,7 +30,6 @@ use Happenv\LaravelTrueModular\ModuleProvider\Exceptions\InvalidModule;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\CachesConfiguration;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Traits\Macroable;
 use Override;
 use ReflectionClass;
 use RuntimeException;
@@ -66,7 +67,7 @@ abstract class ModuleProvider extends ServiceProvider
 
     /** @throws InvalidModule */
     #[Override]
-    final public function register(): ModuleProvider
+    final public function register(): static
     {
         $this->registeringModule();
 
@@ -98,7 +99,7 @@ abstract class ModuleProvider extends ServiceProvider
      * @throws BindingResolutionException
      * @throws RuntimeException
      */
-    final public function initialize(): ModuleProvider
+    final public function initialize(): static
     {
         $this->initializingModule();
 
@@ -134,7 +135,7 @@ abstract class ModuleProvider extends ServiceProvider
      * @throws PcreException
      * @throws RuntimeException
      */
-    final public function boot(): ModuleProvider
+    final public function boot(): static
     {
         $this->bootingModule();
 

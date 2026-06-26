@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasAssets;
@@ -24,7 +26,6 @@ use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViews;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasViewSharedData;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasVoters;
 use Illuminate\Support\Str;
-use Illuminate\Support\Traits\Macroable;
 
 class Module
 {

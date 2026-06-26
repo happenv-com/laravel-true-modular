@@ -17,13 +17,8 @@ use function Safe\json_decode;
 /**
  * Discovers modules and resolves their execution order based on composer.json dependencies.
  */
-final class ModuleTree
+final class ModuleRegistry
 {
-    /**
-     * Default directory (relative to the application base path) scanned for modules.
-     */
-    public const string DEFAULT_DIRECTORY = 'app-modules';
-
     /**
      * @var array<string, array<string, mixed>>|null Cached module data
      */

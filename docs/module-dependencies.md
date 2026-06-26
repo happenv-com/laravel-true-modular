@@ -28,15 +28,15 @@ ordinary library requires are ignored for ordering.
 ## The discovery & graph pipeline
 
 ```
-composer.json files ──▶ ModuleTree ──▶ DependencyGraph ──▶ analyzers / CLI
+composer.json files ──▶ ModuleRegistry ──▶ DependencyGraph ──▶ analyzers / CLI
    (one filesystem scan)   (raw arrays)   (typed traversal)
 ```
 
-- **`ModuleTree`** (`ModuleSystem/`) is the single component that touches the filesystem. It globs
+- **`ModuleRegistry`** (`ModuleSystem/`) is the single component that touches the filesystem. It globs
   the modules directory, parses each `composer.json`, and exposes modules, dependencies, PSR-4
   namespaces, the raw dependency graph, and topological order. It is the foundation everything else
-  builds on. The modules root defaults to `ModuleTree::DEFAULT_DIRECTORY` (`app-modules`) and is
-  configurable via `Application::modulesDirectory()` — see [getting-started.md](getting-started.md).
+  builds on. The modules root defaults to `Application::DEFAULT_MODULES_DIRECTORY` (`app-modules`) and
+  is configurable via `Application::modulesDirectory()` — see [getting-started.md](getting-started.md).
 - **`DependencyGraph`** (`Architecture/Graph/`) is the typed, immutable graph value object used by
   the analysis layer: normalized adjacency, `dependencies()` / `dependents()`, transitive closures,
   shortest `path()`, `dependencyDepth()`, plus `topologicalOrder()` and `cycles()`.
@@ -83,6 +83,6 @@ You can query the graph without booting via the analysis commands — `module:gr
 ## Matching classes to modules
 
 Several places need "which module owns this class?" (e.g. the provider sorter). PSR-4 namespace
-parsing lives once on `ModuleTree` (`getModuleNamespaces()` / `getModuleNamespace()`), and the
+parsing lives once on `ModuleRegistry` (`getModuleNamespaces()` / `getModuleNamespace()`), and the
 longest-prefix match is a single shared helper, `ModuleSystem\NamespaceMatcher::longestPrefix()`,
 used by both the sorter and the architecture module locator.

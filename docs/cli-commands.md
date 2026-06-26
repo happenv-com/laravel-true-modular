@@ -86,10 +86,40 @@ message rather than producing empty output. Renderers are resolved from the cont
 
 | Command | Purpose |
 | --- | --- |
-| `module:list` | List modules in dependency order (`--reverse`, `--simple`). |
+| `true-modular:setup` | Interactively prepare the app to run as a modular monolith (see below). |
+| `module:list` | List modules in dependency order (`--reverse`, `--simple`, `--format=table\|text\|json`). |
 | `module:seed` | Seed module database seeders in dependency order (`--module`, `--class`, `--show-order`). |
 | `module:make:migration {module} {name}` | Scaffold a migration inside a module (`--create`, `--table`). |
 
 `module:list` prints, for each module, its position in the topological order, its declared
 dependencies and its path on disk. With `--reverse` the order is flipped (dependents first), which
-matches teardown ordering.
+matches teardown ordering. The default `table` view uses the interactive console table; `--simple`
+(or `--format=text`) prints a plain numbered list and `--format=json` emits the schema-wrapped
+`modules` report — both flow through the same renderer pipeline as the analysis commands.
+
+### `true-modular:setup`
+
+A one-time setup command (built with [Laravel Prompts](https://laravel.com/docs/prompts)). It asks:
+
+1. the Composer `type` used to identify modules (default `true-module`);
+2. the directory modules live in (default `app-modules`);
+3. whether to convert the current `app/` folder into a `core` module — and if so, the module's
+   namespace (default `TrueModule`).
+
+It always rewrites `bootstrap/app.php` to use `ModularApplication`, applying any non-default Composer
+type, modules directory, and (when converting) module namespace via the fluent setters. If you opt
+into the conversion, it also:
+
+- moves `app/` into `{modules-dir}/core/src/` and rewrites the `App\` namespace to `{namespace}\Core`
+  across the moved code plus `config/`, `database/` and `routes/`;
+- scaffolds the module's `composer.json` and a `CoreServiceProvider` (which keeps your original
+  `AppServiceProvider` working);
+- registers the module as a Composer **path package** — prepends a `{modules-dir}/*` path repository
+  (preserving any existing repositories) and `require`s `{vendor}/core` — and empties
+  `bootstrap/providers.php`.
+
+It leaves the root `composer.json` `autoload` untouched (the stale `"App\\": "app/"` entry only makes
+Composer warn), but offers to remove that entry for you. After conversion the command prints any files
+that still reference `App\` (e.g. under `tests/`) and reminds you to run `composer update {vendor}/core`
+followed by `composer dump-autoload`. The command aborts without changes if `{modules-dir}/core`
+already exists.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -10,7 +12,7 @@ use Illuminate\Console\Scheduling\Schedule;
  */
 trait ProcessSchedules
 {
-    protected function processSchedules(): self
+    protected function processSchedules(): static
     {
         if (blank($this->module->scheduleFileNames)) {
             return $this;

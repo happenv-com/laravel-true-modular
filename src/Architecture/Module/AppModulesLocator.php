@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Architecture\Module;
 
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Happenv\LaravelTrueModular\ModuleSystem\NamespaceMatcher;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
@@ -15,7 +15,7 @@ final class AppModulesLocator implements ModuleLocator
     private ?array $descriptors = null;
 
     public function __construct(
-        private readonly ModuleTree $moduleTree,
+        private readonly ModuleRegistry $moduleRegistry,
         private readonly string $coreName = 'core',
     ) {}
 
@@ -34,20 +34,16 @@ final class AppModulesLocator implements ModuleLocator
 
     public function byPath(string $path): ?ModuleDescriptor
     {
-        $path = $this->normalize($path);
-        $best = null;
-        $bestLength = -1;
+        // Key each descriptor by its base path plus a trailing separator so the
+        // longest-prefix match requires a real directory boundary (a file inside
+        // the module), reusing the shared matcher rather than re-rolling the loop.
+        $pathMap = [];
 
         foreach ($this->all() as $descriptor) {
-            $base = $this->normalize($descriptor->path);
-
-            if (str_starts_with($path, $base.'/') && strlen($base) > $bestLength) {
-                $best = $descriptor;
-                $bestLength = strlen($base);
-            }
+            $pathMap[$this->normalize($descriptor->path).'/'] = $descriptor;
         }
 
-        return $best;
+        return NamespaceMatcher::longestPrefix($this->normalize($path), $pathMap);
     }
 
     public function byComposerPackage(string $package): ?ModuleDescriptor
@@ -69,11 +65,11 @@ final class AppModulesLocator implements ModuleLocator
 
         $descriptors = [];
 
-        foreach ($this->moduleTree->getAllModules() as $name => $data) {
+        foreach ($this->moduleRegistry->getAllModules() as $name => $data) {
             $composer = $data['composer'];
             $shortName = $this->shortName($name);
 
-            $namespace = $this->moduleTree->getModuleNamespace($name);
+            $namespace = $this->moduleRegistry->getModuleNamespace($name);
 
             $providers = $composer['extra']['laravel']['providers'] ?? [];
 

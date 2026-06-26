@@ -5,12 +5,12 @@ declare(strict_types=1);
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Commands\ListModulesCommand;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function (): void {
     Artisan::registerCommand(new ListModulesCommand(
-        app(ModuleTree::class),
+        app(ModuleRegistry::class),
         app(ArchitectureIndexBuilder::class),
         app(RendererRegistry::class),
     ));

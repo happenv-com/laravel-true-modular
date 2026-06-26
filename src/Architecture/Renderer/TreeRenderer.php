@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Architecture\Renderer;
 
+use Happenv\LaravelTrueModular\Architecture\Renderer\Support\DependentsTreeWalker;
 use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 use Happenv\LaravelTrueModular\Architecture\Report\GraphReport;
 
@@ -24,34 +25,36 @@ final class TreeRenderer implements ArchitectureRenderer
         /** @var GraphReport $report */
         $lines = [];
 
-        foreach ($report->roots as $root) {
-            $lines[] = $root;
-            $this->children($root, $report->dependents, '', $lines, [$root => true]);
-        }
+        new DependentsTreeWalker($report->dependents)->walk(
+            $report->roots,
+            static function (string $node, array $ancestorsAreLast, bool $isRoot) use (&$lines): void {
+                $lines[] = $isRoot ? $node : self::glyphPrefix($ancestorsAreLast).$node;
+            },
+        );
 
         return implode("\n", $lines);
     }
 
     /**
-     * @param  array<string, array<string>>  $dependents
-     * @param  array<string>  $lines
-     * @param  array<string, true>  $visited
+     * Turn the per-ancestor "is last child" flags into box-drawing indentation:
+     * ancestor levels become `│   ` / `    `, and the node's own level becomes
+     * the `├── ` / `└── ` connector.
+     *
+     * @param  list<bool>  $ancestorsAreLast
      */
-    private function children(string $node, array $dependents, string $prefix, array &$lines, array $visited = []): void
+    private static function glyphPrefix(array $ancestorsAreLast): string
     {
-        $children = $dependents[$node] ?? [];
-        $last = count($children) - 1;
+        $prefix = '';
+        $lastIndex = count($ancestorsAreLast) - 1;
 
-        foreach ($children as $index => $child) {
-            $isLast = $index === $last;
-            $lines[] = $prefix.($isLast ? '└── ' : '├── ').$child;
-
-            if (isset($visited[$child])) {
-                continue;
+        foreach ($ancestorsAreLast as $index => $isLast) {
+            if ($index === $lastIndex) {
+                $prefix .= $isLast ? '└── ' : '├── ';
+            } else {
+                $prefix .= $isLast ? '    ' : '│   ';
             }
-
-            $visited[$child] = true;
-            $this->children($child, $dependents, $prefix.($isLast ? '    ' : '│   '), $lines, $visited);
         }
+
+        return $prefix;
     }
 }

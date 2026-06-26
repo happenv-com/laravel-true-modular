@@ -3,19 +3,28 @@
 declare(strict_types=1);
 
 use Happenv\LaravelTrueModular\Application;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
 
 afterEach(function (): void {
-    // Reset the process-wide setting so it cannot leak into other tests.
-    Application::modulesDirectory(ModuleTree::DEFAULT_DIRECTORY);
+    // Reset process-wide settings so they cannot leak into other tests.
+    Application::modulesDirectory(Application::DEFAULT_MODULES_DIRECTORY);
+    Application::modulesNamespace(Application::DEFAULT_MODULES_NAMESPACE);
 });
 
-it('defaults the modules directory to the module tree default', function (): void {
-    expect(Application::getModulesDirectory())->toBe(ModuleTree::DEFAULT_DIRECTORY)
-        ->and(ModuleTree::DEFAULT_DIRECTORY)->toBe('app-modules');
+it('defaults the modules directory to the application default', function (): void {
+    expect(Application::getModulesDirectory())->toBe(Application::DEFAULT_MODULES_DIRECTORY)
+        ->and(Application::DEFAULT_MODULES_DIRECTORY)->toBe('app-modules');
 });
 
-it('configures the modules directory and is chainable like moduleComposerType', function (): void {
-    expect(Application::modulesDirectory('packages'))->toBe(Application::class)
-        ->and(Application::getModulesDirectory())->toBe('packages');
+it('configures the modules directory', function (): void {
+    Application::modulesDirectory('packages');
+
+    expect(Application::getModulesDirectory())->toBe('packages');
+});
+
+it('defaults and configures the modules namespace, trimming slashes', function (): void {
+    expect(Application::getModulesNamespace())->toBe('TrueModule');
+
+    Application::modulesNamespace('Acme\\');
+
+    expect(Application::getModulesNamespace())->toBe('Acme');
 });

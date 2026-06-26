@@ -7,7 +7,7 @@ The package's own test suite uses [Pest 4](https://pestphp.com) on top of
 
 ```bash
 vendor/bin/pest                                   # everything
-vendor/bin/pest tests/Feature/ModuleTreeTest.php  # one file
+vendor/bin/pest tests/Feature/ModuleRegistryTest.php  # one file
 vendor/bin/pest --filter "sorts providers"        # one test by name
 vendor/bin/pest --testsuite Unit                  # Unit or Feature (see phpunit.xml)
 ```
@@ -28,8 +28,8 @@ kernel ← core ← pim ← sale ← amazon
 ```
 
 `tests/TestCase.php` overrides `applicationBasePath()` to point at `tests/fixtures/`, so
-`base_path('app-modules')` resolves to the fixtures and `ModuleTree::make()` /
-`ModuleFileFinder::make()` work unchanged. `getEnvironmentSetUp()` additionally rebinds `ModuleTree`
+`base_path('app-modules')` resolves to the fixtures and `ModuleRegistry::make()` /
+`ModuleFileFinder::make()` work unchanged. `getEnvironmentSetUp()` additionally rebinds `ModuleRegistry`
 to that fixture path. The `appModulesFixture()` helper (in `tests/Pest.php`) returns the fixture path.
 
 Only `Feature` tests `use(TestCase::class)`; `Unit` tests are plain and construct their subjects
@@ -52,7 +52,7 @@ its output. Architecture commands construct cleanly from the container:
 use Illuminate\Support\Facades\Artisan;
 
 Artisan::registerCommand(new ListModulesCommand(
-    app(ModuleTree::class),
+    app(ModuleRegistry::class),
     app(ArchitectureIndexBuilder::class),
     app(RendererRegistry::class),
 ));

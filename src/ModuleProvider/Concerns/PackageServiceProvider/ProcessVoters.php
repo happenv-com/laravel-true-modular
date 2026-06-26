@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -10,7 +12,7 @@ use Webard\LaravelAccessControl\VoterRegistry;
  */
 trait ProcessVoters
 {
-    protected function processVoters(): self
+    protected function processVoters(): static
     {
         if (blank($this->module->voters)) {
             return $this;

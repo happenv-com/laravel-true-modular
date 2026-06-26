@@ -6,11 +6,11 @@ use Happenv\LaravelTrueModular\Architecture\Module\AppModulesLocator;
 use Happenv\LaravelTrueModular\Architecture\Source\ComposerArchitectureSource;
 use Happenv\LaravelTrueModular\Architecture\Source\DependenciesContribution;
 use Happenv\LaravelTrueModular\Architecture\Source\ModulesContribution;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 
 function composerSource(): ComposerArchitectureSource
 {
-    $tree = new ModuleTree(appModulesFixture());
+    $tree = new ModuleRegistry(appModulesFixture());
 
     return new ComposerArchitectureSource($tree, new AppModulesLocator($tree));
 }

@@ -7,7 +7,7 @@ namespace Happenv\LaravelTrueModular\ModuleSystem\Graph;
 /**
  * Pure topological ordering and cycle detection over a dependency adjacency map
  * (`node => list of dependencies`). Single home for the graph algorithms that
- * were previously duplicated between ModuleTree and the architecture layer.
+ * were previously duplicated between ModuleRegistry and the architecture layer.
  *
  * The order of the returned sequence follows the input key order for nodes that
  * are otherwise unordered, so callers control tie-breaking by the order in which

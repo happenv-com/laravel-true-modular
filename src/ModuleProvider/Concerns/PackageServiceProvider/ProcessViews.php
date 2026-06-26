@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -16,7 +18,7 @@ trait ProcessViews
     /**
      * @throws FilesystemException
      */
-    protected function processViews(): self
+    protected function processViews(): static
     {
         if (! $this->module->hasViews) {
             return $this;
@@ -44,7 +46,7 @@ trait ProcessViews
         return $this;
     }
 
-    protected function processGlobalViews(): self
+    protected function processGlobalViews(): static
     {
         if (! $this->module->hasGlobalViews) {
             return $this;

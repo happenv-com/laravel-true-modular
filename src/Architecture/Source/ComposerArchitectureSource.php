@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular\Architecture\Source;
 
 use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 
 final readonly class ComposerArchitectureSource implements ArchitectureSource
 {
     public function __construct(
-        private ModuleTree $moduleTree,
+        private ModuleRegistry $moduleRegistry,
         private ModuleLocator $locator,
     ) {}
 
@@ -18,6 +18,6 @@ final readonly class ComposerArchitectureSource implements ArchitectureSource
     {
         yield new ModulesContribution($this->locator->all());
 
-        yield new DependenciesContribution($this->moduleTree->getDependencyGraph());
+        yield new DependenciesContribution($this->moduleRegistry->getDependencyGraph());
     }
 }

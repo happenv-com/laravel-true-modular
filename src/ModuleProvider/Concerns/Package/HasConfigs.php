@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package;
 
+use Happenv\LaravelTrueModular\ModuleProvider\Exceptions\InvalidModule;
 use Happenv\LaravelTrueModular\ModuleProvider\Module;
 
 /**
@@ -30,15 +33,23 @@ trait HasConfigs
     public array $configsToMerge = [];
 
     /**
+     * Declare one or more config files shipped by the module. Configs are scoped
+     * per module (published under `{shortName}::{file}`), so declaring the same
+     * config twice is a mistake and throws rather than silently overwriting.
+     *
      * @param  string|string[]  $config
+     *
+     * @throws InvalidModule when a config file is declared more than once
      */
     public function hasConfig(array|string $config): static
     {
-        if (! is_array($config)) {
-            $config = [$config];
-        }
+        foreach (is_array($config) ? $config : [$config] as $name) {
+            if (in_array($name, $this->configs, strict: true)) {
+                throw InvalidModule::configAlreadyRegistered($name);
+            }
 
-        $this->configs = $config;
+            $this->configs[] = $name;
+        }
 
         return $this;
     }

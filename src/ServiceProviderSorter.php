@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular;
 
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Happenv\LaravelTrueModular\ModuleSystem\NamespaceMatcher;
 use Illuminate\Support\ServiceProvider;
 use Safe\Exceptions\FilesystemException;
@@ -27,7 +27,7 @@ final class ServiceProviderSorter
     private ?array $namespaceMap = null;
 
     public function __construct(
-        private readonly ModuleTree $moduleTree,
+        private readonly ModuleRegistry $moduleRegistry,
     ) {}
 
     /**
@@ -42,7 +42,7 @@ final class ServiceProviderSorter
      */
     public function sort(array $providers): array
     {
-        $topologicalOrder = $this->moduleTree->getTopologicalOrder();
+        $topologicalOrder = $this->moduleRegistry->getTopologicalOrder();
         $moduleOrderMap = array_flip($topologicalOrder);
 
         // Separate app module providers from others
@@ -105,8 +105,8 @@ final class ServiceProviderSorter
 
         $this->namespaceMap = [];
 
-        foreach (array_keys($this->moduleTree->getAllModules()) as $moduleName) {
-            foreach ($this->moduleTree->getModuleNamespaces($moduleName) as $namespace) {
+        foreach (array_keys($this->moduleRegistry->getAllModules()) as $moduleName) {
+            foreach ($this->moduleRegistry->getModuleNamespaces($moduleName) as $namespace) {
                 $this->namespaceMap[$namespace] = $moduleName;
             }
         }

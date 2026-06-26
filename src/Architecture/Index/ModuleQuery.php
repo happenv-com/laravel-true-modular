@@ -29,13 +29,6 @@ final readonly class ModuleQuery
         return $this->only($dependents);
     }
 
-    public function dependedOnBy(string $module): self
-    {
-        $dependencies = $this->graph->dependencies($module);
-
-        return $this->only($dependencies);
-    }
-
     public function sortedByName(): self
     {
         $modules = $this->modules;
@@ -61,12 +54,6 @@ final readonly class ModuleQuery
     public function names(): array
     {
         return array_keys($this->modules);
-    }
-
-    /** @return array<ModuleDescriptor> */
-    public function get(): array
-    {
-        return array_values($this->modules);
     }
 
     /**

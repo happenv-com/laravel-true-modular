@@ -6,7 +6,7 @@ namespace Happenv\LaravelTrueModular\Commands;
 
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleFileFinder;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Console\Command;
 use Illuminate\Database\Seeder;
 use InvalidArgumentException;
@@ -36,7 +36,7 @@ class SeedModulesCommand extends Command
     protected $description = 'Run module seeders in dependency order (dependencies first)';
 
     public function __construct(
-        private readonly ModuleTree $moduleTree,
+        private readonly ModuleRegistry $moduleRegistry,
         private readonly ModuleFileFinder $fileFinder,
     ) {
         parent::__construct();
@@ -53,7 +53,7 @@ class SeedModulesCommand extends Command
     public function handle(): int
     {
         try {
-            $order = $this->moduleTree->getTopologicalOrder();
+            $order = $this->moduleRegistry->getTopologicalOrder();
         } catch (CircularDependencyException $circularDependencyException) {
             $this->error('Cannot seed modules: circular dependencies detected!');
 
@@ -96,7 +96,7 @@ class SeedModulesCommand extends Command
         $tableData = [];
 
         foreach ($order as $index => $moduleName) {
-            $dependencies = $this->moduleTree->getDependencies($moduleName);
+            $dependencies = $this->moduleRegistry->getDependencies($moduleName);
             $seederCount = count($seedersGrouped->get($moduleName, []));
 
             $tableData[] = [

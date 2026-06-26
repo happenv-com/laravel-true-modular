@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\Config\ConfigMerger;
@@ -14,7 +16,7 @@ trait ProcessConfigs
     /**
      * @throws BindingResolutionException
      */
-    public function overwriteConfigs(): self
+    public function overwriteConfigs(): static
     {
         if (blank($this->module->configsToOverwrite)) {
             return $this;
@@ -39,7 +41,7 @@ trait ProcessConfigs
     /**
      * @throws BindingResolutionException
      */
-    public function processConfigs(): self
+    public function processConfigs(): static
     {
         if (blank($this->module->configs)) {
             return $this;
@@ -57,7 +59,7 @@ trait ProcessConfigs
         return $this;
     }
 
-    public function mergeConfigs(): self
+    public function mergeConfigs(): static
     {
         if (blank($this->module->configsToMerge)) {
             return $this;
@@ -76,7 +78,7 @@ trait ProcessConfigs
     /**
      * @throws BindingResolutionException
      */
-    public function extendConfigs(): self
+    public function extendConfigs(): static
     {
         if (blank($this->module->configsToExtend)) {
             return $this;

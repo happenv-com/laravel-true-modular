@@ -45,6 +45,17 @@ final class ModularApplication
     }
 
     /**
+     * Set the root namespace under which modules live, e.g. `TrueModule` so the
+     * core module is `TrueModule\Core` (default `TrueModule`). Used when scaffolding modules.
+     */
+    public function modulesNamespace(string $namespace): self
+    {
+        Application::modulesNamespace($namespace);
+
+        return $this;
+    }
+
+    /**
      * Hand off to the standard Laravel application builder, having applied the
      * module settings above to the custom {@see Application}.
      */

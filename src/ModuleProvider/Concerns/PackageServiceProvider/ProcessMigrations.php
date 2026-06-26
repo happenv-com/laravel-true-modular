@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Carbon\Carbon;
@@ -25,7 +27,7 @@ trait ProcessMigrations
      * @throws PcreException
      * @throws RuntimeException
      */
-    protected function processMigrations(): self
+    protected function processMigrations(): static
     {
         if ($this->module->discoversMigrations) {
             $this->discoverModuleMigrations();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider;
 
 use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
@@ -9,7 +11,7 @@ use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
  */
 trait ProcessBroadcasts
 {
-    protected function processBroadcasts(): self
+    protected function processBroadcasts(): static
     {
         if (blank($this->module->broadcastFileNames)) {
             return $this;

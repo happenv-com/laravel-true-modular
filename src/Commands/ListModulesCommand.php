@@ -9,7 +9,7 @@ use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Report\ModulesReport;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
 use Override;
@@ -22,13 +22,13 @@ class ListModulesCommand extends Command
     protected $signature = 'module:list
                             {--reverse : Show in reverse dependency order (dependents first)}
                             {--simple : Show simple list without table}
-                            {--format= : Output format (table, json)}';
+                            {--format= : Output format (table, text, json)}';
 
     #[Override]
     protected $description = 'List all modules in dependency order';
 
     public function __construct(
-        private readonly ModuleTree $moduleTree,
+        private readonly ModuleRegistry $moduleRegistry,
         private readonly ArchitectureIndexBuilder $builder,
         private readonly RendererRegistry $renderers,
     ) {
@@ -45,8 +45,8 @@ class ListModulesCommand extends Command
     {
         try {
             $order = $this->option('reverse')
-                ? $this->moduleTree->getReverseTopologicalOrder()
-                : $this->moduleTree->getTopologicalOrder();
+                ? $this->moduleRegistry->getReverseTopologicalOrder()
+                : $this->moduleRegistry->getTopologicalOrder();
         } catch (CircularDependencyException $circularDependencyException) {
             $this->error('Circular dependencies detected!');
 
@@ -59,45 +59,33 @@ class ListModulesCommand extends Command
 
         $index = $this->builder->build();
 
-        if ($this->option('format') === 'json') {
-            return $this->renderJson($order, $index);
+        $format = $this->resolveFormat();
+
+        // The boxed table is an interactive console view (Symfony table component),
+        // so it stays here; every string format flows through the renderer registry.
+        if ($format === 'table') {
+            return $this->showTable($order, $index);
         }
 
-        return $this->option('simple')
-            ? $this->showSimpleList($order)
-            : $this->showTable($order, $index);
-    }
-
-    /**
-     * @param  array<string>  $order
-     *
-     * @throws InvalidArgumentException
-     */
-    private function renderJson(array $order, ArchitectureIndex $index): int
-    {
         $report = new ModulesReport($this->rows($order, $index), (bool) $this->option('reverse'));
+        $rendered = $this->renderers->get($format, $report)->render($report);
 
-        $this->line($this->renderers->get('json', $report)->render($report));
+        foreach (explode("\n", $rendered) as $line) {
+            $this->line($line);
+        }
 
         return self::SUCCESS;
     }
 
-    /**
-     * @param  array<string>  $order
-     *
-     * @throws InvalidArgumentException
-     */
-    private function showSimpleList(array $order): int
+    private function resolveFormat(): string
     {
-        $direction = $this->option('reverse') ? 'dependents first' : 'dependencies first';
-        $this->components->info(sprintf('Modules in order (%s):', $direction));
-        $this->newLine();
-
-        foreach ($order as $index => $moduleName) {
-            $this->line(sprintf('  %d. %s', $index + 1, $moduleName));
+        if ($this->option('simple')) {
+            return 'text';
         }
 
-        return self::SUCCESS;
+        $format = $this->option('format');
+
+        return is_string($format) && $format !== '' ? $format : 'table';
     }
 
     /**

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use Happenv\LaravelTrueModular\Architecture\Module\AppModulesLocator;
 use Happenv\LaravelTrueModular\Architecture\Module\ModuleDescriptor;
-use Happenv\LaravelTrueModular\ModuleSystem\ModuleTree;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 
 function locatorFixture(): AppModulesLocator
 {
-    return new AppModulesLocator(new ModuleTree(appModulesFixture()));
+    return new AppModulesLocator(new ModuleRegistry(appModulesFixture()));
 }
 
 it('returns all modules as descriptors keyed and sorted by package', function (): void {

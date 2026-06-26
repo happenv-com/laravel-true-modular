@@ -15,6 +15,10 @@ composer require happenv-com/laravel-true-modular
 The package's `KernelServiceProvider` is auto-discovered — it binds the module services and registers
 the `module:*` console commands.
 
+> **Quick path:** `php artisan true-modular:setup` automates steps 2–4 interactively — it swaps the
+> `Application`, and can convert your existing `app/` folder into a `core` module. See
+> [cli-commands.md](cli-commands.md#true-modularsetup). The manual steps below explain what it does.
+
 ## 2. Swap the Application
 
 Module ordering and the `initialize()` phase live in a custom `Application`. Point `bootstrap/app.php`
@@ -43,6 +47,7 @@ use Happenv\LaravelTrueModular\ModularApplication;
 return (new ModularApplication)
     ->composerType('acme-module')
     ->modulesDirectory('packages')
+    ->modulesNamespace('Acme')        // root namespace for modules (used when scaffolding)
     ->configure(basePath: dirname(__DIR__))
     ->withRouting(/* ... */)
     ->withMiddleware(/* ... */)
@@ -50,14 +55,17 @@ return (new ModularApplication)
 ```
 
 The same settings are also exposed as static methods on `Application`
-(`Application::moduleComposerType()`, `Application::modulesDirectory()`) if you prefer to set them
-directly — `ModularApplication` is a thin fluent wrapper over those.
+(`Application::moduleComposerType()`, `Application::modulesDirectory()`,
+`Application::modulesNamespace()`) if you prefer to set them directly — `ModularApplication` is a thin
+fluent wrapper over those.
 
 ## 3. Create a module
 
 Modules live under `app-modules/` by default — change it with `ModularApplication::modulesDirectory()`
-above. The default lives in `ModuleTree::DEFAULT_DIRECTORY`. A module is a Composer package whose
-`composer.json` has `type: "true-module"`:
+above. The defaults are owned by `Application` (`Application::DEFAULT_MODULES_DIRECTORY`,
+`DEFAULT_COMPOSER_TYPE`, `DEFAULT_MODULES_NAMESPACE`); `ModuleRegistry` reads the configured value back via
+`Application::getModulesDirectory()`. A module is a Composer package whose `composer.json` has
+`type: "true-module"`:
 
 ```
 app-modules/catalog/
