@@ -15,10 +15,10 @@ final class ConfigureComposer extends Step
 {
     /**
      * Register {modulesDir}/* as a path repository (prepended, so it takes
-     * priority over packagist) and require {vendor}/core. Leaves the existing
-     * `autoload` untouched — Composer only warns about the now-missing app/ path.
+     * priority over packagist) and require the given module package. Leaves the
+     * existing `autoload` untouched — Composer only warns about a missing path.
      */
-    public function wire(string $modulesDirectory, string $vendor): void
+    public function wire(string $modulesDirectory, string $package): void
     {
         $path = $this->path('composer.json');
 
@@ -37,7 +37,7 @@ final class ConfigureComposer extends Step
         $composer['repositories'] = $repositories;
 
         $require = is_array($composer['require'] ?? null) ? $composer['require'] : [];
-        $require[$vendor.'/core'] = '*';
+        $require[$package] = '*';
         $composer['require'] = $require;
 
         $this->write($path, $composer);

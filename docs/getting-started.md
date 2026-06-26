@@ -61,6 +61,11 @@ fluent wrapper over those.
 
 ## 3. Create a module
 
+> **Quick path:** `php artisan module:make blog` scaffolds a ready-to-run module (composer.json,
+> provider, config, and a `/blog/welcome` route) under your configured directory/namespace, registers
+> it in `composer.json`, and offers to `composer update` it. See
+> [cli-commands.md](cli-commands.md#modulemake-name). The manual steps below explain the anatomy.
+
 Modules live under `app-modules/` by default — change it with `ModularApplication::modulesDirectory()`
 above. The defaults are owned by `Application` (`Application::DEFAULT_MODULES_DIRECTORY`,
 `DEFAULT_COMPOSER_TYPE`, `DEFAULT_MODULES_NAMESPACE`); `ModuleRegistry` reads the configured value back via

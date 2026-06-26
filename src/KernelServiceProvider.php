@@ -19,6 +19,7 @@ use Happenv\LaravelTrueModular\Architecture\Renderer\WhyTextRenderer;
 use Happenv\LaravelTrueModular\Architecture\Source\ComposerArchitectureSource;
 use Happenv\LaravelTrueModular\Commands\ListModulesCommand;
 use Happenv\LaravelTrueModular\Commands\MakeMigrationCommand;
+use Happenv\LaravelTrueModular\Commands\MakeModuleCommand;
 use Happenv\LaravelTrueModular\Commands\ModuleGraphCommand;
 use Happenv\LaravelTrueModular\Commands\ModuleImpactCommand;
 use Happenv\LaravelTrueModular\Commands\ModuleWhyCommand;
@@ -37,6 +38,7 @@ class KernelServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 SetupCommand::class,
+                MakeModuleCommand::class,
                 ListModulesCommand::class,
                 SeedModulesCommand::class,
                 MakeMigrationCommand::class,
