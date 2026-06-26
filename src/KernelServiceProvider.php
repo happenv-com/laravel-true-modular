@@ -33,7 +33,14 @@ use Override;
 
 class KernelServiceProvider extends ServiceProvider
 {
-    public function initialize(): void
+    /**
+     * Register the console commands in boot() — the standard lifecycle phase run
+     * by every Application — rather than our custom initialize() phase, which
+     * only fires under {@see Application}. Otherwise the commands (including
+     * `true-modular:setup`, which swaps the app over) would be undiscoverable on
+     * a fresh install still running the stock Illuminate Application.
+     */
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
