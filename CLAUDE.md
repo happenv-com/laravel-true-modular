@@ -10,7 +10,7 @@ A Laravel package (`happenv-com/laravel-true-modular`, namespace `Happenv\Larave
 2. A `ModuleProvider` base class that auto-wires a module's assets, routes, configs, migrations, views, permissions, etc. from a fluent `Module` definition.
 3. Architecture analysis commands (`module:graph`, `module:impact`, `module:why`, `module:list`).
 
-PHP 8.4+, Laravel 12/13. Requires `thecodingmachine/safe` (use `Safe\` functions for filesystem/json/pcre).
+PHP 8.3+, Laravel 12/13. Requires `thecodingmachine/safe` (use `Safe\` functions for filesystem/json/pcre).
 
 ## Commands
 

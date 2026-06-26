@@ -25,7 +25,7 @@ final class GraphTextRenderer implements ArchitectureRenderer
         /** @var GraphReport $report */
         $lines = [];
 
-        new DependentsTreeWalker($report->dependents)->walk(
+        (new DependentsTreeWalker($report->dependents))->walk(
             $report->roots,
             static function (string $node, array $ancestorsAreLast) use (&$lines): void {
                 $lines[] = str_repeat('  ', count($ancestorsAreLast)).$node;

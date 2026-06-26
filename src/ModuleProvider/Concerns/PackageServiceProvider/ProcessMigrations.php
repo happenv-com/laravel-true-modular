@@ -80,7 +80,7 @@ trait ProcessMigrations
             return;
         }
 
-        $files = new Filesystem()->files($migrationsDir);
+        $files = (new Filesystem)->files($migrationsDir);
 
         foreach ($files as $file) {
             $filePath = $file->getPathname();

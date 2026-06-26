@@ -41,7 +41,7 @@ composer require happenv-com/laravel-true-modular
 Then point `bootstrap/app.php` at the custom `Application` — see
 [Getting started](docs/getting-started.md).
 
-Requires PHP 8.4+ and Laravel 12/13.
+Requires PHP 8.3+ and Laravel 12/13.
 
 ## Documentation
 

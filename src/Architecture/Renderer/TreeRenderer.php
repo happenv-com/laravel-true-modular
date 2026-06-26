@@ -25,7 +25,7 @@ final class TreeRenderer implements ArchitectureRenderer
         /** @var GraphReport $report */
         $lines = [];
 
-        new DependentsTreeWalker($report->dependents)->walk(
+        (new DependentsTreeWalker($report->dependents))->walk(
             $report->roots,
             static function (string $node, array $ancestorsAreLast, bool $isRoot) use (&$lines): void {
                 $lines[] = $isRoot ? $node : self::glyphPrefix($ancestorsAreLast).$node;
