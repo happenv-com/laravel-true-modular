@@ -2,9 +2,93 @@
 
 [![Tests](https://github.com/happenv-com/laravel-true-modular/actions/workflows/run-tests.yml/badge.svg)](https://github.com/happenv-com/laravel-true-modular/actions)
 
-Turn a Laravel application into a **modular monolith**. Modules are Composer packages that boot in
-topological dependency order, with an extra `initialize()` lifecycle phase between `register()` and
-`boot()` for cross-module coordination — plus architecture analysis commands for the module graph.
+**Make your Laravel architecture explicit, deterministic, and analyzable.**
+
+Modules are first-class Composer packages with deterministic dependency ordering, an extended
+lifecycle, and built-in architecture introspection. Instead of an architecture that lives only in
+your team's heads, you get one you can query, graph, and reason about.
+
+```
+php artisan module:impact acme/catalog
+
+acme/catalog
+
+Direct:
+  acme/checkout
+  acme/pricing
+
+Indirect:
+  acme/storefront
+
+Total affected: 3
+```
+
+Ask the codebase what a change touches *before* you make it.
+
+## Why
+
+Large Laravel applications get harder to evolve over time. Modules end up depending on each other
+silently, boot order becomes implicit, cross-module initialization is fragile, and the real shape of
+the architecture survives only in the heads of the people who wrote it.
+
+Laravel True Modular makes that shape explicit, and builds three guarantees on top of it:
+
+1. **Topological provider ordering** — module service providers are sorted by their `composer.json`
+   dependencies, so a module always boots after the modules it depends on. Cycles are detected and
+   reported, not silently mis-ordered.
+2. **Enhanced lifecycle** — `register() → initialize() → boot()`. The `initialize()` phase runs after
+   every module is registered but before any boots — the right window for morph maps, permissions,
+   drivers, and Livewire/Filament hooks.
+3. **Architecture introspection** — `module:graph`, `module:impact`, `module:why`, `module:list`,
+   with `--format=json` so you can wire blast-radius checks into CI, and `--format=mermaid`/`dot` to
+   render the graph.
+
+## The module graph
+
+Modules declare their dependencies in `composer.json` like any other Composer package. The package
+reads those edges and gives you the whole graph:
+
+```mermaid
+graph TD
+    Core --> Product
+    Product --> Inventory
+    Inventory --> Sale
+    Sale --> Amazon
+    Sale --> Allegro
+```
+
+```bash
+php artisan module:graph                  # tree (default)
+php artisan module:graph --format=mermaid # paste straight into a doc
+php artisan module:why amazon core        # shortest path: why does Amazon depend on Core?
+```
+
+## Enforcing boundaries (static analysis)
+
+The runtime *describes* the module graph; a companion package
+[**`happenv-com/laravel-true-modular-phpstan`**](https://github.com/happenv-com/laravel-true-modular-phpstan)
+*enforces* it. It ships two zero-config PHPStan extensions:
+
+- **Module Boundary Enforcer** — fails analysis when a module references a class from another module
+  that isn't declared in its `composer.json` `require`, and detects circular dependencies between
+  modules. It reads the same `composer.json` edges the framework uses to order providers, so there's
+  nothing to configure.
+- **Dynamic Relation Resolver** — types Eloquent relations registered at runtime (e.g. relations one
+  module adds to another module's model via [model extensions](docs/model-extensions.md)), which are
+  otherwise invisible to static analysis.
+
+```bash
+composer require --dev happenv-com/laravel-true-modular-phpstan
+```
+
+With [`phpstan/extension-installer`](https://github.com/phpstan/phpstan-extension-installer) both
+extensions register automatically. See the
+[package README](https://github.com/happenv-com/laravel-true-modular-phpstan) for details.
+
+## Defining a module
+
+A module is a Composer package (`type: "true-module"`) whose service provider extends
+`ModuleProvider` and declares its features fluently:
 
 ```php
 class CatalogServiceProvider extends ModuleProvider
@@ -22,24 +106,16 @@ class CatalogServiceProvider extends ModuleProvider
 }
 ```
 
-## Why
-
-1. **Topological provider ordering** — module service providers are sorted by their `composer.json`
-   dependencies, so a module always boots after the modules it depends on.
-2. **Enhanced lifecycle** — `register() → initialize() → boot()`. The `initialize()` phase runs after
-   every module is registered but before any boots, the right window for morph maps, permissions,
-   drivers, and Livewire/Filament hooks.
-3. **Architecture tooling** — `module:graph`, `module:impact`, `module:why`, `module:list`, with
-   `--format=json` for CI gates.
-
 ## Install
 
 ```bash
 composer require happenv-com/laravel-true-modular
 ```
 
-Then point `bootstrap/app.php` at the custom `Application` — see
-[Getting started](docs/getting-started.md).
+The one non-obvious step: the package ships a custom `Application` that performs the topological sort
+and the extra lifecycle phase, so `bootstrap/app.php` must boot through it. The
+`php artisan true-modular:setup` command rewrites `bootstrap/app.php` for you — or wire it by hand as
+shown in [Getting started](docs/getting-started.md).
 
 Requires PHP 8.3+ and Laravel 12/13.
 
@@ -50,13 +126,13 @@ Full documentation lives in [`docs/`](docs/README.md):
 | | |
 | --- | --- |
 | [Getting started](docs/getting-started.md) | Install and create your first module. |
+| [CLI commands](docs/cli-commands.md) | Graph / impact / why / list, and the `--format` options. |
+| [Architecture & runtime](docs/architecture-runtime.md) | The lifecycle and the analysis layer. |
+| [Module dependencies](docs/module-dependencies.md) | Discovery, ordering, cycles. |
+| [Model extensions](docs/model-extensions.md) | Add attributes/relations to another module's model. |
 | [Module builders](docs/builders.md) | The fluent `Module` API and every feature. |
 | [Lifecycle hooks & schemas](docs/schema-hooks.md) | Overridable provider hooks; report JSON schema. |
 | [Config merging](docs/config-merging.md) | The four config strategies and merge semantics. |
-| [Model extensions](docs/model-extensions.md) | Add attributes/relations to another module's model. |
-| [Architecture & runtime](docs/architecture-runtime.md) | The lifecycle and the analysis layer. |
-| [Module dependencies](docs/module-dependencies.md) | Discovery, ordering, cycles. |
-| [CLI commands](docs/cli-commands.md) | Graph / impact / why / list. |
 | [Best practices](docs/best-practices.md) · [Anti-patterns](docs/anti-patterns.md) | Do's and don'ts. |
 | [Extending the package](docs/extending-the-package.md) | Add features, renderers, sources. |
 | [Testing](docs/testing.md) | Fixtures, helpers, patterns. |
@@ -69,6 +145,7 @@ composer install
 vendor/bin/pest             # tests (Pest 4)
 vendor/bin/pint             # format
 vendor/bin/phpstan analyse  # static analysis (level 6 + larastan)
+vendor/bin/rector process   # apply refactorings (--dry-run to preview)
 ```
 
 ## License
