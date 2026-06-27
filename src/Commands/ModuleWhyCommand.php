@@ -7,6 +7,7 @@ namespace Happenv\LaravelTrueModular\Commands;
 use Happenv\LaravelTrueModular\Architecture\Analyzer\WhyAnalyzer;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
+use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 use Override;
@@ -25,6 +26,7 @@ final class ModuleWhyCommand extends AbstractArchitectureCommand
         ArchitectureIndexBuilder $builder,
         private readonly WhyAnalyzer $analyzer,
         RendererRegistry $renderers,
+        private readonly ModuleLocator $locator,
     ) {
         parent::__construct($builder, $renderers);
     }
@@ -34,8 +36,8 @@ final class ModuleWhyCommand extends AbstractArchitectureCommand
     {
         return $this->analyzer->analyze(
             $index,
-            (string) $this->argument('from'),
-            (string) $this->argument('to'),
+            $this->locator->resolveOrFail((string) $this->argument('from'))->name,
+            $this->locator->resolveOrFail((string) $this->argument('to'))->name,
         );
     }
 

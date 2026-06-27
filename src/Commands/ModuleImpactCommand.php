@@ -7,6 +7,7 @@ namespace Happenv\LaravelTrueModular\Commands;
 use Happenv\LaravelTrueModular\Architecture\Analyzer\ImpactAnalyzer;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
+use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 use Override;
@@ -24,6 +25,7 @@ final class ModuleImpactCommand extends AbstractArchitectureCommand
         ArchitectureIndexBuilder $builder,
         private readonly ImpactAnalyzer $analyzer,
         RendererRegistry $renderers,
+        private readonly ModuleLocator $locator,
     ) {
         parent::__construct($builder, $renderers);
     }
@@ -31,7 +33,9 @@ final class ModuleImpactCommand extends AbstractArchitectureCommand
     #[Override]
     protected function buildReport(ArchitectureIndex $index): ArchitectureReport
     {
-        return $this->analyzer->analyze($index, (string) $this->argument('module'));
+        $module = $this->locator->resolveOrFail((string) $this->argument('module'))->name;
+
+        return $this->analyzer->analyze($index, $module);
     }
 
     #[Override]
