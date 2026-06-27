@@ -25,7 +25,8 @@
         "livewire/livewire": "^3.0"
     },
     "suggest": {
-        "happenv-com/laravel-access-control": ""
+        "happenv-com/laravel-access-control": "Laravel Access Control for managing permissions and roles in modular applications",
+        "happenv-com/laravel-true-modular-phpstan": "PHPStan rules for Laravel True Modular"
     },
     "minimum-stability": "stable",
     "autoload": {

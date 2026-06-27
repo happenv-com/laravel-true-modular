@@ -1,6 +1,16 @@
 # Laravel True Modular
 
-[![Tests](https://github.com/happenv-com/laravel-true-modular/actions/workflows/run-tests.yml/badge.svg)](https://github.com/happenv-com/laravel-true-modular/actions)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://banners.beyondco.de/Laravel%20True%20Modular.png?theme=dark&packageManager=composer+require&packageName=happenv-com%2Flaravel-true-modular&pattern=architect&style=style_1&description=Make+your+Laravel+architecture+explicit%2C+deterministic+and+analyzable&md=1&showWatermark=0&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg">
+  <img alt="Laravel True Modular" src="https://banners.beyondco.de/Laravel%20True%20Modular.png?theme=light&packageManager=composer+require&packageName=happenv-com%2Flaravel-true-modular&pattern=architect&style=style_1&description=Make+your+Laravel+architecture+explicit%2C+deterministic+and+analyzable&md=1&showWatermark=0&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg">
+</picture>
+
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/happenv-com/laravel-true-modular.svg?style=flat-square)](https://packagist.org/packages/happenv-com/laravel-true-modular)
+[![Total Downloads](https://img.shields.io/packagist/dt/happenv-com/laravel-true-modular.svg?style=flat-square)](https://packagist.org/packages/happenv-com/laravel-true-modular)
+[![Tests](https://img.shields.io/github/actions/workflow/status/happenv-com/laravel-true-modular/tests.yml?branch=0.x&style=flat-square&label=tests)](https://github.com/happenv-com/laravel-true-modular/actions/workflows/tests.yml)
+[![PHPStan](https://img.shields.io/github/actions/workflow/status/happenv-com/laravel-true-modular/phpstan.yml?branch=0.x&style=flat-square&label=phpstan)](https://github.com/happenv-com/laravel-true-modular/actions/workflows/phpstan.yml)
+[![Zizmor](https://img.shields.io/github/actions/workflow/status/happenv-com/laravel-true-modular/zizmor.yml?branch=0.x&style=flat-square&label=zizmor)](https://github.com/happenv-com/laravel-true-modular/actions/workflows/zizmor.yml)
+[![Code Style](https://img.shields.io/github/actions/workflow/status/happenv-com/laravel-true-modular/fix-code-style.yml?branch=0.x&style=flat-square&label=code%20style)](https://github.com/happenv-com/laravel-true-modular/actions/workflows/fix-code-style.yml)
 
 **Make your Laravel architecture explicit, deterministic, and analyzable.**
 
@@ -155,6 +165,9 @@ Output mirrors this: local modules print by short name, external packages by ful
 always uses full names.
 
 ## Enforcing boundaries (static analysis)
+
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/happenv-com/laravel-true-modular-phpstan.svg?style=flat-square)](https://packagist.org/packages/happenv-com/laravel-true-modular-phpstan)
+[![Total Downloads](https://img.shields.io/packagist/dt/happenv-com/laravel-true-modular-phpstan.svg?style=flat-square)](https://packagist.org/packages/happenv-com/laravel-true-modular-phpstan)
 
 The runtime *discovers* and *explains* the architecture; a companion package
 [**`happenv-com/laravel-true-modular-phpstan`**](https://github.com/happenv-com/laravel-true-modular-phpstan)
