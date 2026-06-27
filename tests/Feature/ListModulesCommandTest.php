@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Commands\ListModulesCommand;
@@ -15,6 +16,8 @@ beforeEach(function (): void {
         app(RendererRegistry::class),
     ));
 });
+
+afterEach(fn () => Application::modulesNamespace(Application::DEFAULT_MODULES_NAMESPACE));
 
 it('lists modules in dependency order', function (): void {
     $this->artisan('module:list --simple')
@@ -46,4 +49,47 @@ it('reverses the order with --reverse', function (): void {
 
     expect($json['order'])->toBe('reverse')
         ->and(end($json['modules'])['name'])->toBe('myapp/kernel');
+});
+
+it('lists modules by short name for the default vendor', function (): void {
+    Application::modulesNamespace('Myapp');
+
+    Artisan::registerCommand(new ListModulesCommand(
+        app(ModuleRegistry::class),
+        app(ArchitectureIndexBuilder::class),
+        app(RendererRegistry::class),
+    ));
+
+    $this->artisan('module:list', ['--simple' => true])
+        ->assertSuccessful()
+        ->expectsOutputToContain('core')
+        ->doesntExpectOutputToContain('myapp/core');
+});
+
+it('lists full names with --with-vendor', function (): void {
+    Application::modulesNamespace('Myapp');
+
+    Artisan::registerCommand(new ListModulesCommand(
+        app(ModuleRegistry::class),
+        app(ArchitectureIndexBuilder::class),
+        app(RendererRegistry::class),
+    ));
+
+    $this->artisan('module:list', ['--simple' => true, '--with-vendor' => true])
+        ->assertSuccessful()
+        ->expectsOutputToContain('myapp/core');
+});
+
+it('keeps full names in json regardless of vendor', function (): void {
+    Application::modulesNamespace('Myapp');
+
+    Artisan::registerCommand(new ListModulesCommand(
+        app(ModuleRegistry::class),
+        app(ArchitectureIndexBuilder::class),
+        app(RendererRegistry::class),
+    ));
+
+    $this->artisan('module:list', ['--format' => 'json'])
+        ->assertSuccessful()
+        ->expectsOutputToContain('myapp/core');
 });

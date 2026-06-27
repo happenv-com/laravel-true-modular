@@ -23,7 +23,8 @@ class ListModulesCommand extends Command
     protected $signature = 'module:list
                             {--reverse : Show in reverse dependency order (dependents first)}
                             {--simple : Show simple list without table}
-                            {--format= : Output format (table, text, json)}';
+                            {--format= : Output format (table, text, json)}
+                            {--with-vendor : Show full vendor/name even for local modules}';
 
     protected $description = 'List all modules in dependency order';
 
@@ -61,7 +62,7 @@ class ListModulesCommand extends Command
 
         $format = $this->resolveFormat();
 
-        $context = new RenderContext(Application::getModulesVendor());
+        $context = new RenderContext(Application::getModulesVendor(), (bool) $this->option('with-vendor'));
 
         // The boxed table is an interactive console view (Symfony table component),
         // so it stays here; every string format flows through the renderer registry.
