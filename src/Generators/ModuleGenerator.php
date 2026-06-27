@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular\Generators;
 
 use Happenv\LaravelTrueModular\Application;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleName;
 use Happenv\LaravelTrueModular\Setup\Steps\ConfigureComposer;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
@@ -41,7 +42,7 @@ final readonly class ModuleGenerator
     {
         $slug = Str::kebab(Str::studly($name));
         $studly = Str::studly($name);
-        $vendor = Str::kebab(class_basename(str_replace('\\', '/', $namespace)));
+        $vendor = ModuleName::vendorFromNamespace($namespace);
         $package = $vendor.'/'.$slug;
         $moduleNamespace = trim($namespace, '\\').'\\'.$studly;
         $relativePath = $modulesDirectory.'/'.$slug;
