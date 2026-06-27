@@ -4,45 +4,42 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Commands;
 
+use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
 use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\MigrateMakeCommand;
-
-use function Happenv\LaravelTrueModular\module_path;
+use InvalidArgumentException;
 
 class MakeMigrationCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'module:make:migration {module : The name of the module} {name : The name of the migration} {--create= : The table to be created} {--table= : The table to migrate}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Create a new migration for a module';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle(): void
+    public function __construct(private readonly ModuleLocator $locator)
     {
+        parent::__construct();
+    }
+
+    public function handle(): int
+    {
+        try {
+            $module = $this->locator->resolveOrFail((string) $this->argument('module'));
+        } catch (InvalidArgumentException $exception) {
+            $this->error($exception->getMessage());
+
+            return self::FAILURE;
+        }
+
+        $path = $module->path.'/database/migrations';
+
         $this->runCommand(MigrateMakeCommand::class, [
             '--create' => $this->option('create'),
-            '--path' => $this->getMigrationPath(),
-            '--realpath' => $this->getMigrationPath(),
+            '--path' => $path,
+            '--realpath' => $path,
             '--table' => $this->option('table'),
             'name' => $this->argument('name'),
         ], $this->output);
-    }
 
-    protected function getMigrationPath(): string
-    {
-        $module = $this->argument('module');
-
-        return module_path($module, 'database/migrations');
+        return self::SUCCESS;
     }
 }
