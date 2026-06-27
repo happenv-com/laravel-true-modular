@@ -150,6 +150,10 @@ default vendor (derived from `modulesNamespace`, e.g. `happenv/amazon`). Externa
 full `vendor/name` (`acme/catalog`), which signals they aren't part of the local system. Resolution is
 case-insensitive.
 
+Output mirrors this: local modules print by short name, external packages by full `vendor/name`. Pass
+`--with-vendor` to any of these commands to print every module with its full `vendor/name`; `--format=json`
+always uses full names.
+
 ## Enforcing boundaries (static analysis)
 
 The runtime *discovers* and *explains* the architecture; a companion package
