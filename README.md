@@ -43,6 +43,21 @@ Laravel True Modular makes that shape explicit, and builds three guarantees on t
    with `--format=json` so you can wire blast-radius checks into CI, and `--format=mermaid`/`dot` to
    render the graph.
 
+## Where modules live
+
+A module is just a Composer package whose `composer.json` declares `type: "true-module"`. That means
+a module can live in either place:
+
+- **Local to your app** — under the `app-modules/` directory, versioned alongside the rest of your
+  code. This is where most modules start.
+- **An external Composer package** — pulled in via `composer require` and resolved from `vendor/`
+  like any dependency, so a module can be shared across applications or published privately.
+
+Both are discovered the same way and take part in the same dependency ordering and tooling — there's
+no difference in how they behave at runtime. The modules directory (default `app-modules`) and the
+module type (default `true-module`) are configurable in `bootstrap/app.php` via
+`Application::modulesDirectory()` and `Application::moduleComposerType()`.
+
 ## The module graph
 
 Modules declare their dependencies in `composer.json` like any other Composer package. The package
