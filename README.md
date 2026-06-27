@@ -316,4 +316,4 @@ vendor/bin/rector process   # apply refactorings (--dry-run to preview)
 
 ## License
 
-See [composer.json](composer.json) for license information.
+[MIT](LICENSE.md)
