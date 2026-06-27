@@ -22,3 +22,15 @@ it('reports json as its format and supports any report', function (): void {
     expect($renderer->format())->toBe('json')
         ->and($renderer->supports(new ImpactReport('core', [], [])))->toBeTrue();
 });
+
+it('preserves full vendor-prefixed names even when rendering context would shorten them', function (): void {
+    $json = (new JsonRenderer)->render(
+        new ImpactReport('happenv/core', ['happenv/sale'], ['happenv/pim']),
+        new RenderContext('happenv'),
+    );
+    $decoded = json_decode($json, true);
+
+    expect($decoded['module'])->toBe('happenv/core')
+        ->and($decoded['direct'])->toBe(['happenv/sale'])
+        ->and($decoded['total'])->toBe(2);
+});
