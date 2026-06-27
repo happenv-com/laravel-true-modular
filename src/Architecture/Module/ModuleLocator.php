@@ -15,6 +15,10 @@ interface ModuleLocator
 
     public function byComposerPackage(string $package): ?ModuleDescriptor;
 
+    public function resolve(string $name): ?ModuleDescriptor;
+
+    public function resolveOrFail(string $name): ModuleDescriptor;
+
     /**
      * @return array<string, ModuleDescriptor> keyed by composer package
      *
