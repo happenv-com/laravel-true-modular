@@ -63,24 +63,39 @@ module type (default `true-module`) are configurable in `bootstrap/app.php` via
 
 Modules declare their dependencies in `composer.json` like any other Composer package. The package
 reads those edges and derives both the **shape** of your system and the **exact order** things run.
+Real graphs aren't a straight line — modules fan out and share dependencies. The number on each node
+is its position in the deterministic boot order:
 
 ```mermaid
 graph TD
-    Core --> Product
-    Product --> Inventory
-    Inventory --> Sale
-    Sale --> Amazon
-    Sale --> Allegro
+    core["1 · core"] --> auth["2 · auth"]
+    core --> product["3 · product"]
+    product --> inventory["4 · inventory"]
+    product --> pricing["5 · pricing"]
+    auth --> sale
+    inventory --> sale["6 · sale"]
+    pricing --> sale
+    sale --> amazon["7 · amazon"]
+    sale --> allegro["8 · allegro"]
 ```
 
-`module:graph` renders that as a tree — each module sits under the one it depends on:
+`module:graph` renders that as a tree — each module sits under the one it depends on. A module with
+two dependencies (here `sale`) appears under each path that reaches it:
 
 ```
 php artisan module:graph
 
 core
+├── auth
+│   └── sale
+│       ├── amazon
+│       └── allegro
 └── product
-    └── inventory
+    ├── inventory
+    │   └── sale
+    │       ├── amazon
+    │       └── allegro
+    └── pricing
         └── sale
             ├── amazon
             └── allegro
@@ -95,11 +110,13 @@ php artisan module:list --simple
 Modules in order (dependencies first):
 
   1. core
-  2. product
-  3. inventory
-  4. sale
-  5. amazon
-  6. allegro
+  2. auth
+  3. product
+  4. inventory
+  5. pricing
+  6. sale
+  7. amazon
+  8. allegro
 ```
 
 No module ever boots before the modules it depends on — and a cycle is a hard error, not a
