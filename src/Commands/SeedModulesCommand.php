@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Commands;
 
+use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleFileFinder;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
@@ -35,6 +36,7 @@ class SeedModulesCommand extends Command
     public function __construct(
         private readonly ModuleRegistry $moduleRegistry,
         private readonly ModuleFileFinder $fileFinder,
+        private readonly ModuleLocator $locator,
     ) {
         parent::__construct();
     }
@@ -69,6 +71,14 @@ class SeedModulesCommand extends Command
         $specificClass = $this->option('class');
 
         if ($specificModule !== null) {
+            try {
+                $specificModule = $this->locator->resolveOrFail($specificModule)->name;
+            } catch (InvalidArgumentException $exception) {
+                $this->error($exception->getMessage());
+
+                return self::FAILURE;
+            }
+
             return $this->seedModule($specificModule, $specificClass);
         }
 

@@ -7,6 +7,7 @@ namespace Happenv\LaravelTrueModular\Commands;
 use Happenv\LaravelTrueModular\Architecture\Analyzer\GraphAnalyzer;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
+use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
 use Override;
@@ -24,6 +25,7 @@ final class ModuleGraphCommand extends AbstractArchitectureCommand
         ArchitectureIndexBuilder $builder,
         private readonly GraphAnalyzer $analyzer,
         RendererRegistry $renderers,
+        private readonly ModuleLocator $locator,
     ) {
         parent::__construct($builder, $renderers);
     }
@@ -33,7 +35,11 @@ final class ModuleGraphCommand extends AbstractArchitectureCommand
     {
         $root = $this->option('root');
 
-        return $this->analyzer->analyze($index, $root === null ? null : (string) $root);
+        if ($root !== null) {
+            $root = $this->locator->resolveOrFail((string) $root)->name;
+        }
+
+        return $this->analyzer->analyze($index, $root);
     }
 
     #[Override]

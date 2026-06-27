@@ -12,7 +12,7 @@ function composerSource(): ComposerArchitectureSource
 {
     $tree = new ModuleRegistry(appModulesFixture());
 
-    return new ComposerArchitectureSource($tree, new AppModulesLocator($tree));
+    return new ComposerArchitectureSource($tree, new AppModulesLocator($tree, 'myapp'));
 }
 
 it('yields a modules contribution and a dependencies contribution', function (): void {

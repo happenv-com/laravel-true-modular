@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use Happenv\LaravelTrueModular\Architecture\Module\AppModulesLocator;
+use Happenv\LaravelTrueModular\Architecture\Module\ModuleLocator;
 use Happenv\LaravelTrueModular\Commands\SeedModulesCommand;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function (): void {
@@ -10,6 +13,14 @@ beforeEach(function (): void {
     // which testbench's standard Application does not call — register it here.
     Artisan::registerCommand(app(SeedModulesCommand::class));
 });
+
+function bindLocatorVendor(string $vendor): void
+{
+    app()->singleton(
+        ModuleLocator::class,
+        static fn ($app): AppModulesLocator => new AppModulesLocator($app->make(ModuleRegistry::class), $vendor),
+    );
+}
 
 describe('SeedModulesCommand', function (): void {
     describe('module:seed --show-order', function (): void {
@@ -34,6 +45,23 @@ describe('SeedModulesCommand', function (): void {
             // is that the command accepts the --module option.
             $this->artisan('module:seed', ['--module' => 'myapp/core'])
                 ->assertSuccessful();
+        });
+
+        it('accepts a bare module name for --module', function (): void {
+            bindLocatorVendor('myapp');
+            Artisan::registerCommand(app(SeedModulesCommand::class));
+
+            $this->artisan('module:seed', ['--module' => 'core'])
+                ->assertSuccessful();
+        });
+
+        it('fails with a friendly error for an unknown --module', function (): void {
+            bindLocatorVendor('myapp');
+            Artisan::registerCommand(app(SeedModulesCommand::class));
+
+            $this->artisan('module:seed', ['--module' => 'nope'])
+                ->assertFailed()
+                ->expectsOutputToContain('Unknown module: nope');
         });
     });
 });

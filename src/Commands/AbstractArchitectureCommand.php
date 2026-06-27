@@ -32,7 +32,9 @@ abstract class AbstractArchitectureCommand extends Command
         try {
             $report = $this->buildReport($this->builder->build());
         } catch (InvalidArgumentException $exception) {
-            $this->error($exception->getMessage());
+            foreach (explode("\n", $exception->getMessage()) as $line) {
+                $this->error($line);
+            }
 
             return self::FAILURE;
         }

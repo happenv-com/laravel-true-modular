@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Architecture\Module;
 
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleName;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Happenv\LaravelTrueModular\ModuleSystem\NamespaceMatcher;
+use InvalidArgumentException;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
 
@@ -16,6 +18,7 @@ final class AppModulesLocator implements ModuleLocator
 
     public function __construct(
         private readonly ModuleRegistry $moduleRegistry,
+        private readonly string $defaultVendor,
         private readonly string $coreName = 'core',
     ) {}
 
@@ -44,6 +47,30 @@ final class AppModulesLocator implements ModuleLocator
         }
 
         return NamespaceMatcher::longestPrefix($this->normalize($path), $pathMap);
+    }
+
+    public function resolve(string $name): ?ModuleDescriptor
+    {
+        return $this->byComposerPackage(ModuleName::qualify($name, $this->defaultVendor));
+    }
+
+    public function resolveOrFail(string $name): ModuleDescriptor
+    {
+        $descriptor = $this->resolve($name);
+
+        if ($descriptor !== null) {
+            return $descriptor;
+        }
+
+        $lines = ['Unknown module: '.$name];
+
+        if (! str_contains($name, '/')) {
+            $lines[] = 'Resolved to: '.ModuleName::qualify($name, $this->defaultVendor);
+        }
+
+        $lines[] = 'Run `php artisan module:list` to see available modules.';
+
+        throw new InvalidArgumentException(implode("\n", $lines));
     }
 
     public function byComposerPackage(string $package): ?ModuleDescriptor

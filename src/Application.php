@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular;
 
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleName;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Foundation\Application as FoundationApplication;
@@ -260,5 +261,14 @@ final class Application extends FoundationApplication
     public static function getModulesNamespace(): string
     {
         return self::$modulesNamespace;
+    }
+
+    /**
+     * The default Composer vendor for local modules, derived from the modules
+     * namespace (e.g. `Happenv` → `happenv`). Used to qualify bare module names.
+     */
+    public static function getModulesVendor(): string
+    {
+        return ModuleName::vendorFromNamespace(self::getModulesNamespace());
     }
 }

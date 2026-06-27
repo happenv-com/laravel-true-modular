@@ -67,7 +67,10 @@ class KernelServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             ModuleLocator::class,
-            static fn (Application $app): AppModulesLocator => new AppModulesLocator($app->make(ModuleRegistry::class)),
+            static fn (Application $app): AppModulesLocator => new AppModulesLocator(
+                $app->make(ModuleRegistry::class),
+                \Happenv\LaravelTrueModular\Application::getModulesVendor(),
+            ),
         );
 
         $this->app->tag([ComposerArchitectureSource::class], 'architecture.sources');

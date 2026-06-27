@@ -145,6 +145,11 @@ php artisan module:graph --root=sale      # restrict to one subtree
 php artisan module:why amazon core        # shortest path: why does Amazon depend on Core?
 ```
 
+Local modules are referenced by their short name (`amazon`) — the package qualifies them with your
+default vendor (derived from `modulesNamespace`, e.g. `happenv/amazon`). External packages keep their
+full `vendor/name` (`acme/catalog`), which signals they aren't part of the local system. Resolution is
+case-insensitive.
+
 ## Enforcing boundaries (static analysis)
 
 The runtime *discovers* and *explains* the architecture; a companion package
