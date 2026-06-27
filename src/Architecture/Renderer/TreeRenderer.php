@@ -20,15 +20,16 @@ final class TreeRenderer implements ArchitectureRenderer
         return $report instanceof GraphReport;
     }
 
-    public function render(ArchitectureReport $report): string
+    public function render(ArchitectureReport $report, RenderContext $context): string
     {
         /** @var GraphReport $report */
         $lines = [];
 
         (new DependentsTreeWalker($report->dependents))->walk(
             $report->roots,
-            static function (string $node, array $ancestorsAreLast, bool $isRoot) use (&$lines): void {
-                $lines[] = $isRoot ? $node : self::glyphPrefix($ancestorsAreLast).$node;
+            function (string $node, array $ancestorsAreLast, bool $isRoot) use (&$lines, $context): void {
+                $name = $context->display($node);
+                $lines[] = $isRoot ? $name : self::glyphPrefix($ancestorsAreLast).$name;
             },
         );
 

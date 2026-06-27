@@ -24,14 +24,14 @@ final class ModulesTextRenderer implements ArchitectureRenderer
         return $report instanceof ModulesReport;
     }
 
-    public function render(ArchitectureReport $report): string
+    public function render(ArchitectureReport $report, RenderContext $context): string
     {
         /** @var ModulesReport $report */
         $direction = $report->reverse ? 'dependents first' : 'dependencies first';
         $lines = [sprintf('Modules in order (%s):', $direction), ''];
 
         foreach ($report->modules as $index => $module) {
-            $lines[] = sprintf('  %d. %s', $index + 1, $module['name']);
+            $lines[] = sprintf('  %d. %s', $index + 1, $context->display($module['name']));
         }
 
         return implode("\n", $lines);

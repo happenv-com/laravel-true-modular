@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Commands;
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Module\ModuleDescriptor;
+use Happenv\LaravelTrueModular\Architecture\Renderer\RenderContext;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Report\ModulesReport;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
@@ -21,7 +23,8 @@ class ListModulesCommand extends Command
     protected $signature = 'module:list
                             {--reverse : Show in reverse dependency order (dependents first)}
                             {--simple : Show simple list without table}
-                            {--format= : Output format (table, text, json)}';
+                            {--format= : Output format (table, text, json)}
+                            {--with-vendor : Show full vendor/name even for local modules}';
 
     protected $description = 'List all modules in dependency order';
 
@@ -59,14 +62,15 @@ class ListModulesCommand extends Command
 
         $format = $this->resolveFormat();
 
+        $context = new RenderContext(Application::getModulesVendor(), (bool) $this->option('with-vendor'));
+
         // The boxed table is an interactive console view (Symfony table component),
         // so it stays here; every string format flows through the renderer registry.
         if ($format === 'table') {
-            return $this->showTable($order, $index);
+            return $this->showTable($order, $index, $context);
         }
-
         $report = new ModulesReport($this->rows($order, $index), (bool) $this->option('reverse'));
-        $rendered = $this->renderers->get($format, $report)->render($report);
+        $rendered = $this->renderers->get($format, $report)->render($report, $context);
 
         foreach (explode("\n", $rendered) as $line) {
             $this->line($line);
@@ -91,7 +95,7 @@ class ListModulesCommand extends Command
      *
      * @throws InvalidArgumentException
      */
-    private function showTable(array $order, ArchitectureIndex $index): int
+    private function showTable(array $order, ArchitectureIndex $index, RenderContext $context): int
     {
         $direction = $this->option('reverse') ? 'dependents first' : 'dependencies first';
         $this->components->info(sprintf('Modules (%s):', $direction));
@@ -100,20 +104,22 @@ class ListModulesCommand extends Command
         $tableData = [];
 
         foreach ($this->rows($order, $index) as $position => $row) {
+            $dependencies = array_map(
+                static fn (string $dependency): string => $context->display($dependency),
+                $row['dependencies'],
+            );
+
             $tableData[] = [
                 $position + 1,
-                $row['name'],
-                $row['dependencies'] !== [] ? implode(PHP_EOL, $row['dependencies']) : '-',
+                $context->display($row['name']),
+                $dependencies !== [] ? implode(PHP_EOL, $dependencies) : '-',
                 $row['path'],
             ];
 
             $tableData[] = ['-', '-', '-', '-'];
         }
 
-        $this->table(
-            ['#', 'Module', 'Depends On', 'Path'],
-            $tableData
-        );
+        $this->table(['#', 'Module', 'Depends On', 'Path'], $tableData);
 
         $this->components->info(sprintf('Total: %d modules', count($order)));
 

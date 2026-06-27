@@ -20,8 +20,9 @@ final class JsonRenderer implements ArchitectureRenderer
         return true;
     }
 
-    public function render(ArchitectureReport $report): string
+    public function render(ArchitectureReport $report, RenderContext $context): string
     {
+        // Context intentionally ignored: JSON is a machine contract and always uses full names.
         $payload = [
             'schema' => [
                 'name' => $report->schemaName(),

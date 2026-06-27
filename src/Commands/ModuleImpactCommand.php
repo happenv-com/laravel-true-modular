@@ -17,6 +17,7 @@ final class ModuleImpactCommand extends AbstractArchitectureCommand
     protected $signature = 'module:impact
                             {module : The module to analyze}
                             {--format= : Output format (text, json)}
+                            {--with-vendor : Show full vendor/name even for local modules}
                             {--schema-version=1 : Machine API schema version}';
 
     protected $description = 'Show which modules are affected by a change to the given module';
