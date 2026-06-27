@@ -96,7 +96,7 @@ Config processing is skipped entirely when the application config is cached. See
 | --- | --- | --- |
 | `hasViews(?string $namespace = null)` | `resources/views`, namespace defaults to the short name. | boot |
 | `hasGlobalViews()` | `resources/views-global`, prepended to global `view.paths`. | initialize |
-| `hasViewComponent(string $prefix, string $name)` / `hasViewComponents(string $prefix, string ...$names)` | `src/Components` | boot |
+| `hasViewComponent(string $prefix, string $viewComponentName)` / `hasViewComponents(string $prefix, string ...$viewComponentNames)` | `src/Components` | boot |
 | `hasViewComposer(array\|string $view, callable\|string $composer)` | View composer binding. | boot |
 | `sharesDataWithAllViews(string $name, mixed $value)` | `View::share`. | boot |
 | `hasInertiaComponents(?string $namespace = null)` | `resources/js/Pages` | boot |

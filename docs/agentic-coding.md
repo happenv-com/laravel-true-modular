@@ -103,7 +103,7 @@ The files an agent needs for a change to `X` are:
 loading everything:
 
 ```bash
-php artisan module:graph --root=acme/sale
+php artisan module:graph --root=acme/catalog
 ```
 
 Everything *downstream* of `X` (its dependents, from `module:impact`) is what to **verify** after the
