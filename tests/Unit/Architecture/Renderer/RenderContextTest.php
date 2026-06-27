@@ -20,3 +20,7 @@ it('shows full names for everything when withVendor is true', function (): void 
 it('returns a name without a slash unchanged', function (): void {
     expect((new RenderContext('happenv'))->display('core'))->toBe('core');
 });
+
+it('returns the segment after the last slash for a multi-segment default-vendor name', function (): void {
+    expect((new RenderContext('happenv'))->display('happenv/foo/bar'))->toBe('bar');
+});

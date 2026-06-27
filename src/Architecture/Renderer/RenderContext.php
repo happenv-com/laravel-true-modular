@@ -22,14 +22,16 @@ final readonly class RenderContext
             return $fullName;
         }
 
-        $slash = strpos($fullName, '/');
+        $firstSlash = strpos($fullName, '/');
 
-        if ($slash === false) {
+        if ($firstSlash === false) {
             return $fullName;
         }
 
-        if (substr($fullName, 0, $slash) === $this->defaultVendor) {
-            return substr($fullName, $slash + 1);
+        if (substr($fullName, 0, $firstSlash) === $this->defaultVendor) {
+            $lastSlash = (int) strrpos($fullName, '/');
+
+            return substr($fullName, $lastSlash + 1);
         }
 
         return $fullName;
