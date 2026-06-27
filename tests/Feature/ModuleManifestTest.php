@@ -23,7 +23,7 @@ class GadgetManifestProvider extends ModuleProvider
     }
 }
 
-it('exposes a booted module\'s declared health checks through the manifest', function (): void {
+it('exposes a registered module\'s declared health checks through the manifest', function (): void {
     $this->app->register(WidgetManifestProvider::class);
 
     $module = app(ModuleManifestRepository::class)->find('widget');
