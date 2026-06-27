@@ -23,7 +23,7 @@ Indirect:
 Total affected: 3
 ```
 
-Ask the codebase what a change touches *before* you make it.
+> **Ask the codebase what a change touches before you make it.**
 
 ## Why
 
@@ -75,12 +75,13 @@ graph TD
 ```bash
 php artisan module:graph                  # tree (default)
 php artisan module:graph --format=mermaid # paste straight into a doc
+php artisan module:graph --format=dot     # pipe into Graphviz
 php artisan module:why amazon core        # shortest path: why does Amazon depend on Core?
 ```
 
 ## Enforcing boundaries (static analysis)
 
-The runtime *describes* the module graph; a companion package
+The runtime *discovers* and *explains* the architecture; a companion package
 [**`happenv-com/laravel-true-modular-phpstan`**](https://github.com/happenv-com/laravel-true-modular-phpstan)
 *enforces* it. It ships two zero-config PHPStan extensions:
 
@@ -120,6 +121,41 @@ class CatalogServiceProvider extends ModuleProvider
     }
 }
 ```
+
+## Extending existing modules
+
+Modules don't only talk to each other through services — they can extend the **domain model itself**.
+A downstream module adds attributes and relations to an upstream module's Eloquent model without
+touching that model's class, so the dependency arrow stays pointed the right way.
+
+The `billing` module declares the extension:
+
+```php
+$module->hasModelExtensions([
+    Product::class => ProductBillingExtension::class,
+]);
+```
+
+```php
+final class ProductBillingExtension extends ModelExtension
+{
+    public function invoices(): HasMany
+    {
+        return $this->model->hasMany(Invoice::class);
+    }
+}
+```
+
+And `Product` gains the relation as if it were defined on it:
+
+```php
+Product::query()->with('invoices');
+```
+
+The `catalog` module that owns `Product` is never modified — `billing` contributes new capabilities
+to it. Each module composes the shared domain model instead of forking or patching it. (Static
+analysis still sees these runtime relations, thanks to the
+[PHPStan extension](#enforcing-boundaries-static-analysis) above.)
 
 ## Install
 
