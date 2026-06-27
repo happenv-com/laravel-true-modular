@@ -27,6 +27,7 @@ use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\Pr
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\ProcessViewSharedData;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\PackageServiceProvider\ProcessVoters;
 use Happenv\LaravelTrueModular\ModuleProvider\Exceptions\InvalidModule;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleManifestRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Foundation\CachesConfiguration;
 use Illuminate\Support\ServiceProvider;
@@ -80,6 +81,9 @@ abstract class ModuleProvider extends ServiceProvider
         }
 
         $this->moduleRegistered();
+
+        $this->app->singletonIf(ModuleManifestRepository::class);
+        $this->app->make(ModuleManifestRepository::class)->register($this->module);
 
         return $this;
     }
