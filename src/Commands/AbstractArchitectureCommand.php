@@ -72,7 +72,7 @@ abstract class AbstractArchitectureCommand extends Command
             return self::FAILURE;
         }
 
-        $context = new RenderContext(Application::getModulesVendor());
+        $context = new RenderContext(Application::getModulesVendor(), (bool) $this->option('with-vendor'));
 
         $this->line($renderer->render($report, $context));
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Architecture\Analyzer\GraphAnalyzer;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Module\AppModulesLocator;
@@ -19,6 +20,8 @@ beforeEach(function (): void {
         app(ModuleLocator::class),
     ));
 });
+
+afterEach(fn () => Application::modulesNamespace(Application::DEFAULT_MODULES_NAMESPACE));
 
 function registerGraphWithVendor(string $vendor): void
 {
@@ -63,4 +66,35 @@ it('fails with a friendly error for an unknown bare root name', function (): voi
         ->assertFailed()
         ->expectsOutputToContain('Unknown module: nope')
         ->expectsOutputToContain('Resolved to: myapp/nope');
+});
+
+it('shows short names for default-vendor modules', function (): void {
+    Application::modulesNamespace('Myapp'); // vendor → myapp, matching fixtures
+
+    Artisan::registerCommand(new ModuleGraphCommand(
+        app(ArchitectureIndexBuilder::class),
+        app(GraphAnalyzer::class),
+        app(RendererRegistry::class),
+        app(ModuleLocator::class),
+    ));
+
+    $this->artisan('module:graph')
+        ->assertSuccessful()
+        ->expectsOutputToContain('core')
+        ->doesntExpectOutputToContain('myapp/core');
+});
+
+it('shows full names with --with-vendor', function (): void {
+    Application::modulesNamespace('Myapp');
+
+    Artisan::registerCommand(new ModuleGraphCommand(
+        app(ArchitectureIndexBuilder::class),
+        app(GraphAnalyzer::class),
+        app(RendererRegistry::class),
+        app(ModuleLocator::class),
+    ));
+
+    $this->artisan('module:graph', ['--with-vendor' => true])
+        ->assertSuccessful()
+        ->expectsOutputToContain('myapp/core');
 });

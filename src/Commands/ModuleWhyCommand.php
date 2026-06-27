@@ -18,6 +18,7 @@ final class ModuleWhyCommand extends AbstractArchitectureCommand
                             {from : The dependent module}
                             {to : The dependency module}
                             {--format= : Output format (text, json)}
+                            {--with-vendor : Show full vendor/name even for local modules}
                             {--schema-version=1 : Machine API schema version}';
 
     protected $description = 'Explain why one module depends on another (shortest dependency path)';
