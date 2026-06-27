@@ -61,13 +61,13 @@ class ListModulesCommand extends Command
 
         $format = $this->resolveFormat();
 
+        $context = new RenderContext(Application::getModulesVendor());
+
         // The boxed table is an interactive console view (Symfony table component),
         // so it stays here; every string format flows through the renderer registry.
         if ($format === 'table') {
-            return $this->showTable($order, $index);
+            return $this->showTable($order, $index, $context);
         }
-
-        $context = new RenderContext(Application::getModulesVendor());
         $report = new ModulesReport($this->rows($order, $index), (bool) $this->option('reverse'));
         $rendered = $this->renderers->get($format, $report)->render($report, $context);
 
@@ -94,7 +94,7 @@ class ListModulesCommand extends Command
      *
      * @throws InvalidArgumentException
      */
-    private function showTable(array $order, ArchitectureIndex $index): int
+    private function showTable(array $order, ArchitectureIndex $index, RenderContext $context): int
     {
         $direction = $this->option('reverse') ? 'dependents first' : 'dependencies first';
         $this->components->info(sprintf('Modules (%s):', $direction));
@@ -103,20 +103,22 @@ class ListModulesCommand extends Command
         $tableData = [];
 
         foreach ($this->rows($order, $index) as $position => $row) {
+            $dependencies = array_map(
+                static fn (string $dependency): string => $context->display($dependency),
+                $row['dependencies'],
+            );
+
             $tableData[] = [
                 $position + 1,
-                $row['name'],
-                $row['dependencies'] !== [] ? implode(PHP_EOL, $row['dependencies']) : '-',
+                $context->display($row['name']),
+                $dependencies !== [] ? implode(PHP_EOL, $dependencies) : '-',
                 $row['path'],
             ];
 
             $tableData[] = ['-', '-', '-', '-'];
         }
 
-        $this->table(
-            ['#', 'Module', 'Depends On', 'Path'],
-            $tableData
-        );
+        $this->table(['#', 'Module', 'Depends On', 'Path'], $tableData);
 
         $this->components->info(sprintf('Total: %d modules', count($order)));
 
