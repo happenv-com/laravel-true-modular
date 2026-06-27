@@ -5,7 +5,7 @@
 **Make your Laravel architecture explicit, deterministic, and analyzable.**
 
 Modules are first-class Composer packages with deterministic dependency ordering, an extended
-lifecycle, and built-in architecture introspection. Instead of an architecture that lives only in
+lifecycle, and a built-in architecture runtime. Instead of an architecture that lives only in
 your team's heads, you get one you can query, graph, and reason about.
 
 ```
@@ -34,6 +34,8 @@ Total affected: 3
 - [Built for agentic coding](#built-for-agentic-coding)
 - [Defining a module](#defining-a-module)
 - [Extending existing modules](#extending-existing-modules)
+- [Extending the framework](#extending-the-framework)
+- [Production notes](#production-notes)
 - [Install](#install)
 - [Documentation](#documentation)
 - [Development](#development)
@@ -54,7 +56,7 @@ Laravel True Modular makes that shape explicit, and builds three guarantees on t
    every provider is registered but before *anything* boots - including third-party package
    providers. So your cross-module wiring (morph maps, permissions, drivers, Livewire/Filament hooks)
    is in place before any package's `boot()` reads it.
-3. **Architecture introspection** - `module:graph`, `module:impact`, `module:why`, `module:list`,
+3. **Architecture runtime** - `module:graph`, `module:impact`, `module:why`, `module:list`,
    with `--format=json` so you can wire blast-radius checks into CI, and `--format=mermaid`/`dot` to
    render the graph.
 
@@ -167,30 +169,23 @@ extensions register automatically. See the
 
 ## Built for agentic coding
 
-Explicit boundaries aren't only good for humans - they're what makes a codebase legible to an AI
-coding agent, and that's becoming one of the biggest reasons to adopt this architecture.
+Explicit boundaries aren't only good for humans — they're what makes a codebase legible to an AI
+coding agent, and one of the biggest reasons to adopt this architecture today.
 
-- **Smaller context, faster iterations.** A module is a self-contained Composer package with an
-  explicit dependency list, so an agent can load just that module plus the few it depends on -
-  instead of the whole application. Less context means cheaper, faster, and more accurate edits.
-- **The agent knows where it's allowed to work.** Before touching anything it can ask the codebase:
-  `module:impact <module>` gives the blast radius of a change, `module:why <a> <b>` explains an
-  existing coupling, and `module:graph --root=<module>` scopes the graph to one subtree. The
-  architecture answers *"what does this affect, and what does it depend on?"* - so the agent moves
-  inside well-defined boundaries instead of grepping and guessing across the whole system.
-- **Guardrails the agent gets feedback from.** The PHPStan
+- **Smaller context, faster iterations.** A module is a self-contained package with an explicit
+  dependency list, so an agent loads just that module and the few it depends on — not the whole app.
+- **The agent knows where it's allowed to work.** `module:impact`, `module:why`, and
+  `module:graph --root=` let it ask *"what does this affect, and what does it depend on?"* — so it
+  moves inside well-defined boundaries instead of grepping and guessing across the whole system.
+- **Guardrails it gets feedback from.** The PHPStan
   [Module Boundary Enforcer](#enforcing-boundaries-static-analysis) fails the moment generated code
-  reaches across a boundary not declared in `composer.json`. That's immediate, machine-readable
-  feedback that keeps an agent inside the lines, rather than a human catching it in review later.
-- **The agent already knows the conventions.** The package ships
-  [Laravel Boost](https://laravel.com/docs/boost) resources - an always-on AI guideline plus an
-  on-demand `modular-monolith-development` skill - auto-installed by `php artisan boost:install`. An
-  agent picks up the lifecycle, the `Module` builder, model extensions, and the dependency rules
-  out of the box, without you pasting documentation into the prompt. See
-  [docs/laravel-boost.md](docs/laravel-boost.md).
+  crosses a boundary not declared in `composer.json` — immediate, machine-readable feedback, not a
+  reviewer catching it later.
+- **It already knows the conventions.** The package ships
+  [Laravel Boost](https://laravel.com/docs/boost) resources auto-installed by `boost:install`, so an
+  agent picks up the lifecycle, the `Module` builder, and the rules without docs in the prompt.
 
-The net effect: an agent works on a small, sharply-bounded slice of the system, with explicit edges
-and hard guardrails - exactly the conditions under which LLMs do their best work.
+See [docs/agentic-coding.md](docs/agentic-coding.md) for the full agent workflow.
 
 ## Defining a module
 
@@ -228,6 +223,9 @@ $module->hasModelExtensions([
 ```
 
 ```php
+/**
+ * @property Product $model
+ */
 final class ProductBillingExtension extends ModelExtension
 {
     public function invoices(): HasMany
@@ -259,6 +257,19 @@ The `catalog` module that owns `Product` is never modified - `billing` contribut
 relations, and query methods to it. Each module composes the shared domain model instead of forking
 or patching it. (Static analysis still sees these runtime additions, thanks to the
 [PHPStan extension](#enforcing-boundaries-static-analysis) above.)
+
+## Extending the framework
+
+The extensions above aren't a custom trick — they ride on `Macroable`, the trait Eloquent already
+uses everywhere (`Builder`, `Collection`, `Str`, `Request`, …) to add methods to a class *from the
+outside*, without editing it. That's a textbook **open/closed**, and the natural tool for
+cross-module extension: `hasModelBuilderExtensions()` registers a builder **mixin**
+(`Builder::mixin(...)`), `hasModelExtensions()` adds relations via `resolveRelationUsing()`.
+
+Macros are normally invisible to static analysis — but the companion
+[PHPStan extension](#enforcing-boundaries-static-analysis) (with Larastan) types the relations and
+mixins this package registers, so you extend modules without patching them **and** keep a green
+analysis. See [docs/model-extensions.md](docs/model-extensions.md).
 
 ## Install
 
