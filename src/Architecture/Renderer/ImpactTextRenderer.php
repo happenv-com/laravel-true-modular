@@ -19,16 +19,16 @@ final class ImpactTextRenderer implements ArchitectureRenderer
         return $report instanceof ImpactReport;
     }
 
-    public function render(ArchitectureReport $report): string
+    public function render(ArchitectureReport $report, RenderContext $context): string
     {
         /** @var ImpactReport $report */
-        $lines = [$report->module, ''];
+        $lines = [$context->display($report->module), ''];
 
         $lines[] = 'Direct:';
-        $lines = [...$lines, ...$this->indent($report->direct)];
+        $lines = [...$lines, ...$this->indent($report->direct, $context)];
         $lines[] = '';
         $lines[] = 'Indirect:';
-        $lines = [...$lines, ...$this->indent($report->indirect)];
+        $lines = [...$lines, ...$this->indent($report->indirect, $context)];
         $lines[] = '';
         $lines[] = sprintf('Total affected: %d', $report->total());
 
@@ -39,12 +39,12 @@ final class ImpactTextRenderer implements ArchitectureRenderer
      * @param  array<string>  $items
      * @return array<string>
      */
-    private function indent(array $items): array
+    private function indent(array $items, RenderContext $context): array
     {
         if ($items === []) {
             return ['  -'];
         }
 
-        return array_map(static fn (string $item): string => '  '.$item, $items);
+        return array_map(static fn (string $item): string => '  '.$context->display($item), $items);
     }
 }

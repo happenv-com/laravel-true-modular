@@ -22,10 +22,10 @@ final class DotRenderer implements ArchitectureRenderer
         return $report instanceof GraphReport;
     }
 
-    public function render(ArchitectureReport $report): string
+    public function render(ArchitectureReport $report, RenderContext $context): string
     {
         /** @var GraphReport $report */
-        $edges = $this->edges($report, static fn (string $from, string $to): string => sprintf('    "%s" -> "%s"', $from, $to));
+        $edges = $this->edges($report, $context, static fn (string $from, string $to): string => sprintf('    "%s" -> "%s"', $from, $to));
 
         return implode("\n", ['digraph {', '', ...$edges, '', '}']);
     }

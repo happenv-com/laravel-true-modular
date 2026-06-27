@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Commands;
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Module\ModuleDescriptor;
+use Happenv\LaravelTrueModular\Architecture\Renderer\RenderContext;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Report\ModulesReport;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
@@ -65,8 +67,9 @@ class ListModulesCommand extends Command
             return $this->showTable($order, $index);
         }
 
+        $context = new RenderContext(Application::getModulesVendor());
         $report = new ModulesReport($this->rows($order, $index), (bool) $this->option('reverse'));
-        $rendered = $this->renderers->get($format, $report)->render($report);
+        $rendered = $this->renderers->get($format, $report)->render($report, $context);
 
         foreach (explode("\n", $rendered) as $line) {
             $this->line($line);

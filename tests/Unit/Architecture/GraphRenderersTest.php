@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Happenv\LaravelTrueModular\Architecture\Renderer\DotRenderer;
 use Happenv\LaravelTrueModular\Architecture\Renderer\MermaidRenderer;
+use Happenv\LaravelTrueModular\Architecture\Renderer\RenderContext;
 use Happenv\LaravelTrueModular\Architecture\Renderer\TreeRenderer;
 use Happenv\LaravelTrueModular\Architecture\Report\GraphReport;
 use Happenv\LaravelTrueModular\Architecture\Report\ImpactReport;
@@ -22,7 +23,7 @@ function graphReport(): GraphReport
 }
 
 it('renders an ascii tree', function (): void {
-    $text = (new TreeRenderer)->render(graphReport());
+    $text = (new TreeRenderer)->render(graphReport(), new RenderContext('x'));
 
     expect($text)->toContain('core')
         ->and($text)->toContain('└── pim')
@@ -30,7 +31,7 @@ it('renders an ascii tree', function (): void {
 });
 
 it('renders mermaid edges', function (): void {
-    $text = (new MermaidRenderer)->render(graphReport());
+    $text = (new MermaidRenderer)->render(graphReport(), new RenderContext('x'));
 
     expect($text)->toContain('graph TD')
         ->and($text)->toContain('core --> pim')
@@ -38,7 +39,7 @@ it('renders mermaid edges', function (): void {
 });
 
 it('renders graphviz dot edges', function (): void {
-    $text = (new DotRenderer)->render(graphReport());
+    $text = (new DotRenderer)->render(graphReport(), new RenderContext('x'));
 
     expect($text)->toContain('digraph')
         ->and($text)->toContain('"core" -> "pim"');
@@ -58,8 +59,22 @@ it('tree renderer handles cyclic dependencies without hanging', function (): voi
         root: null,
     );
 
-    $text = (new TreeRenderer)->render($report);
+    $text = (new TreeRenderer)->render($report, new RenderContext('x'));
 
     expect($text)->toContain('a')
         ->and($text)->toContain('b');
+});
+
+it('mermaid shortens default-vendor nodes and keeps external full', function (): void {
+    $report = new GraphReport(
+        roots: ['happenv/core'],
+        dependents: ['happenv/core' => ['happenv/product', 'acme/catalog'], 'happenv/product' => [], 'acme/catalog' => []],
+        root: null,
+    );
+
+    $out = (new MermaidRenderer)->render($report, new RenderContext('happenv'));
+
+    expect($out)->toContain('core --> product')
+        ->and($out)->toContain('core --> acme/catalog')
+        ->and($out)->not->toContain('happenv/core');
 });

@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 use Happenv\LaravelTrueModular\Architecture\Renderer\JsonRenderer;
+use Happenv\LaravelTrueModular\Architecture\Renderer\RenderContext;
 use Happenv\LaravelTrueModular\Architecture\Report\ImpactReport;
 
 it('wraps the report payload with a schema block', function (): void {
-    $json = (new JsonRenderer)->render(new ImpactReport('core', ['pim'], ['amazon']));
+    $json = (new JsonRenderer)->render(new ImpactReport('core', ['pim'], ['amazon']), new RenderContext('x'));
     $decoded = json_decode($json, true);
 
     expect($decoded['schema'])->toBe(['name' => 'impact', 'version' => 1])

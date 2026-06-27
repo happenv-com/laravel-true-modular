@@ -12,5 +12,5 @@ interface ArchitectureRenderer
 
     public function supports(ArchitectureReport $report): bool;
 
-    public function render(ArchitectureReport $report): string;
+    public function render(ArchitectureReport $report, RenderContext $context): string;
 }

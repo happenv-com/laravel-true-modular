@@ -19,13 +19,13 @@ final class WhyTextRenderer implements ArchitectureRenderer
         return $report instanceof WhyReport;
     }
 
-    public function render(ArchitectureReport $report): string
+    public function render(ArchitectureReport $report, RenderContext $context): string
     {
         /** @var WhyReport $report */
         if ($report->path === null) {
-            return sprintf('%s has no dependency path to %s', $report->from, $report->to);
+            return sprintf('%s has no dependency path to %s', $context->display($report->from), $context->display($report->to));
         }
 
-        return implode("\n  ↓\n", $report->path);
+        return implode("\n  ↓\n", array_map(static fn (string $node): string => $context->display($node), $report->path));
     }
 }

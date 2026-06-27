@@ -20,15 +20,15 @@ final class GraphTextRenderer implements ArchitectureRenderer
         return $report instanceof GraphReport;
     }
 
-    public function render(ArchitectureReport $report): string
+    public function render(ArchitectureReport $report, RenderContext $context): string
     {
         /** @var GraphReport $report */
         $lines = [];
 
         (new DependentsTreeWalker($report->dependents))->walk(
             $report->roots,
-            static function (string $node, array $ancestorsAreLast) use (&$lines): void {
-                $lines[] = str_repeat('  ', count($ancestorsAreLast)).$node;
+            function (string $node, array $ancestorsAreLast) use (&$lines, $context): void {
+                $lines[] = str_repeat('  ', count($ancestorsAreLast)).$context->display($node);
             },
         );
 

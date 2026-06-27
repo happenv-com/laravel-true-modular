@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Commands;
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndex;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
+use Happenv\LaravelTrueModular\Architecture\Renderer\RenderContext;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Renderer\UnsupportedFormatException;
 use Happenv\LaravelTrueModular\Architecture\Report\ArchitectureReport;
@@ -70,7 +72,9 @@ abstract class AbstractArchitectureCommand extends Command
             return self::FAILURE;
         }
 
-        $this->line($renderer->render($report));
+        $context = new RenderContext(Application::getModulesVendor());
+
+        $this->line($renderer->render($report, $context));
 
         return self::SUCCESS;
     }
