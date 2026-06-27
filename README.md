@@ -25,6 +25,20 @@ Total affected: 3
 
 > **Ask the codebase what a change touches before you make it.**
 
+## Contents
+
+- [Why](#why)
+- [Where modules live](#where-modules-live)
+- [The module graph](#the-module-graph)
+- [Enforcing boundaries (static analysis)](#enforcing-boundaries-static-analysis)
+- [Built for agentic coding](#built-for-agentic-coding)
+- [Defining a module](#defining-a-module)
+- [Extending existing modules](#extending-existing-modules)
+- [Install](#install)
+- [Documentation](#documentation)
+- [Development](#development)
+- [License](#license)
+
 ## Why
 
 Large Laravel applications get harder to evolve over time. Modules end up depending on each other
@@ -33,14 +47,14 @@ the architecture survives only in the heads of the people who wrote it.
 
 Laravel True Modular makes that shape explicit, and builds three guarantees on top of it:
 
-1. **Topological provider ordering** — module service providers are sorted by their `composer.json`
+1. **Topological provider ordering** - module service providers are sorted by their `composer.json`
    dependencies, so a module always boots after the modules it depends on. Cycles are detected and
    reported, not silently mis-ordered.
-2. **Enhanced lifecycle** — `register() → initialize() → boot()`. The `initialize()` phase runs after
-   every provider is registered but before *anything* boots — including third-party package
+2. **Enhanced lifecycle** - `register() → initialize() → boot()`. The `initialize()` phase runs after
+   every provider is registered but before *anything* boots - including third-party package
    providers. So your cross-module wiring (morph maps, permissions, drivers, Livewire/Filament hooks)
    is in place before any package's `boot()` reads it.
-3. **Architecture introspection** — `module:graph`, `module:impact`, `module:why`, `module:list`,
+3. **Architecture introspection** - `module:graph`, `module:impact`, `module:why`, `module:list`,
    with `--format=json` so you can wire blast-radius checks into CI, and `--format=mermaid`/`dot` to
    render the graph.
 
@@ -49,12 +63,12 @@ Laravel True Modular makes that shape explicit, and builds three guarantees on t
 A module is just a Composer package whose `composer.json` declares `type: "true-module"`. That means
 a module can live in either place:
 
-- **Local to your app** — under the `app-modules/` directory, versioned alongside the rest of your
+- **Local to your app** - under the `app-modules/` directory, versioned alongside the rest of your
   code. This is where most modules start.
-- **An external Composer package** — pulled in via `composer require` and resolved from `vendor/`
+- **An external Composer package** - pulled in via `composer require` and resolved from `vendor/`
   like any dependency, so a module can be shared across applications or published privately.
 
-Both are discovered the same way and take part in the same dependency ordering and tooling — there's
+Both are discovered the same way and take part in the same dependency ordering and tooling - there's
 no difference in how they behave at runtime. The modules directory (default `app-modules`) and the
 module type (default `true-module`) are configurable in `bootstrap/app.php` via
 `Application::modulesDirectory()` and `Application::moduleComposerType()`.
@@ -63,7 +77,7 @@ module type (default `true-module`) are configurable in `bootstrap/app.php` via
 
 Modules declare their dependencies in `composer.json` like any other Composer package. The package
 reads those edges and derives both the **shape** of your system and the **exact order** things run.
-Real graphs aren't a straight line — modules fan out and share dependencies. The number on each node
+Real graphs aren't a straight line - modules fan out and share dependencies. The number on each node
 is its position in the deterministic boot order:
 
 ```mermaid
@@ -76,10 +90,10 @@ graph TD
     inventory --> sale["6 · sale"]
     pricing --> sale
     sale --> amazon["7 · amazon"]
-    sale --> allegro["8 · allegro"]
+    sale --> ebay["8 · ebay"]
 ```
 
-`module:graph` renders that as a tree — each module sits under the one it depends on. A module with
+`module:graph` renders that as a tree - each module sits under the one it depends on. A module with
 two dependencies (here `sale`) appears under each path that reaches it:
 
 ```
@@ -89,19 +103,19 @@ core
 ├── auth
 │   └── sale
 │       ├── amazon
-│       └── allegro
+│       └── ebay
 └── product
     ├── inventory
     │   └── sale
     │       ├── amazon
-    │       └── allegro
+    │       └── ebay
     └── pricing
         └── sale
             ├── amazon
-            └── allegro
+            └── ebay
 ```
 
-`module:list` flattens it into the **deterministic execution order** — the exact, numbered sequence
+`module:list` flattens it into the **deterministic execution order** - the exact, numbered sequence
 in which providers `register()`, `initialize()`, and `boot()`, dependencies first:
 
 ```
@@ -116,10 +130,10 @@ Modules in order (dependencies first):
   5. pricing
   6. sale
   7. amazon
-  8. allegro
+  8. ebay
 ```
 
-No module ever boots before the modules it depends on — and a cycle is a hard error, not a
+No module ever boots before the modules it depends on - and a cycle is a hard error, not a
 race condition. Other views of the same graph:
 
 ```bash
@@ -135,11 +149,11 @@ The runtime *discovers* and *explains* the architecture; a companion package
 [**`happenv-com/laravel-true-modular-phpstan`**](https://github.com/happenv-com/laravel-true-modular-phpstan)
 *enforces* it. It ships two zero-config PHPStan extensions:
 
-- **Module Boundary Enforcer** — fails analysis when a module references a class from another module
+- **Module Boundary Enforcer** - fails analysis when a module references a class from another module
   that isn't declared in its `composer.json` `require`, and detects circular dependencies between
   modules. It reads the same `composer.json` edges the framework uses to order providers, so there's
   nothing to configure.
-- **Dynamic Relation Resolver** — types Eloquent relations registered at runtime (e.g. relations one
+- **Dynamic Relation Resolver** - types Eloquent relations registered at runtime (e.g. relations one
   module adds to another module's model via [model extensions](docs/model-extensions.md)), which are
   otherwise invisible to static analysis.
 
@@ -150,6 +164,33 @@ composer require --dev happenv-com/laravel-true-modular-phpstan
 With [`phpstan/extension-installer`](https://github.com/phpstan/phpstan-extension-installer) both
 extensions register automatically. See the
 [package README](https://github.com/happenv-com/laravel-true-modular-phpstan) for details.
+
+## Built for agentic coding
+
+Explicit boundaries aren't only good for humans - they're what makes a codebase legible to an AI
+coding agent, and that's becoming one of the biggest reasons to adopt this architecture.
+
+- **Smaller context, faster iterations.** A module is a self-contained Composer package with an
+  explicit dependency list, so an agent can load just that module plus the few it depends on -
+  instead of the whole application. Less context means cheaper, faster, and more accurate edits.
+- **The agent knows where it's allowed to work.** Before touching anything it can ask the codebase:
+  `module:impact <module>` gives the blast radius of a change, `module:why <a> <b>` explains an
+  existing coupling, and `module:graph --root=<module>` scopes the graph to one subtree. The
+  architecture answers *"what does this affect, and what does it depend on?"* - so the agent moves
+  inside well-defined boundaries instead of grepping and guessing across the whole system.
+- **Guardrails the agent gets feedback from.** The PHPStan
+  [Module Boundary Enforcer](#enforcing-boundaries-static-analysis) fails the moment generated code
+  reaches across a boundary not declared in `composer.json`. That's immediate, machine-readable
+  feedback that keeps an agent inside the lines, rather than a human catching it in review later.
+- **The agent already knows the conventions.** The package ships
+  [Laravel Boost](https://laravel.com/docs/boost) resources - an always-on AI guideline plus an
+  on-demand `modular-monolith-development` skill - auto-installed by `php artisan boost:install`. An
+  agent picks up the lifecycle, the `Module` builder, model extensions, and the dependency rules
+  out of the box, without you pasting documentation into the prompt. See
+  [docs/laravel-boost.md](docs/laravel-boost.md).
+
+The net effect: an agent works on a small, sharply-bounded slice of the system, with explicit edges
+and hard guardrails - exactly the conditions under which LLMs do their best work.
 
 ## Defining a module
 
@@ -174,7 +215,7 @@ class CatalogServiceProvider extends ModuleProvider
 
 ## Extending existing modules
 
-Modules don't only talk to each other through services — they can extend the **domain model itself**.
+Modules don't only talk to each other through services - they can extend the **domain model itself**.
 A downstream module adds attributes and relations to an upstream module's Eloquent model without
 touching that model's class, so the dependency arrow stays pointed the right way.
 
@@ -202,7 +243,7 @@ And `Product` gains the relation as if it were defined on it:
 Product::query()->with('invoices');
 ```
 
-A sibling, `hasModelBuilderExtensions()`, does the same for an Eloquent **query builder** — the key
+A sibling, `hasModelBuilderExtensions()`, does the same for an Eloquent **query builder** - the key
 is the builder class to mix new query methods into, so a downstream module can teach an upstream
 model's builder new scopes:
 
@@ -214,7 +255,7 @@ $module->hasModelBuilderExtensions([
 Product::query()->withOutstandingInvoices()->get();
 ```
 
-The `catalog` module that owns `Product` is never modified — `billing` contributes new attributes,
+The `catalog` module that owns `Product` is never modified - `billing` contributes new attributes,
 relations, and query methods to it. Each module composes the shared domain model instead of forking
 or patching it. (Static analysis still sees these runtime additions, thanks to the
 [PHPStan extension](#enforcing-boundaries-static-analysis) above.)
@@ -227,7 +268,7 @@ composer require happenv-com/laravel-true-modular
 
 The one non-obvious step: the package ships a custom `Application` that performs the topological sort
 and the extra lifecycle phase, so `bootstrap/app.php` must boot through it. The
-`php artisan true-modular:setup` command rewrites `bootstrap/app.php` for you — or wire it by hand as
+`php artisan true-modular:setup` command rewrites `bootstrap/app.php` for you - or wire it by hand as
 shown in [Getting started](docs/getting-started.md).
 
 Requires PHP 8.3+ and Laravel 12/13.
@@ -240,6 +281,7 @@ Full documentation lives in [`docs/`](docs/README.md):
 | --- | --- |
 | [Getting started](docs/getting-started.md) | Install and create your first module. |
 | [CLI commands](docs/cli-commands.md) | Graph / impact / why / list, and the `--format` options. |
+| [Agentic coding](docs/agentic-coding.md) | Working on the codebase with AI agents; the workflow. |
 | [Architecture & runtime](docs/architecture-runtime.md) | The lifecycle and the analysis layer. |
 | [Module dependencies](docs/module-dependencies.md) | Discovery, ordering, cycles. |
 | [Model extensions](docs/model-extensions.md) | Add attributes/relations to another module's model. |

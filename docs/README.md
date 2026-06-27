@@ -25,4 +25,5 @@ Documentation for `happenv-com/laravel-true-modular` — a modular-monolith tool
 - [Anti-patterns](anti-patterns.md) — common mistakes and what to do instead.
 - [Extending the package](extending-the-package.md) — add features, renderers, and data sources.
 - [Testing](testing.md) — fixtures, helpers, and patterns for testing modules.
+- [Agentic coding](agentic-coding.md) — working on the codebase with AI agents; the recommended workflow.
 - [Laravel Boost integration](laravel-boost.md) — AI guidelines & skills shipped for coding agents.

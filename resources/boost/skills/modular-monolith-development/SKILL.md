@@ -189,6 +189,17 @@ php artisan module:why acme/checkout acme/core # shortest dependency path
 Use `module:impact` before changing a low-level module, and `module:why` to confirm a dependency is
 intended. The JSON output carries a versioned schema for CI gates.
 
+When editing module `X`, work this loop to stay scoped:
+
+1. `module:impact X` — the set of modules to **re-check** after the change (its dependents).
+2. `module:why X <dep>` — confirm why an edge exists before relying on it.
+3. Load **only** `X` plus the modules in its `composer.json` `require` — those are the only modules
+   `X` may reference. Don't pull in dependents; they're for verification, not for the edit.
+4. Edit inside `X`, then run `vendor/bin/phpstan analyse`. If the
+   [boundary enforcer](https://github.com/happenv-com/laravel-true-modular-phpstan) is installed, a
+   reference to a module not in `require` (or a new cycle) fails analysis — declare the dependency or
+   don't cross the boundary.
+
 ## Do / don't
 
 - DO put feature code in a module; DON'T add it to `app/`.
@@ -204,4 +215,4 @@ intended. The JSON output carries a versioned schema for CI gates.
 Full documentation ships with the package under `vendor/happenv-com/laravel-true-modular/docs/`:
 `getting-started.md`, `builders.md`, `schema-hooks.md`, `architecture-runtime.md`,
 `module-dependencies.md`, `model-extensions.md`, `config-merging.md`, `cli-commands.md`,
-`best-practices.md`, `anti-patterns.md`, `extending-the-package.md`, `testing.md`.
+`agentic-coding.md`, `best-practices.md`, `anti-patterns.md`, `extending-the-package.md`, `testing.md`.
