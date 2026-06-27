@@ -37,8 +37,9 @@ Laravel True Modular makes that shape explicit, and builds three guarantees on t
    dependencies, so a module always boots after the modules it depends on. Cycles are detected and
    reported, not silently mis-ordered.
 2. **Enhanced lifecycle** — `register() → initialize() → boot()`. The `initialize()` phase runs after
-   every module is registered but before any boots — the right window for morph maps, permissions,
-   drivers, and Livewire/Filament hooks.
+   every provider is registered but before *anything* boots — including third-party package
+   providers. So your cross-module wiring (morph maps, permissions, drivers, Livewire/Filament hooks)
+   is in place before any package's `boot()` reads it.
 3. **Architecture introspection** — `module:graph`, `module:impact`, `module:why`, `module:list`,
    with `--format=json` so you can wire blast-radius checks into CI, and `--format=mermaid`/`dot` to
    render the graph.
@@ -61,7 +62,7 @@ module type (default `true-module`) are configurable in `bootstrap/app.php` via
 ## The module graph
 
 Modules declare their dependencies in `composer.json` like any other Composer package. The package
-reads those edges and gives you the whole graph:
+reads those edges and derives both the **shape** of your system and the **exact order** things run.
 
 ```mermaid
 graph TD
@@ -72,10 +73,42 @@ graph TD
     Sale --> Allegro
 ```
 
+`module:graph` renders that as a tree — each module sits under the one it depends on:
+
+```
+php artisan module:graph
+
+core
+└── product
+    └── inventory
+        └── sale
+            ├── amazon
+            └── allegro
+```
+
+`module:list` flattens it into the **deterministic execution order** — the exact, numbered sequence
+in which providers `register()`, `initialize()`, and `boot()`, dependencies first:
+
+```
+php artisan module:list --simple
+
+Modules in order (dependencies first):
+
+  1. core
+  2. product
+  3. inventory
+  4. sale
+  5. amazon
+  6. allegro
+```
+
+No module ever boots before the modules it depends on — and a cycle is a hard error, not a
+race condition. Other views of the same graph:
+
 ```bash
-php artisan module:graph                  # tree (default)
 php artisan module:graph --format=mermaid # paste straight into a doc
 php artisan module:graph --format=dot     # pipe into Graphviz
+php artisan module:graph --root=sale      # restrict to one subtree
 php artisan module:why amazon core        # shortest path: why does Amazon depend on Core?
 ```
 
@@ -152,9 +185,21 @@ And `Product` gains the relation as if it were defined on it:
 Product::query()->with('invoices');
 ```
 
-The `catalog` module that owns `Product` is never modified — `billing` contributes new capabilities
-to it. Each module composes the shared domain model instead of forking or patching it. (Static
-analysis still sees these runtime relations, thanks to the
+A sibling, `hasModelBuilderExtensions()`, does the same for an Eloquent **query builder** — the key
+is the builder class to mix new query methods into, so a downstream module can teach an upstream
+model's builder new scopes:
+
+```php
+$module->hasModelBuilderExtensions([
+    ProductBuilder::class => ProductBillingQueries::class,
+]);
+
+Product::query()->withOutstandingInvoices()->get();
+```
+
+The `catalog` module that owns `Product` is never modified — `billing` contributes new attributes,
+relations, and query methods to it. Each module composes the shared domain model instead of forking
+or patching it. (Static analysis still sees these runtime additions, thanks to the
 [PHPStan extension](#enforcing-boundaries-static-analysis) above.)
 
 ## Install
