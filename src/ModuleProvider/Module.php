@@ -10,6 +10,7 @@ use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasBroadcasts;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasCommands;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasConfigs;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasEventListeners;
+use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasHealthChecks;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasInertia;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasLivewireComponents;
 use Happenv\LaravelTrueModular\ModuleProvider\Concerns\Package\HasMigrations;
@@ -35,6 +36,7 @@ class Module
     use HasCommands;
     use HasConfigs;
     use HasEventListeners;
+    use HasHealthChecks;
     use HasInertia;
     use HasLivewireComponents;
     use HasMigrations;

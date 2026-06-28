@@ -125,6 +125,16 @@ Config processing is skipped entirely when the application config is cached. See
 
 See [model-extensions.md](model-extensions.md) for `hasModelExtensions` / `hasModelBuilderExtensions`.
 
+### Diagnostics
+
+| Method | Effect | Phase |
+| --- | --- | --- |
+| `hasHealthCheck(string)` / `hasHealthChecks(string\|array ...)` | Declares runtime health-check classes for the module. Stored as plain class-strings; **not** processed by a `Process*` trait — instead the finalized `Module` is recorded in `ModuleManifestRepository`, where a health companion (e.g. `laravel-true-modular-health`) reads and runs them. | register (recorded in the manifest) |
+
+Unlike every other declaration, `hasHealthChecks` has no consuming `Process*` trait: it
+contributes to the module's persistent capability record rather than to a runtime side effect.
+The core never resolves or validates the class-strings — that is the consuming companion's job.
+
 ## Spread or array — both work
 
 Every `hasXs(string ...$values)` method accepts spread arguments or a single array; both are

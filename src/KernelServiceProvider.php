@@ -26,6 +26,7 @@ use Happenv\LaravelTrueModular\Commands\ModuleWhyCommand;
 use Happenv\LaravelTrueModular\Commands\SeedModulesCommand;
 use Happenv\LaravelTrueModular\Commands\SetupCommand;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleFileFinder;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleManifestRepository;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
@@ -59,6 +60,8 @@ class KernelServiceProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
+        $this->app->singletonIf(ModuleManifestRepository::class);
+
         $this->app->singleton(ModuleRegistry::class, static fn (): ModuleRegistry => ModuleRegistry::make());
 
         $this->app->singleton(ModuleFileFinder::class, static fn ($app): ModuleFileFinder => new ModuleFileFinder(
