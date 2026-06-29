@@ -1,4 +1,4 @@
-# Laravel True Modular
+# True Modular for Laravel
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://banners.beyondco.de/Laravel%20True%20Modular.png?theme=dark&packageManager=composer+require&packageName=happenv-com%2Flaravel-true-modular&pattern=architect&style=style_1&description=Make+your+Laravel+architecture+explicit%2C+deterministic+and+analyzable&md=1&showWatermark=0&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg">
@@ -57,7 +57,7 @@ Large Laravel applications get harder to evolve over time. Modules end up depend
 silently, boot order becomes implicit, cross-module initialization is fragile, and the real shape of
 the architecture survives only in the heads of the people who wrote it.
 
-Laravel True Modular makes that shape explicit, and builds three guarantees on top of it:
+True Modular for Laravel makes that shape explicit, and builds three guarantees on top of it:
 
 1. **Topological provider ordering** - module service providers are sorted by their `composer.json`
    dependencies, so a module always boots after the modules it depends on. Cycles are detected and
