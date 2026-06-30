@@ -341,6 +341,18 @@ vendor/bin/phpstan analyse  # static analysis (level 6 + larastan)
 vendor/bin/rector process   # apply refactorings (--dry-run to preview)
 ```
 
+## Alternatives
+
+This isn't the only way to build a modular Laravel app. If this package doesn't fit your needs,
+take a look at:
+
+- [nWidart/laravel-modules](https://github.com/nWidart/laravel-modules) — organizes a large Laravel
+  app into self-contained modules, each with its own views, controllers, and models, managed through
+  a dedicated directory structure and generator commands.
+- [InterNACHI/modular](https://github.com/InterNACHI/modular) — splits an app into separate modules
+  using Composer path repositories and Laravel's native package discovery, instead of a custom
+  directory structure.
+
 ## License
 
 [MIT](LICENSE.md)
