@@ -230,6 +230,11 @@ class CatalogServiceProvider extends ModuleProvider
 }
 ```
 
+> The `ModuleProvider` / `Module` fluent API is heavily inspired by
+> [spatie/laravel-package-tools](https://github.com/spatie/laravel-package-tools).
+> Many thanks to Spatie and its contributors for their hard work — this package
+> builds on the patterns they pioneered.
+
 ## Extending existing modules
 
 Modules don't only talk to each other through services - they can extend the **domain model itself**.
