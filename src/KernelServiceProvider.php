@@ -77,7 +77,10 @@ class KernelServiceProvider extends ServiceProvider
             $app->basePath(),
         ));
 
-        $this->app->singleton(ModuleRegistry::class, static fn (): ModuleRegistry => ModuleRegistry::make());
+        // singletonIf, not singleton: under our own Application the registry is already
+        // bound in registerBaseBindings(), and rebinding would discard its memoized
+        // module scan. Under the stock Illuminate Application this still binds.
+        $this->app->singletonIf(ModuleRegistry::class, static fn (): ModuleRegistry => ModuleRegistry::make());
 
         $this->app->singleton(ModuleFileFinder::class, static fn ($app): ModuleFileFinder => new ModuleFileFinder(
             $app->make(ModuleRegistry::class)
