@@ -9,3 +9,5 @@
 /tests/fixtures/storage/logs/*.log
 .claude/settings.local.json
 /docs/superpowers
+# Private-registry credentials copied in for local installs — never commit.
+auth.json

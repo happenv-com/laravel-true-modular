@@ -149,5 +149,42 @@ version (`1.0.0` by default — set in both `composer.json` and `config/blog.php
 
 It then registers the module in the root `composer.json` (prepends the `{modules-dir}/*` path repository
 if missing and `require`s the new package) and offers to run `composer update {vendor}/{slug}` for you to
-install it and auto-discover its provider. The command aborts without changes if the module directory
-already exists.
+install it and auto-discover its provider. The requirement is inserted where Composer's own
+`sort-packages` would keep it, so the scaffolding does not show up as an out-of-order diff hunk; existing
+entries are never reordered. The command aborts without changes if the module directory already exists.
+
+#### Customising what a module gets — publish the stubs
+
+The layout above is the package's demo module, not a fixed contract. **The generated file set is the stub
+set**: every `*.stub` becomes one file at the same relative path minus the extension, so adding a stub
+adds a file and deleting one removes it.
+
+```bash
+php artisan vendor:publish --tag=true-modular-stubs
+```
+
+That copies the stubs to `stubs/true-modular/module/`, which `module:make` then uses instead of the
+package's. Delete `src/Http/Controllers/WelcomeModuleController.php.stub`, `routes/web.php.stub` and
+`config/{{slug}}.php.stub` (and drop the matching `->hasConfig()` / `->hasRoutes()` from the provider
+stub — a module declaring a file it does not ship fatals on boot) to get a bare module; edit
+`composer.json.stub` to carry your own `require`, `require-dev`, PSR-4 entries for factories and tests,
+and anything else every module in your app has. This replaces deleting the same files after every run.
+
+Placeholders are substituted in file **contents and paths**, in either spelling (`{{ slug }}` or
+`{{slug}}`, the latter so filenames stay space-free):
+
+| Placeholder | `module:make BlogPosts` under vendor `acme` / namespace `Acme` |
+|---|---|
+| `{{ package }}` | `acme/blog-posts` |
+| `{{ vendor }}` | `acme` |
+| `{{ type }}` | the configured Composer type, e.g. `true-module` |
+| `{{ slug }}` | `blog-posts` |
+| `{{ studly }}` | `BlogPosts` |
+| `{{ namespace }}` | `Acme\BlogPosts` |
+| `{{ namespaceEscaped }}` | `Acme\\BlogPosts` — for embedding in a `.json` stub, which has no single-backslash escape |
+| `{{ version }}` | `1.0.0` |
+
+The report's `route` key is only set when the stubs produced `routes/web.php`; the command omits the
+"exposed GET …" line otherwise. If you need more than custom stubs, rebind
+`Happenv\LaravelTrueModular\Generators\ModuleGenerator` in a service provider — the command resolves it
+from the container.

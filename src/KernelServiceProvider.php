@@ -25,10 +25,12 @@ use Happenv\LaravelTrueModular\Commands\ModuleImpactCommand;
 use Happenv\LaravelTrueModular\Commands\ModuleWhyCommand;
 use Happenv\LaravelTrueModular\Commands\SeedModulesCommand;
 use Happenv\LaravelTrueModular\Commands\SetupCommand;
+use Happenv\LaravelTrueModular\Generators\ModuleGenerator;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleFileFinder;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleManifestRepository;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\ServiceProvider;
 use Override;
 
@@ -54,6 +56,14 @@ class KernelServiceProvider extends ServiceProvider
                 ModuleWhyCommand::class,
                 ModuleGraphCommand::class,
             ]);
+
+            // Publishing the module stubs is how an application states its own
+            // module convention: `module:make` reads the published directory
+            // instead of the package's, and the stub SET decides which files a
+            // new module gets. See {@see ModuleGenerator}.
+            $this->publishes([
+                ModuleGenerator::packageStubDirectory() => $this->app->basePath(ModuleGenerator::PUBLISHED_STUB_PATH),
+            ], 'true-modular-stubs');
         }
     }
 
@@ -61,6 +71,11 @@ class KernelServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singletonIf(ModuleManifestRepository::class);
+
+        $this->app->bind(ModuleGenerator::class, static fn (Application $app): ModuleGenerator => new ModuleGenerator(
+            $app->make(Filesystem::class),
+            $app->basePath(),
+        ));
 
         $this->app->singleton(ModuleRegistry::class, static fn (): ModuleRegistry => ModuleRegistry::make());
 

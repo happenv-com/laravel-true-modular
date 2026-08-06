@@ -1,0 +1,17 @@
+{
+    "name": "{{ package }}",
+    "type": "{{ type }}",
+    "version": "{{ version }}",
+    "autoload": {
+        "psr-4": {
+            "{{ namespaceEscaped }}\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "{{ namespaceEscaped }}\\{{ studly }}ServiceProvider"
+            ]
+        }
+    }
+}
