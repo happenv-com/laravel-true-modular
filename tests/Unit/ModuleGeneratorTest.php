@@ -14,7 +14,7 @@ beforeEach(function (): void {
         'require' => ['php' => '^8.4'],
     ], JSON_PRETTY_PRINT)."\n");
 
-    $this->generate = fn (string $name = 'blog') => (new ModuleGenerator($this->files, $this->base))
+    $this->generate = fn (string $name = 'blog'): array => (new ModuleGenerator($this->files, $this->base))
         ->generate($name, 'app-modules', 'TrueModule', 'true-module');
 });
 
@@ -32,7 +32,7 @@ it('scaffolds the module files with the configured namespace and version', funct
 
     $module = $this->base.'/app-modules/blog';
 
-    $composer = json_decode($this->files->get($module.'/composer.json'), true);
+    $composer = json_decode($this->files->get($module.'/composer.json'), associative: true);
     expect($composer['name'])->toBe('true-module/blog')
         ->and($composer['type'])->toBe('true-module')
         ->and($composer['version'])->toBe('1.0.0')
@@ -72,7 +72,7 @@ it('generates a welcome route + controller reading the module version config', f
 it('registers the module in the root composer.json as a path package', function (): void {
     ($this->generate)();
 
-    $composer = json_decode($this->files->get($this->base.'/composer.json'), true);
+    $composer = json_decode($this->files->get($this->base.'/composer.json'), associative: true);
 
     expect($composer['repositories'][0])->toBe(['type' => 'path', 'url' => 'app-modules/*'])
         ->and($composer['require'])->toHaveKey('true-module/blog')
@@ -93,4 +93,72 @@ it('aborts when the module already exists', function (): void {
     ($this->generate)();
 
     expect(fn () => ($this->generate)())->toThrow(RuntimeException::class);
+});
+
+it('emits exactly the stub set, so removing a stub removes the file it produced', function (): void {
+    $stubs = $this->base.'/custom-stubs';
+    $this->files->ensureDirectoryExists($stubs.'/src');
+    $this->files->put($stubs.'/composer.json.stub', '{"name": "{{ package }}"}');
+    $this->files->put($stubs.'/src/{{studly}}ServiceProvider.php.stub', 'namespace {{ namespace }};');
+
+    $report = (new ModuleGenerator($this->files, $this->base, $stubs))
+        ->generate('blog', 'app-modules', 'TrueModule', 'true-module');
+
+    expect($report['files'])->toBe([
+        'app-modules/blog/composer.json',
+        'app-modules/blog/src/BlogServiceProvider.php',
+    ]);
+
+    $module = $this->base.'/app-modules/blog';
+
+    // The three files the packaged stubs would have produced are simply absent —
+    // no post-scaffold deletion needed.
+    expect($this->files->exists($module.'/src/Http/Controllers/WelcomeModuleController.php'))->toBeFalse()
+        ->and($this->files->exists($module.'/routes/web.php'))->toBeFalse()
+        ->and($this->files->exists($module.'/config/blog.php'))->toBeFalse()
+        ->and($this->files->get($module.'/src/BlogServiceProvider.php'))->toBe('namespace TrueModule\Blog;');
+});
+
+it('reports no welcome route when the stubs did not produce one', function (): void {
+    $stubs = $this->base.'/custom-stubs';
+    $this->files->ensureDirectoryExists($stubs);
+    $this->files->put($stubs.'/composer.json.stub', '{"name": "{{ package }}"}');
+
+    $report = (new ModuleGenerator($this->files, $this->base, $stubs))
+        ->generate('blog', 'app-modules', 'TrueModule', 'true-module');
+
+    expect($report['route'])->toBeNull();
+});
+
+it('prefers stubs published into the application over the packaged ones', function (): void {
+    $published = $this->base.'/'.ModuleGenerator::PUBLISHED_STUB_PATH;
+    $this->files->ensureDirectoryExists($published);
+    $this->files->put($published.'/README.md.stub', 'The {{ studly }} module.');
+
+    $report = ($this->generate)();
+
+    expect($report['files'])->toBe(['app-modules/blog/README.md'])
+        ->and($this->files->get($this->base.'/app-modules/blog/README.md'))->toBe('The Blog module.');
+});
+
+it('replaces placeholders in paths as well as contents, in either spelling', function (): void {
+    $stubs = $this->base.'/custom-stubs';
+    $this->files->ensureDirectoryExists($stubs.'/config');
+    $this->files->put($stubs.'/config/{{slug}}.php.stub', "return ['name' => '{{ slug }}'];");
+
+    $report = (new ModuleGenerator($this->files, $this->base, $stubs))
+        ->generate('BlogPosts', 'app-modules', 'TrueModule', 'true-module');
+
+    expect($report['files'])->toBe(['app-modules/blog-posts/config/blog-posts.php'])
+        ->and($this->files->get($this->base.'/app-modules/blog-posts/config/blog-posts.php'))
+        ->toBe("return ['name' => 'blog-posts'];");
+});
+
+it('fails loudly when the stub directory holds no stubs', function (): void {
+    $stubs = $this->base.'/empty-stubs';
+    $this->files->ensureDirectoryExists($stubs);
+
+    expect(fn (): array => (new ModuleGenerator($this->files, $this->base, $stubs))
+        ->generate('blog', 'app-modules', 'TrueModule', 'true-module'))
+        ->toThrow(RuntimeException::class, 'No module stubs found');
 });

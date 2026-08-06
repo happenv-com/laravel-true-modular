@@ -39,11 +39,53 @@ final class ConfigureComposer extends Step
         }
         $composer['repositories'] = $repositories;
 
+        /** @var array<string, string> $require */
         $require = is_array($composer['require'] ?? null) ? $composer['require'] : [];
-        $require[$package] = $version;
-        $composer['require'] = $require;
+        $composer['require'] = $this->insertRequirement($require, $package, $version);
 
         $this->write($path, $composer);
+    }
+
+    /**
+     * Place the requirement where Composer's own `sort-packages` would keep it,
+     * instead of appending. Appending leaves the entry out of order in a sorted
+     * file, so the next `composer normalize` (or any contributor with
+     * `sort-packages` on) moves it and the scaffolding shows up as an unrelated
+     * diff hunk.
+     *
+     * Existing entries are never reordered — this is an insertion, not a sort, so
+     * a hand-ordered `require` block survives untouched. Platform requirements
+     * (`php`, `ext-*`: no slash) are skipped over, since Composer keeps them first
+     * regardless of alphabet.
+     *
+     * @param  array<string, string>  $require
+     * @return array<string, string>
+     */
+    private function insertRequirement(array $require, string $package, string $version): array
+    {
+        if (array_key_exists($package, $require)) {
+            $require[$package] = $version;
+
+            return $require;
+        }
+
+        $result = [];
+        $inserted = false;
+
+        foreach ($require as $name => $constraint) {
+            if (! $inserted && str_contains((string) $name, '/') && strcmp((string) $name, $package) > 0) {
+                $result[$package] = $version;
+                $inserted = true;
+            }
+
+            $result[$name] = $constraint;
+        }
+
+        if (! $inserted) {
+            $result[$package] = $version;
+        }
+
+        return $result;
     }
 
     /**

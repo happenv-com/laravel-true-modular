@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use Happenv\LaravelTrueModular\ModuleProvider\Module;
+use Happenv\LaravelTrueModular\ModuleProvider\ModuleProvider;
+
+class {{ studly }}ServiceProvider extends ModuleProvider
+{
+    public function configureModule(Module $module): void
+    {
+        $module
+            ->name('{{ slug }}')
+            ->hasConfig('{{ slug }}')
+            ->hasRoutes('web');
+    }
+}

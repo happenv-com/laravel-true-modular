@@ -7,7 +7,6 @@ namespace Happenv\LaravelTrueModular\Commands;
 use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Generators\ModuleGenerator;
 use Illuminate\Console\Command;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Process;
 use RuntimeException;
 
@@ -21,7 +20,9 @@ class MakeModuleCommand extends Command
 
     public function handle(): int
     {
-        $generator = new ModuleGenerator(new Filesystem, $this->laravel->basePath());
+        // Resolved, not constructed: an application that needs more than custom
+        // stubs (a different registration step, say) rebinds this in a provider.
+        $generator = $this->laravel->make(ModuleGenerator::class);
 
         try {
             $report = $generator->generate(
@@ -42,7 +43,9 @@ class MakeModuleCommand extends Command
             $this->components->twoColumnDetail('created', $file);
         }
 
-        $this->components->info(sprintf('Registered %s in composer.json and exposed GET %s.', $report['package'], $report['route']));
+        $this->components->info($report['route'] === null
+            ? sprintf('Registered %s in composer.json.', $report['package'])
+            : sprintf('Registered %s in composer.json and exposed GET %s.', $report['package'], $report['route']));
 
         $command = 'composer update '.$report['package'];
 

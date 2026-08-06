@@ -63,7 +63,9 @@ fluent wrapper over those.
 
 > **Quick path:** `php artisan module:make blog` scaffolds a ready-to-run module (composer.json,
 > provider, config, and a `/blog/welcome` route) under your configured directory/namespace, registers
-> it in `composer.json`, and offers to `composer update` it. See
+> it in `composer.json`, and offers to `composer update` it. That layout is a demo, not a contract —
+> `php artisan vendor:publish --tag=true-modular-stubs` puts the stubs under your control, and the stub
+> set decides which files a module gets. See
 > [cli-commands.md](cli-commands.md#modulemake-name). The manual steps below explain the anatomy.
 
 Modules live under `app-modules/` by default — change it with `ModularApplication::modulesDirectory()`
