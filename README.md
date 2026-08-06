@@ -45,6 +45,7 @@ Total affected: 3
 - [Defining a module](#defining-a-module)
 - [Extending existing modules](#extending-existing-modules)
 - [Extending the framework](#extending-the-framework)
+- [Switching modules off](#switching-modules-off)
 - [Production notes](#production-notes)
 - [Install](#install)
 - [Documentation](#documentation)
@@ -298,6 +299,57 @@ Macros are normally invisible to static analysis — but the companion
 mixins this package registers, so you extend modules without patching them **and** keep a green
 analysis. See [docs/model-extensions.md](docs/model-extensions.md).
 
+## Switching modules off
+
+A module you are not ready to ship should stay in the repository and stop booting — not disappear from
+`composer.json`. Removing it there leaves the directory on disk while its PSR-4 mapping vanishes, so
+the first symptom is a bare `class not found` from somewhere unrelated.
+
+Two channels decide what boots, and they are **never merged** — the environment key wins whenever it is
+set, even to an empty string:
+
+```bash
+MODULES_DISABLED=acme/workflows      # production, CI, containers; no rebuild needed
+```
+
+```json
+// modules.json in the application root — gitignore it
+{ "disabled": ["acme/workflows"] }
+```
+
+Filtering happens in the package manifest, so a disabled module loses its **service providers and its
+facade aliases together**: no config merge, no routes, no migrations, no scheduled tasks, no panel
+plugins. With an empty list the manifest is returned untouched and the module registry is never read,
+so an application that configures neither channel behaves exactly as before.
+
+A module can declare two things about itself in its own `composer.json`:
+
+```json
+"extra": {
+    "true-modular": {
+        "disablable": false,
+        "owns": ["acme/workflow-engine"]
+    }
+}
+```
+
+`disablable: false` marks a module that must never be switched off (set it on your core module).
+`owns` lists vendor packages this module is the sole owner of — they leave discovery with it, so
+disabling a wrapper doesn't leave the wrapped engine booting its own provider and migrations.
+
+Disabling **never cascades**: switching off a module an enabled module depends on is an error that
+lists exactly what to add. Computing a cascade belongs to a user interface that can ask for
+confirmation; what reaches the runtime is always an explicit, complete list.
+
+```bash
+php artisan module:check              # run this on deploy, before serving traffic
+php artisan module:list --only-disabled
+```
+
+`module:check` also catches the orphaned-directory failure above — a module directory that no
+`composer.json` requires — turning it into one sentence instead of a missing class.
+See [Switching modules off](docs/switching-modules-off.md) for the full reference.
+
 ## Install
 
 ```bash
@@ -326,6 +378,7 @@ Full documentation lives in [`docs/`](docs/README.md):
 | [Module builders](docs/builders.md) | The fluent `Module` API and every feature. |
 | [Lifecycle hooks & schemas](docs/schema-hooks.md) | Overridable provider hooks; report JSON schema. |
 | [Config merging](docs/config-merging.md) | The four config strategies and merge semantics. |
+| [Switching modules off](docs/switching-modules-off.md) | Keep a module in the repo without booting it. |
 | [Best practices](docs/best-practices.md) · [Anti-patterns](docs/anti-patterns.md) | Do's and don'ts. |
 | [Extending the package](docs/extending-the-package.md) | Add features, renderers, sources. |
 | [Testing](docs/testing.md) | Fixtures, helpers, patterns. |

@@ -18,6 +18,7 @@ Documentation for `happenv-com/laravel-true-modular` — a modular-monolith tool
 - [Architecture & runtime](architecture-runtime.md) — register → initialize → boot; the analysis layer.
 - [Module dependencies](module-dependencies.md) — discovery, topological order, cycles, sorting.
 - [CLI commands](cli-commands.md) — `module:graph` / `module:impact` / `module:why` / `module:list`.
+- [Switching modules off](switching-modules-off.md) — keep a module in the repo without booting it.
 
 ## Working with the package
 

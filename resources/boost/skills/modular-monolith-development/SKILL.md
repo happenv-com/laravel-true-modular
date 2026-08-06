@@ -200,6 +200,30 @@ When editing module `X`, work this loop to stay scoped:
    reference to a module not in `require` (or a new cycle) fails analysis — declare the dependency or
    don't cross the boundary.
 
+## Switching a module off
+
+A module that must not boot stays in `composer.json` and in the repository; **never** remove it from
+`require` to disable it (the directory survives, its autoload mapping does not, and the failure shows
+up as an unrelated `class not found`).
+
+```bash
+MODULES_DISABLED=acme/workflows   # production/CI; wins over modules.json, never merged with it
+```
+
+```json
+// modules.json in the application root, gitignored — the developer-machine channel
+{ "disabled": ["acme/workflows"] }
+```
+
+A disabled module loses its providers **and** its facade aliases; it contributes no config, routes,
+migrations or scheduled tasks. In its own `composer.json` a module may declare
+`extra.true-modular.disablable: false` (never switch me off) and `extra.true-modular.owns`
+(vendor packages that leave discovery with me — otherwise a wrapped engine keeps booting its own
+provider).
+
+Disabling never cascades: switching off a module an enabled one depends on is an error naming what to
+add. Validate with `php artisan module:check`, and run it on deploy before serving traffic.
+
 ## Do / don't
 
 - DO put feature code in a module; DON'T add it to `app/`.
@@ -209,6 +233,7 @@ When editing module `X`, work this loop to stay scoped:
 - DO extend other modules' models from the downstream side; DON'T point a dependency upstream or create
   a cycle.
 - DON'T edit package internals to add a renderer/source/feature — use the documented extension seams.
+- DO switch a module off with `MODULES_DISABLED` / `modules.json`; DON'T remove it from `composer.json`.
 
 ## Deeper reference
 

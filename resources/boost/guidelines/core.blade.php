@@ -53,6 +53,13 @@ downstream module (`->hasModelExtensions(Model::class, Extension::class)`), keep
 pointing from the dependent module to the one that owns the model. Never make a low-level module require
 a high-level one, and never create dependency cycles.
 
+### Switching a module off
+
+Never remove a module from `composer.json` to disable it — the directory survives without its autoload
+mapping and fails as an unrelated `class not found`. Use `MODULES_DISABLED=vendor/module` (production,
+CI) or a gitignored `modules.json` (`{"disabled": [...]}`); the environment key wins and the two are
+never merged. Disabling never cascades — validate with `php artisan module:check`.
+
 ### Inspect the architecture
 
 Use `php artisan module:list`, `module:graph`, `module:impact <module>`, and `module:why <from> <to>`
