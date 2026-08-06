@@ -230,7 +230,7 @@ final class ModuleActivationAudit
         $require = is_array($composer['require'] ?? null) ? $composer['require'] : [];
         $requireDev = is_array($composer['require-dev'] ?? null) ? $composer['require-dev'] : [];
 
-        return array_values(array_map(strval(...), array_keys($require + $requireDev)));
+        return array_map(strval(...), array_keys($require + $requireDev));
     }
 
     /**

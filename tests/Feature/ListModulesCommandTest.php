@@ -6,6 +6,7 @@ use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Architecture\Index\ArchitectureIndexBuilder;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Commands\ListModulesCommand;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleActivation;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Support\Facades\Artisan;
 
@@ -92,4 +93,48 @@ it('keeps full names in json regardless of vendor', function (): void {
     $this->artisan('module:list', ['--format' => 'json'])
         ->assertSuccessful()
         ->expectsOutputToContain('myapp/core');
+});
+
+describe('activation state', function (): void {
+    afterEach(function (): void {
+        unset($_ENV[ModuleActivation::ENV_KEY], $_SERVER[ModuleActivation::ENV_KEY]);
+    });
+
+    it('reports every module as enabled when no channel disables anything', function (): void {
+        $_ENV[ModuleActivation::ENV_KEY] = '';
+
+        $exit = Artisan::call('module:list', ['--format' => 'json']);
+        $json = json_decode(Artisan::output(), associative: true);
+
+        expect($exit)->toBe(0)
+            ->and(collect($json['modules'])->pluck('enabled')->unique()->all())->toBe([true]);
+    });
+
+    it('marks a disabled module in the json report', function (): void {
+        $_ENV[ModuleActivation::ENV_KEY] = 'myapp/amazon';
+
+        Artisan::call('module:list', ['--format' => 'json']);
+        $json = json_decode(Artisan::output(), associative: true);
+
+        expect(collect($json['modules'])->firstWhere('name', 'myapp/amazon')['enabled'])->toBeFalse()
+            ->and(collect($json['modules'])->firstWhere('name', 'myapp/pim')['enabled'])->toBeTrue();
+    });
+
+    it('shows the state in the table view', function (): void {
+        $_ENV[ModuleActivation::ENV_KEY] = 'myapp/amazon';
+
+        $this->artisan('module:list')
+            ->assertSuccessful()
+            ->expectsOutputToContain('disabled');
+    });
+
+    it('narrows the list to switched-off modules on demand', function (): void {
+        $_ENV[ModuleActivation::ENV_KEY] = 'myapp/amazon';
+
+        Artisan::call('module:list', ['--format' => 'json', '--only-disabled' => true]);
+        $json = json_decode(Artisan::output(), associative: true);
+
+        expect($json['modules'])->toHaveCount(1)
+            ->and($json['modules'][0]['name'])->toBe('myapp/amazon');
+    });
 });

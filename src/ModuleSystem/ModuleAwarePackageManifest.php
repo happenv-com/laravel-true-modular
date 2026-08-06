@@ -24,8 +24,8 @@ final class ModuleAwarePackageManifest extends PackageManifest
 
     /**
      * @param  Closure(): ModuleActivation  $activationResolver  resolved lazily: the manifest is
-     *                                                          built during RegisterProviders, before the package's own
-     *                                                          service provider has bound anything.
+     *                                                           built during RegisterProviders, before the package's own
+     *                                                           service provider has bound anything.
      */
     public function __construct(
         Filesystem $files,
