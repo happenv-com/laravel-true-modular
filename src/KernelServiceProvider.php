@@ -20,12 +20,15 @@ use Happenv\LaravelTrueModular\Architecture\Source\ComposerArchitectureSource;
 use Happenv\LaravelTrueModular\Commands\ListModulesCommand;
 use Happenv\LaravelTrueModular\Commands\MakeMigrationCommand;
 use Happenv\LaravelTrueModular\Commands\MakeModuleCommand;
+use Happenv\LaravelTrueModular\Commands\ModuleCheckCommand;
 use Happenv\LaravelTrueModular\Commands\ModuleGraphCommand;
 use Happenv\LaravelTrueModular\Commands\ModuleImpactCommand;
 use Happenv\LaravelTrueModular\Commands\ModuleWhyCommand;
 use Happenv\LaravelTrueModular\Commands\SeedModulesCommand;
 use Happenv\LaravelTrueModular\Commands\SetupCommand;
 use Happenv\LaravelTrueModular\Generators\ModuleGenerator;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleActivation;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleActivationAudit;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleFileFinder;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleManifestRepository;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
@@ -50,6 +53,7 @@ class KernelServiceProvider extends ServiceProvider
                 SetupCommand::class,
                 MakeModuleCommand::class,
                 ListModulesCommand::class,
+                ModuleCheckCommand::class,
                 SeedModulesCommand::class,
                 MakeMigrationCommand::class,
                 ModuleImpactCommand::class,
@@ -85,6 +89,17 @@ class KernelServiceProvider extends ServiceProvider
         $this->app->singleton(ModuleFileFinder::class, static fn ($app): ModuleFileFinder => new ModuleFileFinder(
             $app->make(ModuleRegistry::class)
         ));
+
+        $this->app->singletonIf(ModuleActivation::class, static fn (): ModuleActivation => ModuleActivation::make());
+
+        $this->app->singleton(
+            ModuleActivationAudit::class,
+            static fn (Application $app): ModuleActivationAudit => new ModuleActivationAudit(
+                $app->make(ModuleRegistry::class),
+                $app->make(ModuleActivation::class),
+                $app->basePath(),
+            ),
+        );
 
         $this->app->singleton(
             ModuleLocator::class,
