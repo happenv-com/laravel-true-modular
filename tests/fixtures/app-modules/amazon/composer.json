@@ -1,6 +1,19 @@
 {
     "name": "myapp/amazon",
     "type": "true-module",
-    "require": { "myapp/sale": "*" },
-    "autoload": { "psr-4": { "Myapp\\Amazon\\": "src/" } }
+    "require": {
+        "myapp/sale": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Myapp\\Amazon\\": "src/"
+        }
+    },
+    "extra": {
+        "true-modular": {
+            "owns": [
+                "myapp/amazon-sdk"
+            ]
+        }
+    }
 }
