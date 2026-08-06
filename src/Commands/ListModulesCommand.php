@@ -12,6 +12,7 @@ use Happenv\LaravelTrueModular\Architecture\Renderer\RenderContext;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Report\ModulesReport;
 use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleActivation;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
@@ -24,7 +25,8 @@ class ListModulesCommand extends Command
                             {--reverse : Show in reverse dependency order (dependents first)}
                             {--simple : Show simple list without table}
                             {--format= : Output format (table, text, json)}
-                            {--with-vendor : Show full vendor/name even for local modules}';
+                            {--with-vendor : Show full vendor/name even for local modules}
+                            {--only-disabled : Show only the modules this environment switches off}';
 
     protected $description = 'List all modules in dependency order';
 
@@ -42,7 +44,7 @@ class ListModulesCommand extends Command
      * @throws InvalidArgumentException
      * @throws JsonException
      */
-    public function handle(): int
+    public function handle(ModuleActivation $activation): int
     {
         try {
             $order = $this->option('reverse')
@@ -67,9 +69,9 @@ class ListModulesCommand extends Command
         // The boxed table is an interactive console view (Symfony table component),
         // so it stays here; every string format flows through the renderer registry.
         if ($format === 'table') {
-            return $this->showTable($order, $index, $context);
+            return $this->showTable($this->rows($order, $index, $activation), $context);
         }
-        $report = new ModulesReport($this->rows($order, $index), (bool) $this->option('reverse'));
+        $report = new ModulesReport($this->rows($order, $index, $activation), (bool) $this->option('reverse'));
         $rendered = $this->renderers->get($format, $report)->render($report, $context);
 
         foreach (explode("\n", $rendered) as $line) {
@@ -91,11 +93,11 @@ class ListModulesCommand extends Command
     }
 
     /**
-     * @param  array<string>  $order
+     * @param  list<array{name: string, dependencies: array<string>, path: string, enabled: bool}>  $rows
      *
      * @throws InvalidArgumentException
      */
-    private function showTable(array $order, ArchitectureIndex $index, RenderContext $context): int
+    private function showTable(array $rows, RenderContext $context): int
     {
         $direction = $this->option('reverse') ? 'dependents first' : 'dependencies first';
         $this->components->info(sprintf('Modules (%s):', $direction));
@@ -103,7 +105,7 @@ class ListModulesCommand extends Command
 
         $tableData = [];
 
-        foreach ($this->rows($order, $index) as $position => $row) {
+        foreach ($rows as $position => $row) {
             $dependencies = array_map(
                 static fn (string $dependency): string => $context->display($dependency),
                 $row['dependencies'],
@@ -112,38 +114,51 @@ class ListModulesCommand extends Command
             $tableData[] = [
                 $position + 1,
                 $context->display($row['name']),
+                $row['enabled'] ? 'enabled' : 'disabled',
                 $dependencies !== [] ? implode(PHP_EOL, $dependencies) : '-',
                 $row['path'],
             ];
 
-            $tableData[] = ['-', '-', '-', '-'];
+            $tableData[] = ['-', '-', '-', '-', '-'];
         }
 
-        $this->table(['#', 'Module', 'Depends On', 'Path'], $tableData);
+        $this->table(['#', 'Module', 'Status', 'Depends On', 'Path'], $tableData);
 
-        $this->components->info(sprintf('Total: %d modules', count($order)));
+        $this->components->info(sprintf('Total: %d modules', count($rows)));
 
         return self::SUCCESS;
     }
 
     /**
      * Build ordered rows sourced from the architecture index (dependencies and
-     * path), keeping a single description of each module's data.
+     * path) and the activation state, keeping a single description of each
+     * module's data.
      *
      * @param  array<string>  $order
-     * @return list<array{name: string, dependencies: array<string>, path: string}>
+     * @return list<array{name: string, dependencies: array<string>, path: string, enabled: bool}>
+     *
+     * @throws FilesystemException
+     * @throws JsonException
      */
-    private function rows(array $order, ArchitectureIndex $index): array
+    private function rows(array $order, ArchitectureIndex $index, ModuleActivation $activation): array
     {
+        $onlyDisabled = (bool) $this->option('only-disabled');
         $rows = [];
 
         foreach ($order as $moduleName) {
+            $enabled = ! $activation->isDisabled($moduleName);
+
+            if ($onlyDisabled && $enabled) {
+                continue;
+            }
+
             $descriptor = $index->module($moduleName);
 
             $rows[] = [
                 'name' => $moduleName,
                 'dependencies' => $index->graph()->dependencies($moduleName),
                 'path' => $descriptor instanceof ModuleDescriptor ? str_replace(base_path().'/', '', $descriptor->path) : '',
+                'enabled' => $enabled,
             ];
         }
 

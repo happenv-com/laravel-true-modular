@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular;
 
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleActivation;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleAwarePackageManifest;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleName;
+use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\Application as FoundationApplication;
+use Illuminate\Foundation\PackageManifest;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Override;
@@ -99,6 +104,34 @@ final class Application extends FoundationApplication
         }
 
         return $provider;
+    }
+
+    /**
+     * Bind the module-aware package manifest, so a disabled module's providers and
+     * facade aliases never reach discovery in the first place.
+     *
+     * ModuleRegistry is bound here too — earlier than KernelServiceProvider can,
+     * since the manifest decides which providers get registered at all — so the
+     * manifest, the provider sorter and the console commands share ONE instance
+     * and the module scan happens once per process.
+     */
+    #[Override]
+    protected function registerBaseBindings(): void
+    {
+        parent::registerBaseBindings();
+
+        $this->singletonIf(ModuleRegistry::class, static fn (): ModuleRegistry => ModuleRegistry::make());
+
+        $this->singleton(PackageManifest::class, fn (): PackageManifest => new ModuleAwarePackageManifest(
+            new Filesystem,
+            $this->basePath(),
+            $this->getCachedPackagesPath(),
+            fn (): ModuleActivation => new ModuleActivation(
+                $this->make(ModuleRegistry::class),
+                $this->basePath(),
+                self::getModulesVendor(),
+            ),
+        ));
     }
 
     /**

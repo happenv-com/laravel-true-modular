@@ -7,7 +7,7 @@ namespace Happenv\LaravelTrueModular\Architecture\Report;
 final readonly class ModulesReport implements ArchitectureReport
 {
     /**
-     * @param  list<array{name: string, dependencies: array<string>, path: string}>  $modules  in resolution order
+     * @param  list<array{name: string, dependencies: array<string>, path: string, enabled: bool}>  $modules  in resolution order
      */
     public function __construct(
         public array $modules,

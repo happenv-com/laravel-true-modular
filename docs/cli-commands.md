@@ -88,7 +88,8 @@ message rather than producing empty output. Renderers are resolved from the cont
 | --- | --- |
 | `true-modular:setup` | Interactively prepare the app to run as a modular monolith (see below). |
 | `module:make {name}` | Scaffold a new module under the configured directory/namespace (see below). |
-| `module:list` | List modules in dependency order (`--reverse`, `--simple`, `--format=table\|text\|json`). |
+| `module:list` | List modules in dependency order (`--reverse`, `--simple`, `--only-disabled`, `--format=table\|text\|json`). |
+| `module:check` | Validate module activation: orphaned directories, the disabled list, dependencies, owned packages. |
 | `module:seed` | Seed module database seeders in dependency order (`--module`, `--class`, `--show-order`). |
 | `module:make:migration {module} {name}` | Scaffold a migration inside a module (`--create`, `--table`). |
 
@@ -97,6 +98,22 @@ dependencies and its path on disk. With `--reverse` the order is flipped (depend
 matches teardown ordering. The default `table` view uses the interactive console table; `--simple`
 (or `--format=text`) prints a plain numbered list and `--format=json` emits the schema-wrapped
 `modules` report — both flow through the same renderer pipeline as the analysis commands.
+
+`--only-disabled` narrows the list to the modules the current environment switches off, and every
+view carries an activation state (a `Status` column in the table, an `enabled` flag in JSON).
+
+### `module:check`
+
+Validates module activation and exits non-zero on the first problem set:
+
+1. every module directory is required by *some* `composer.json` — the root's or another module's;
+2. the disabled list names only known modules;
+3. no disabled module declares `disablable: false`;
+4. no enabled module depends on a disabled one, and no `owns` entry is contested.
+
+Run it on deploy, before the process starts serving — a bad disabled list must abort the release, not
+surface as a missing class on the first request. See
+[Switching modules off](switching-modules-off.md).
 
 ### `true-modular:setup`
 

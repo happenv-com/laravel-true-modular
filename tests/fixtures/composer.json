@@ -1,0 +1,7 @@
+{
+    "name": "myapp/app",
+    "description": "Fixture root application: mirrors a real host that requires its leaf modules and lets Composer pull the rest transitively.",
+    "require": {
+        "myapp/amazon": "*"
+    }
+}
