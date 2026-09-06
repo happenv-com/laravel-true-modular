@@ -33,8 +33,17 @@ final class ServiceProviderSorter
     /**
      * Sort service providers according to module dependency order.
      *
+     * The result is keyed by class name, the shape `Application::$serviceProviders` is read
+     * back through: `markAsRegistered()` files each provider under `get_class($provider)`
+     * and `getProvider()` is a plain lookup on that key. Returning a list here would leave
+     * `getProvider()` answering null for every provider in the application — silently, since
+     * a missing key is indistinguishable from a provider that was never registered.
+     *
+     * As in `markAsRegistered()`, one class means one provider: passing two instances of the
+     * same class keeps the last one.
+     *
      * @param  array<ServiceProvider>  $providers
-     * @return array<ServiceProvider>
+     * @return array<class-string<ServiceProvider>, ServiceProvider>
      *
      * @throws CircularDependencyException
      * @throws FilesystemException
@@ -72,8 +81,15 @@ final class ServiceProviderSorter
             $moduleProviders
         );
 
-        // Return other providers first, then sorted module providers
-        return [...$otherProviders, ...$sortedModuleProviders];
+        // Other providers first, then sorted module providers — re-keyed by class name on the
+        // way out, because the spread above would otherwise renumber them into a list.
+        $sorted = [];
+
+        foreach ([...$otherProviders, ...$sortedModuleProviders] as $provider) {
+            $sorted[$provider::class] = $provider;
+        }
+
+        return $sorted;
     }
 
     /**

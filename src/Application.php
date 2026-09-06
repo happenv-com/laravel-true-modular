@@ -149,7 +149,10 @@ final class Application extends FoundationApplication
             return;
         }
 
-        // Sort service providers according to module dependency order
+        // Sort service providers according to module dependency order. The sorter returns them
+        // re-keyed by class name, which is what this assignment needs: `markAsRegistered()` files
+        // providers under that key and `getProvider()` reads them back by it, so a list here would
+        // silently make every `getProvider()` call in the application answer null.
         $sorter = $this->resolve(ServiceProviderSorter::class);
         $this->serviceProviders = $sorter->sort($this->serviceProviders);
 
