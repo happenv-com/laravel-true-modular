@@ -48,6 +48,21 @@ it('hands back the very instance it booted, not a second one built on the way ou
     expect($app->getProvider(SaleModuleServiceProvider::class))->toBe(reset($registered));
 });
 
+it('refuses to register a provider twice after boot, which is what its own getProvider() guard is for', function () use ($bootFixtureApplication): void {
+    // The one caller of `getProvider()` inside this package: `register()` opens with
+    // `if (($registered = $this->getProvider($provider)) && ! $force)`. With the keys gone that
+    // guard could never fire after boot, so a second `register()` built a SECOND instance, filed it
+    // under the class name the sort had just vacated, and — because the application is already
+    // booted — ran `initialize()` and `boot()` on it. MEASURED: two instances, where the whole
+    // point of the guard is one. Everything a provider does on the way up therefore happened twice.
+    $app = $bootFixtureApplication();
+
+    $again = $app->register(SaleModuleServiceProvider::class);
+
+    expect($app->getProviders(SaleModuleServiceProvider::class))->toHaveCount(1)
+        ->and($again)->toBe($app->getProvider(SaleModuleServiceProvider::class));
+});
+
 it('still orders module providers by dependency, behind the providers that belong to no module', function () use ($bootFixtureApplication): void {
     // The guard on the fix above: preserving keys must not cost the ordering the sorter exists for.
     // `myapp/sale` depends on `myapp/kernel` transitively, and it was registered first on purpose.
