@@ -121,11 +121,12 @@ A one-time setup command (built with [Laravel Prompts](https://laravel.com/docs/
 
 1. the Composer `type` used to identify modules (default `true-module`);
 2. the directory modules live in (default `app-modules`);
-3. whether to convert the current `app/` folder into a `core` module — and if so, the module's
-   namespace (default `TrueModule`).
+3. whether to convert the current `app/` folder into a `core` module — and if so, the
+   application's root namespace under which every module (including the core one) will be
+   qualified (default `TrueModule`); the core module itself becomes `{namespace}\Core`.
 
 It always rewrites `bootstrap/app.php` to use `ModularApplication`, applying any non-default Composer
-type, modules directory, and (when converting) module namespace via the fluent setters. If you opt
+type, modules directory, and (when converting) modules namespace via the fluent setters. If you opt
 into the conversion, it also:
 
 - moves `app/` into `{modules-dir}/core/src/` and rewrites the `App\` namespace to `{namespace}\Core`

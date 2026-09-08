@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Setup\TrueModularSetup;
 use Illuminate\Filesystem\Filesystem;
 
@@ -45,6 +46,8 @@ beforeEach(function (): void {
 
 afterEach(function (): void {
     $this->files->deleteDirectory($this->base);
+    // Reset process-wide settings so they cannot leak into other tests.
+    Application::coreModuleName(Application::DEFAULT_CORE_MODULE_NAME);
 });
 
 it('swaps bootstrap/app.php to ModularApplication with non-default settings', function (): void {
@@ -171,4 +174,36 @@ it('aborts when the target module directory already exists', function (): void {
     expect(fn () => (new TrueModularSetup($this->files, $this->base))
         ->convertAppToCoreModule('packages', 'acme-module', 'TrueModule'))
         ->toThrow(RuntimeException::class);
+});
+
+it('scaffolds the core module using the explicit default segment', function (): void {
+    // Ties the assertion to the named constant instead of a hardcoded 'Core' string, so this
+    // test tracks the constant's value rather than silently drifting from it.
+    $report = (new TrueModularSetup($this->files, $this->base))
+        ->convertAppToCoreModule('packages', 'acme-module', 'TrueModule');
+
+    expect(Application::DEFAULT_CORE_MODULE_NAME)->toBe('Core')
+        ->and($report['moduleNamespace'])->toBe('TrueModule\\'.Application::DEFAULT_CORE_MODULE_NAME);
+});
+
+it('scaffolds the core module from the configured segment, not a segment hardcoded independently of it', function (): void {
+    // Before the fix, TrueModularSetup and RewriteNamespace each concatenated their own literal
+    // '\Core' suffix — changing the package setting had no effect on the scaffolded output. This
+    // proves the segment is actually read from Application::getCoreModuleName(), not re-hardcoded.
+    Application::coreModuleName('Kernel');
+
+    $report = (new TrueModularSetup($this->files, $this->base))
+        ->convertAppToCoreModule('packages', 'acme-module', 'TrueModule');
+
+    expect($report['moduleNamespace'])->toBe('TrueModule\Kernel');
+
+    // The namespace rewrite (moved code, config/database/routes) picked up the same segment.
+    expect($this->files->get($this->base.'/packages/core/src/Models/User.php'))
+        ->toContain('namespace TrueModule\Kernel\Models;')
+        ->and($this->files->get($this->base.'/config/auth.php'))->toContain('TrueModule\Kernel\Models\User::class');
+
+    // The scaffolded composer.json and provider picked up the same segment too.
+    $moduleComposer = json_decode($this->files->get($this->base.'/packages/core/composer.json'), true);
+    expect($moduleComposer['autoload']['psr-4'])->toBe(['TrueModule\\Kernel\\' => 'src/'])
+        ->and($moduleComposer['extra']['laravel']['providers'])->toBe(['TrueModule\\Kernel\\CoreServiceProvider']);
 });

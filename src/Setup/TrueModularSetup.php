@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular\Setup;
 
+use Happenv\LaravelTrueModular\Application;
 use Happenv\LaravelTrueModular\Setup\Steps\ConfigureBootstrapApp;
 use Happenv\LaravelTrueModular\Setup\Steps\ConfigureComposer;
 use Happenv\LaravelTrueModular\Setup\Steps\EmptyBootstrapProviders;
@@ -54,7 +55,7 @@ final readonly class TrueModularSetup
     public function convertAppToCoreModule(string $modulesDirectory, string $composerType, string $namespace): array
     {
         $vendor = Str::kebab(class_basename(str_replace('\\', '/', $namespace)));
-        $moduleNamespace = trim($namespace, '\\').'\\Core';
+        $moduleNamespace = trim($namespace, '\\').'\\'.Application::getCoreModuleName();
 
         // 1. Move app/ -> {modulesDir}/core/src
         [$modulePath, $srcPath] = (new MoveApplicationToModule($this->files, $this->basePath))->move($modulesDirectory);
@@ -62,7 +63,7 @@ final readonly class TrueModularSetup
         // 2. Rewrite namespace in the moved code and the app's other code dirs
         $rewritten = (new RewriteNamespace($this->files, $this->basePath))->rewrite(
             [$srcPath, ...array_map($this->path(...), self::REWRITE_DIRECTORIES)],
-            $namespace,
+            $moduleNamespace,
         );
 
         // 3. Scaffold the module (composer.json + a ModuleProvider)

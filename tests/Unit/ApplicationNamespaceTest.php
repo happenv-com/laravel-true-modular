@@ -8,6 +8,7 @@ use Illuminate\Filesystem\Filesystem;
 afterEach(function (): void {
     // Reset process-wide settings so they cannot leak into other tests.
     Application::modulesNamespace(Application::DEFAULT_MODULES_NAMESPACE);
+    Application::coreModuleName(Application::DEFAULT_CORE_MODULE_NAME);
 });
 
 it('falls back to the core module namespace when composer.json has no entry pointing at app/', function (): void {
@@ -22,12 +23,13 @@ it('falls back to the core module namespace when composer.json has no entry poin
     expect($app->getNamespace())->toBe('TrueModule\Core\\');
 });
 
-it('builds the fallback from the configured modules namespace, not the bare default', function (): void {
+it('builds the fallback from the configured modules namespace and core module name, not the bare defaults', function (): void {
     Application::modulesNamespace('Acme');
+    Application::coreModuleName('Kernel');
 
     $app = new Application(dirname(appModulesFixture()));
 
-    expect($app->getNamespace())->toBe('Acme\Core\\');
+    expect($app->getNamespace())->toBe('Acme\Kernel\\');
 });
 
 it('keeps resolving the parent namespace unchanged for an application whose composer.json still autoloads an existing app/', function (): void {

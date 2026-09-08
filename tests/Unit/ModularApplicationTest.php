@@ -11,6 +11,7 @@ afterEach(function (): void {
     Application::moduleComposerType(Application::DEFAULT_COMPOSER_TYPE);
     Application::modulesDirectory(Application::DEFAULT_MODULES_DIRECTORY);
     Application::modulesNamespace(Application::DEFAULT_MODULES_NAMESPACE);
+    Application::coreModuleName(Application::DEFAULT_CORE_MODULE_NAME);
 });
 
 it('applies settings fluently and is chainable', function (): void {
@@ -19,9 +20,11 @@ it('applies settings fluently and is chainable', function (): void {
     expect($modular->composerType('acme-module'))->toBe($modular)
         ->and($modular->modulesDirectory('packages'))->toBe($modular)
         ->and($modular->modulesNamespace('Acme'))->toBe($modular)
+        ->and($modular->coreModuleName('Kernel'))->toBe($modular)
         ->and(Application::getModuleComposerType())->toBe('acme-module')
         ->and(Application::getModulesDirectory())->toBe('packages')
-        ->and(Application::getModulesNamespace())->toBe('Acme');
+        ->and(Application::getModulesNamespace())->toBe('Acme')
+        ->and(Application::getCoreModuleName())->toBe('Kernel');
 });
 
 it('hands off to the standard Laravel application builder', function (): void {

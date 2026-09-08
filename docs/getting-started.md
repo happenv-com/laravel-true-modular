@@ -47,7 +47,8 @@ use Happenv\LaravelTrueModular\ModularApplication;
 return (new ModularApplication)
     ->composerType('acme-module')
     ->modulesDirectory('packages')
-    ->modulesNamespace('Acme')        // root namespace for modules (used when scaffolding)
+    ->modulesNamespace('Acme')        // root namespace for every module (used when scaffolding)
+    ->coreModuleName('Core')          // segment appended to it for the core module, e.g. Acme\Core
     ->configure(basePath: dirname(__DIR__))
     ->withRouting(/* ... */)
     ->withMiddleware(/* ... */)
@@ -56,8 +57,8 @@ return (new ModularApplication)
 
 The same settings are also exposed as static methods on `Application`
 (`Application::moduleComposerType()`, `Application::modulesDirectory()`,
-`Application::modulesNamespace()`) if you prefer to set them directly — `ModularApplication` is a thin
-fluent wrapper over those.
+`Application::modulesNamespace()`, `Application::coreModuleName()`) if you prefer to set them
+directly — `ModularApplication` is a thin fluent wrapper over those.
 
 ## 3. Create a module
 
