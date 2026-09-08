@@ -8,6 +8,7 @@ afterEach(function (): void {
     // Reset process-wide settings so they cannot leak into other tests.
     Application::modulesDirectory(Application::DEFAULT_MODULES_DIRECTORY);
     Application::modulesNamespace(Application::DEFAULT_MODULES_NAMESPACE);
+    Application::coreModuleName(Application::DEFAULT_CORE_MODULE_NAME);
 });
 
 it('defaults the modules directory to the application default', function (): void {
@@ -27,4 +28,13 @@ it('defaults and configures the modules namespace, trimming slashes', function (
     Application::modulesNamespace('Acme\\');
 
     expect(Application::getModulesNamespace())->toBe('Acme');
+});
+
+it('defaults and configures the core module name, trimming slashes', function (): void {
+    expect(Application::getCoreModuleName())->toBe('Core')
+        ->and(Application::DEFAULT_CORE_MODULE_NAME)->toBe('Core');
+
+    Application::coreModuleName('\\Kernel\\');
+
+    expect(Application::getCoreModuleName())->toBe('Kernel');
 });

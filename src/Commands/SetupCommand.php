@@ -42,9 +42,10 @@ class SetupCommand extends Command
 
         $namespace = $convertApp
             ? text(
-                label: 'Namespace for the core module',
+                label: 'Root namespace for the application',
                 default: Application::DEFAULT_MODULES_NAMESPACE,
                 required: true,
+                hint: sprintf('Every module is qualified under it — the core module becomes <namespace>\\%s.', Application::getCoreModuleName()),
             )
             : null;
 
@@ -62,7 +63,7 @@ class SetupCommand extends Command
         }
 
         if (! confirm(
-            label: sprintf('This moves app/ into %s/core and rewrites the App\\ namespace to %s\\Core. Continue?', $modulesDirectory, $namespace),
+            label: sprintf('This moves app/ into %s/core and rewrites the App\\ namespace to %s\\%s. Continue?', $modulesDirectory, $namespace, Application::getCoreModuleName()),
             default: true,
         )) {
             $this->components->warn('Skipped the app → core conversion.');

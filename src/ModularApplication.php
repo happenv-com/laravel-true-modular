@@ -56,6 +56,18 @@ final class ModularApplication
     }
 
     /**
+     * Set the core module's namespace segment, e.g. `Core` so the core module is
+     * `<modulesNamespace>\Core` (default `Core`). Used when scaffolding the core module
+     * and by {@see Application::getNamespace()}'s fallback.
+     */
+    public function coreModuleName(string $name): self
+    {
+        Application::coreModuleName($name);
+
+        return $this;
+    }
+
+    /**
      * Hand off to the standard Laravel application builder, having applied the
      * module settings above to the custom {@see Application}.
      */

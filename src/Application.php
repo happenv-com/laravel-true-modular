@@ -8,6 +8,7 @@ use Happenv\LaravelTrueModular\ModuleSystem\ModuleActivation;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleAwarePackageManifest;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleName;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleRegistry;
+use Happenv\LaravelTrueModular\Setup\Steps\ConfigureComposer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Filesystem\Filesystem;
@@ -17,6 +18,7 @@ use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Override;
 use ReflectionException;
+use RuntimeException;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
 use TypeError;
@@ -31,6 +33,9 @@ final class Application extends FoundationApplication
 
     /** Default root namespace under which modules live (e.g. the core module is `<namespace>\Core`). */
     public const string DEFAULT_MODULES_NAMESPACE = 'TrueModule';
+
+    /** Default name of the core module's namespace segment (e.g. `<namespace>\Core`). */
+    public const string DEFAULT_CORE_MODULE_NAME = 'Core';
 
     /** Default version stamped into a scaffolded module's composer.json and root `require`. */
     public const string DEFAULT_MODULE_VERSION = '1.0.0';
@@ -254,6 +259,31 @@ final class Application extends FoundationApplication
         $this->initializedCallbacks = [];
     }
 
+    /**
+     * Get the application namespace.
+     *
+     * Tries the stock Laravel resolution first, so an application whose root
+     * composer.json still autoloads app/ keeps behaving exactly as it does today.
+     * Falls back to the core module's namespace when the parent can't find a match —
+     * the shape `true-modular:setup` leaves behind once app/ has been converted into
+     * a module and its `"App\\": "app/"` autoload entry removed (see
+     * {@see ConfigureComposer::removeAppAutoload()}).
+     * Without this fallback nothing in `autoload.psr-4` points at `app/` any more, so
+     * the parent has nothing to match and throws — breaking every request, `route:list`,
+     * and `Model::factory()` call.
+     *
+     * @return string
+     */
+    #[Override]
+    public function getNamespace()
+    {
+        try {
+            return parent::getNamespace();
+        } catch (RuntimeException) {
+            return $this->namespace = self::getModulesNamespace().'\\'.self::getCoreModuleName().'\\';
+        }
+    }
+
     private static string $moduleComposerType = self::DEFAULT_COMPOSER_TYPE;
 
     public static function moduleComposerType(string $type): void
@@ -297,6 +327,24 @@ final class Application extends FoundationApplication
     public static function getModulesNamespace(): string
     {
         return self::$modulesNamespace;
+    }
+
+    private static string $coreModuleName = self::DEFAULT_CORE_MODULE_NAME;
+
+    /**
+     * Set the core module's namespace segment, e.g. `Core` so the core module is
+     * `<modulesNamespace>\Core` (default `Core`). Used when scaffolding the core module
+     * (`true-modular:setup`) and by {@see Application::getNamespace()}'s fallback.
+     * Call before configure(), or use the fluent {@see ModularApplication} wrapper.
+     */
+    public static function coreModuleName(string $name): void
+    {
+        self::$coreModuleName = trim($name, '\\');
+    }
+
+    public static function getCoreModuleName(): string
+    {
+        return self::$coreModuleName;
     }
 
     /**
