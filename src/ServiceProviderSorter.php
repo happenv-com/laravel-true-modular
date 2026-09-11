@@ -22,9 +22,9 @@ use Safe\Exceptions\JsonException;
 final class ServiceProviderSorter
 {
     /**
-     * @var array<string, string>|null Cached namespace to module name map
+     * @var NamespaceMatcher<string>|null Cached index over the namespace to module name map
      */
-    private ?array $namespaceMap = null;
+    private ?NamespaceMatcher $namespaceMatcher = null;
 
     public function __construct(
         private readonly ModuleRegistry $moduleRegistry,
@@ -102,7 +102,24 @@ final class ServiceProviderSorter
      */
     public function getModuleName(ServiceProvider $provider): ?string
     {
-        return NamespaceMatcher::longestPrefix($provider::class, $this->getNamespaceMap());
+        return $this->getNamespaceMatcher()->match($provider::class);
+    }
+
+    /**
+     * The namespace to module name index, built on first use.
+     *
+     * Held as an index rather than a plain map because `sort()` asks it one question per
+     * registered provider, and rebuilding the index per question would put the whole map
+     * back on the hot path that indexing it was meant to take it off.
+     *
+     * @return NamespaceMatcher<string>
+     *
+     * @throws FilesystemException
+     * @throws JsonException
+     */
+    private function getNamespaceMatcher(): NamespaceMatcher
+    {
+        return $this->namespaceMatcher ??= NamespaceMatcher::for($this->buildNamespaceMap());
     }
 
     /**
@@ -113,21 +130,17 @@ final class ServiceProviderSorter
      * @throws FilesystemException
      * @throws JsonException
      */
-    private function getNamespaceMap(): array
+    private function buildNamespaceMap(): array
     {
-        if ($this->namespaceMap !== null) {
-            return $this->namespaceMap;
-        }
-
-        $this->namespaceMap = [];
+        $namespaceMap = [];
 
         foreach (array_keys($this->moduleRegistry->getAllModules()) as $moduleName) {
             foreach ($this->moduleRegistry->getModuleNamespaces($moduleName) as $namespace) {
-                $this->namespaceMap[$namespace] = $moduleName;
+                $namespaceMap[$namespace] = $moduleName;
             }
         }
 
-        return $this->namespaceMap;
+        return $namespaceMap;
     }
 
     /**
