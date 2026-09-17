@@ -46,7 +46,6 @@ final readonly class ModuleFileFinder
     {
         $order = $this->moduleRegistry->getTopologicalOrder();
 
-        /** @phpstan-ignore return.type */
         return collect($order)
             ->flatMap(fn (string $moduleName): array => $this->getModuleFiles($moduleName, $directory, $pattern));
     }
@@ -66,7 +65,6 @@ final readonly class ModuleFileFinder
     {
         $order = $this->moduleRegistry->getReverseTopologicalOrder();
 
-        /** @phpstan-ignore return.type */
         return collect($order)
             ->flatMap(fn (string $moduleName): array => $this->getModuleFiles($moduleName, $directory, $pattern));
     }
