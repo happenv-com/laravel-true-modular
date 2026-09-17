@@ -29,6 +29,11 @@ final class ModuleRegistry
      */
     private ?array $dependencyGraph = null;
 
+    /**
+     * @var array<string, array<string>>|null Cached graph including `require-dev`
+     */
+    private ?array $fullDependencyGraph = null;
+
     public function __construct(
         private readonly string $appModulesPath,
     ) {}
@@ -149,16 +154,49 @@ final class ModuleRegistry
      */
     public function getDependencies(string $moduleName): array
     {
+        return $this->declaredModules($moduleName, 'require');
+    }
+
+    /**
+     * Dependencies a module declares for its TESTS only (`require-dev`).
+     *
+     * Deliberately NOT folded into {@see self::getDependencies()}: that method feeds
+     * {@see self::getTopologicalOrder()}, which orders service providers at boot. A
+     * `require-dev` edge legitimately points back at a dependent — a module's tests
+     * commonly exercise it through one — so adding these edges there would make the
+     * provider graph cyclic and boot would throw.
+     *
+     * @return array<string>
+     *
+     * @throws FilesystemException
+     * @throws JsonException
+     */
+    public function getDevDependencies(string $moduleName): array
+    {
+        return $this->declaredModules($moduleName, 'require-dev');
+    }
+
+    /**
+     * The module names one composer section of a module declares, keeping only those
+     * that are themselves modules here.
+     *
+     * @return array<string>
+     *
+     * @throws FilesystemException
+     * @throws JsonException
+     */
+    private function declaredModules(string $moduleName, string $section): array
+    {
         $modules = $this->getAllModules();
 
         if (! isset($modules[$moduleName])) {
             return [];
         }
 
-        $require = $modules[$moduleName]['composer']['require'] ?? [];
+        $declared = $modules[$moduleName]['composer'][$section] ?? [];
         $dependencies = [];
 
-        foreach (array_keys($require) as $dependency) {
+        foreach (array_keys($declared) as $dependency) {
             // Only include if it's an actual module we know about
             if (! isset($modules[$dependency])) {
                 continue;
@@ -191,6 +229,37 @@ final class ModuleRegistry
         }
 
         return $this->dependencyGraph;
+    }
+
+    /**
+     * The dependency graph including `require-dev` edges.
+     *
+     * This is the graph a test-scoped runner and a boundary gate answer from: a module
+     * whose tests reach another module is affected by it just as surely as one whose
+     * shipped code does. It is NOT the graph providers are ordered from — see
+     * {@see self::getDevDependencies()} for why those must stay apart.
+     *
+     * @return array<string, array<string>>
+     *
+     * @throws FilesystemException
+     * @throws JsonException
+     */
+    public function getFullDependencyGraph(): array
+    {
+        if ($this->fullDependencyGraph !== null) {
+            return $this->fullDependencyGraph;
+        }
+
+        $this->fullDependencyGraph = [];
+
+        foreach ($this->getModuleNames() as $moduleName) {
+            $this->fullDependencyGraph[$moduleName] = array_values(array_unique([
+                ...$this->getDependencies($moduleName),
+                ...$this->getDevDependencies($moduleName),
+            ]));
+        }
+
+        return $this->fullDependencyGraph;
     }
 
     /**
@@ -241,14 +310,22 @@ final class ModuleRegistry
     /**
      * Detect circular dependencies in the module graph.
      *
+     * Defaults to the SHIPPED graph, so existing callers — provider ordering, the
+     * health check, the graph command — keep seeing exactly what they saw before.
+     * Pass `$includeDev` to ask about the graph a test-scoped runner and a boundary
+     * gate use, where `require-dev` edges can and do close cycles.
+     *
+     * @param  bool  $includeDev  also walk `require-dev` edges
      * @return array<array<string>> Array of circular dependency paths
      *
      * @throws FilesystemException
      * @throws JsonException
      */
-    public function detectCircularDependencies(): array
+    public function detectCircularDependencies(bool $includeDev = false): array
     {
-        return TopologicalSort::cycles($this->getDependencyGraph());
+        return TopologicalSort::cycles(
+            $includeDev ? $this->getFullDependencyGraph() : $this->getDependencyGraph(),
+        );
     }
 
     /**
@@ -271,5 +348,6 @@ final class ModuleRegistry
     {
         $this->modules = null;
         $this->dependencyGraph = null;
+        $this->fullDependencyGraph = null;
     }
 }

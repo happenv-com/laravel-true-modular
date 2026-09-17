@@ -5,6 +5,9 @@
     "require": {
         "myapp/kernel": "*"
     },
+    "require-dev": {
+        "myapp/sale": "*"
+    },
     "autoload": {
         "psr-4": {
             "Myapp\\Core\\": "src/"

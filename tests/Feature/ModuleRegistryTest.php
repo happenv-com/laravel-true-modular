@@ -150,6 +150,32 @@ describe('ModuleRegistry', function (): void {
         });
     });
 
+    describe('getDevDependencies', function (): void {
+        it('returns the modules a module declares for its tests only', function (): void {
+            $tree = ModuleRegistry::make();
+
+            // The fixture core dev-requires sale, which requires core back: the shape
+            // this whole feature exists for.
+            expect($tree->getDevDependencies('myapp/core'))->toBe(['myapp/sale'])
+                ->and($tree->getDevDependencies('myapp/sale'))->toBeEmpty();
+        });
+
+        it('keeps the dev edge out of the shipped dependencies', function (): void {
+            $tree = ModuleRegistry::make();
+
+            expect($tree->getDependencies('myapp/core'))->toBe(['myapp/kernel']);
+        });
+    });
+
+    describe('getFullDependencyGraph', function (): void {
+        it('carries the dev edges the shipped graph leaves out', function (): void {
+            $tree = ModuleRegistry::make();
+
+            expect($tree->getDependencyGraph()['myapp/core'])->toBe(['myapp/kernel'])
+                ->and($tree->getFullDependencyGraph()['myapp/core'])->toBe(['myapp/kernel', 'myapp/sale']);
+        });
+    });
+
     describe('detectCircularDependencies', function (): void {
         it('returns empty array when no circular dependencies exist', function (): void {
             $tree = ModuleRegistry::make();
@@ -157,6 +183,24 @@ describe('ModuleRegistry', function (): void {
 
             expect($cycles)->toBeArray()
                 ->and($cycles)->toBeEmpty();
+        });
+
+        it('finds the cycle a require-dev edge closes when asked to include dev', function (): void {
+            $tree = ModuleRegistry::make();
+            $cycles = $tree->detectCircularDependencies(includeDev: true);
+
+            expect($cycles)->not->toBeEmpty()
+                ->and(array_merge(...$cycles))->toContain('myapp/core')
+                ->and(array_merge(...$cycles))->toContain('myapp/sale');
+        });
+
+        it('leaves provider ordering alone, which is why the graphs stay apart', function (): void {
+            // The regression this guards: folding require-dev into getDependencies()
+            // would make this throw CircularDependencyException at boot.
+            $tree = ModuleRegistry::make();
+
+            expect($tree->getTopologicalOrder())->toContain('myapp/core')
+                ->and($tree->detectCircularDependencies())->toBeEmpty();
         });
     });
 
