@@ -48,6 +48,20 @@ topological order (dependencies before dependents) using `ModuleRegistry`'s orde
 to its module by longest PSR-4 namespace prefix (`NamespaceMatcher`). See
 [module-dependencies.md](module-dependencies.md) for the ordering itself.
 
+### What a boot does not pay for
+
+A boot happens far more often than it sounds: every request, every artisan command, every queue
+worker, and every single test (a suite boots a fresh application per test). So the runtime keeps work
+that only some of those need off the boot path:
+
+- **Module migrations are listed when the migrator is resolved**, not when the module boots — that
+  is, only by the commands that migrate. Their `vendor:publish` targets (a timestamped name per
+  migration) are worked out only when `vendor:publish` itself is resolved, including when another
+  command calls it.
+- **The module registry can be cached.** `php artisan optimize` writes the module scan to
+  `bootstrap/cache/true-modular.php` (see [cli-commands.md](cli-commands.md#true-modularcache--true-modularclear));
+  `ModuleRegistry::make()` answers from it while it still matches the modules on disk.
+
 ## The analysis layer
 
 Separate from the runtime, the `Architecture/` namespace builds an immutable snapshot of the module

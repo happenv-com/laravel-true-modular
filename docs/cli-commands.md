@@ -92,6 +92,8 @@ message rather than producing empty output. Renderers are resolved from the cont
 | `module:check` | Validate module activation: orphaned directories, the disabled list, dependencies, owned packages. |
 | `module:seed` | Seed module database seeders in dependency order (`--module`, `--class`, `--show-order`). |
 | `module:make:migration {module} {name}` | Scaffold a migration inside a module (`--create`, `--table`). |
+| `true-modular:cache` | Cache the module registry in `bootstrap/cache/true-modular.php` (run by `optimize`, see below). |
+| `true-modular:clear` | Remove that cache (run by `optimize:clear`). |
 
 `module:list` prints, for each module, its position in the topological order, its declared
 dependencies and its path on disk. With `--reverse` the order is flipped (dependents first), which
@@ -114,6 +116,19 @@ Validates module activation and exits non-zero on the first problem set:
 Run it on deploy, before the process starts serving — a bad disabled list must abort the release, not
 surface as a missing class on the first request. See
 [Switching modules off](switching-modules-off.md).
+
+### `true-modular:cache` / `true-modular:clear`
+
+Every boot needs the module list — the provider sorter orders every provider by it — and producing it
+means reading and decoding every module's `composer.json`. `true-modular:cache` writes that scan to
+`bootstrap/cache/true-modular.php` so a boot reads one file instead. Both commands are registered with
+Laravel's `optimize` / `optimize:clear`, so a deploy that already runs `php artisan optimize` needs no
+extra step.
+
+Unlike Laravel's own caches, this one never has to be cleared by hand after a module changes. It
+records which `composer.json` files it was built from, with each one's mtime and size, and is ignored
+as soon as that stops matching the disk — a module added, removed or edited since costs one full
+scan, never a boot with the old module list.
 
 ### `true-modular:setup`
 

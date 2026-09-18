@@ -11,11 +11,12 @@ use Override;
 
 /**
  * A module whose migrations directory lives wherever the test put it, recording what
- * discovery hands to Laravel instead of letting it reach the publisher and the migrator.
+ * discovery hands to the publisher instead of letting it reach `vendor:publish`.
  *
- * Both recorded calls are counted, not just merged: "one call per module" is the whole
- * point of batching them, and a per-file regression would leave the merged result
- * identical while quietly putting the cost back.
+ * Publish calls are counted, not just merged: "one call per module" is the whole point of
+ * batching them, and a per-file regression would leave the merged result identical while
+ * quietly putting the cost back. The migrator needs no double — the tests read what it
+ * was given straight from it.
  */
 final class RecordingMigrationModuleProvider extends ModuleProvider
 {
@@ -23,9 +24,6 @@ final class RecordingMigrationModuleProvider extends ModuleProvider
 
     /** @var list<array{paths: array<string, string>, groups: mixed}> */
     public array $publishCalls = [];
-
-    /** @var list<array<string>|string> */
-    public array $loadCalls = [];
 
     public bool $runsMigrations = true;
 
@@ -62,14 +60,5 @@ final class RecordingMigrationModuleProvider extends ModuleProvider
     protected function publishes(array $paths, $groups = null): void
     {
         $this->publishCalls[] = ['groups' => $groups, 'paths' => $paths];
-    }
-
-    /**
-     * @param  array<string>|string  $paths
-     */
-    #[Override]
-    protected function loadMigrationsFrom($paths): void
-    {
-        $this->loadCalls[] = $paths;
     }
 }

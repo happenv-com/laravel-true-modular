@@ -34,16 +34,30 @@ final class ModuleRegistry
      */
     private ?array $fullDependencyGraph = null;
 
+    /**
+     * `$modules` is a scan already made — by {@see ModuleRegistryCache} — to answer from
+     * instead of scanning; null scans on first use.
+     *
+     * @param  array<string, array{name: string, path: string, composer: array<string, mixed>}>|null  $modules
+     */
     public function __construct(
         private readonly string $appModulesPath,
-    ) {}
+        ?array $modules = null,
+    ) {
+        $this->modules = $modules;
+    }
 
     /**
      * Get the default instance using Laravel's base path.
+     *
+     * Answers from the module cache written by `true-modular:cache` when there is one and it
+     * still describes the modules on disk; scans otherwise.
      */
     public static function make(): self
     {
-        return new self(base_path(Application::getModulesDirectory()));
+        $appModulesPath = base_path(Application::getModulesDirectory());
+
+        return new self($appModulesPath, ModuleRegistryCache::make()->modules($appModulesPath));
     }
 
     /**
