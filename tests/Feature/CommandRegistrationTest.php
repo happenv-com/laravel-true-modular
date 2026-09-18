@@ -19,5 +19,7 @@ it('registers the package console commands via the service provider boot phase',
         'module:graph',
         'module:impact',
         'module:why',
+        'true-modular:cache',
+        'true-modular:clear',
     );
 });

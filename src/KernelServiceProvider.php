@@ -17,6 +17,8 @@ use Happenv\LaravelTrueModular\Architecture\Renderer\RendererRegistry;
 use Happenv\LaravelTrueModular\Architecture\Renderer\TreeRenderer;
 use Happenv\LaravelTrueModular\Architecture\Renderer\WhyTextRenderer;
 use Happenv\LaravelTrueModular\Architecture\Source\ComposerArchitectureSource;
+use Happenv\LaravelTrueModular\Commands\CacheModulesCommand;
+use Happenv\LaravelTrueModular\Commands\ClearModulesCacheCommand;
 use Happenv\LaravelTrueModular\Commands\ListModulesCommand;
 use Happenv\LaravelTrueModular\Commands\MakeMigrationCommand;
 use Happenv\LaravelTrueModular\Commands\MakeModuleCommand;
@@ -59,7 +61,17 @@ class KernelServiceProvider extends ServiceProvider
                 ModuleImpactCommand::class,
                 ModuleWhyCommand::class,
                 ModuleGraphCommand::class,
+                CacheModulesCommand::class,
+                ClearModulesCacheCommand::class,
             ]);
+
+            // The module registry cache is written by `optimize` and removed by `optimize:clear`
+            // alongside Laravel's own caches, so deploying it takes no step of its own.
+            $this->optimizes(
+                optimize: 'true-modular:cache',
+                clear: 'true-modular:clear',
+                key: 'true-modular',
+            );
 
             // Publishing the module stubs is how an application states its own
             // module convention: `module:make` reads the published directory
