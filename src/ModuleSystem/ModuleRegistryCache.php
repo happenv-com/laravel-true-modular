@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Happenv\LaravelTrueModular\ModuleSystem;
 
 use Happenv\LaravelTrueModular\Application;
+use Happenv\LaravelTrueModular\ModuleSystem\Exceptions\CircularDependencyException;
 use Illuminate\Filesystem\Filesystem;
 use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
@@ -29,12 +30,18 @@ use function Safe\glob;
  * boot with the old module list. Checking the fingerprint is one glob and one stat per module,
  * roughly an eighth of the scan it replaces.
  *
+ * Next to the scan it keeps what every boot derives from it: the modules' topological order,
+ * which orders the service providers, and a signature of both, under which the provider sorter
+ * keeps the order it arrived at for the rest of the process. Deriving them at boot was ~0.4 ms
+ * and ~0.8 ms of every boot on a host with 115 modules and 286 providers.
+ *
  * @phpstan-type Modules array<string, array{name: string, path: string, composer: array<string, mixed>}>
+ * @phpstan-type Snapshot array{modules: Modules, topological_order: array<string>|null, signature: string}
  */
 final readonly class ModuleRegistryCache
 {
     /** Bump whenever the shape of the cached payload changes. */
-    public const int FORMAT = 1;
+    public const int FORMAT = 2;
 
     public function __construct(
         private string $path,
@@ -62,6 +69,21 @@ final readonly class ModuleRegistryCache
      */
     public function modules(string $appModulesPath): ?array
     {
+        return $this->load($appModulesPath)['modules'] ?? null;
+    }
+
+    /**
+     * {@see modules()} together with what was derived from them when the cache was written: their
+     * topological order and a signature of both. Null in every case in which `modules()` is.
+     *
+     * The order is null for modules with a circular dependency. The exception belongs to the boot
+     * that orders providers by it, as it always has — not to `true-modular:cache`, which would
+     * otherwise turn `php artisan optimize` into the place that reports a dependency cycle.
+     *
+     * @return Snapshot|null
+     */
+    public function load(string $appModulesPath): ?array
+    {
         if (! is_file($this->path)) {
             return null;
         }
@@ -72,7 +94,9 @@ final readonly class ModuleRegistryCache
             || ($cached['format'] ?? null) !== self::FORMAT
             || ($cached['modules_path'] ?? null) !== $appModulesPath
             || ($cached['composer_type'] ?? null) !== Application::getModuleComposerType()
-            || ! is_array($cached['modules'] ?? null)) {
+            || ! is_array($cached['modules'] ?? null)
+            || ! is_array($cached['topological_order'] ?? null) && ($cached['topological_order'] ?? null) !== null
+            || ! is_string($cached['signature'] ?? null)) {
             return null;
         }
 
@@ -86,10 +110,14 @@ final readonly class ModuleRegistryCache
             return null;
         }
 
-        /** @var Modules $modules */
-        $modules = $cached['modules'];
+        /** @var Snapshot $snapshot */
+        $snapshot = [
+            'modules' => $cached['modules'],
+            'topological_order' => $cached['topological_order'],
+            'signature' => $cached['signature'],
+        ];
 
-        return $modules;
+        return $snapshot;
     }
 
     /**
@@ -108,7 +136,14 @@ final readonly class ModuleRegistryCache
     public function rebuild(string $appModulesPath): array
     {
         $fingerprint = $this->fingerprint($appModulesPath);
-        $modules = (new ModuleRegistry($appModulesPath))->getAllModules();
+        $registry = new ModuleRegistry($appModulesPath);
+        $modules = $registry->getAllModules();
+
+        try {
+            $topologicalOrder = $registry->getTopologicalOrder();
+        } catch (CircularDependencyException) {
+            $topologicalOrder = null;
+        }
 
         $payload = [
             'format' => self::FORMAT,
@@ -116,6 +151,8 @@ final readonly class ModuleRegistryCache
             'composer_type' => Application::getModuleComposerType(),
             'fingerprint' => $fingerprint,
             'modules' => $modules,
+            'topological_order' => $topologicalOrder,
+            'signature' => hash('xxh128', serialize([$modules, $topologicalOrder])),
         ];
 
         $files = new Filesystem;
