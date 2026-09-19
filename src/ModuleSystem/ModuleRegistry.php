@@ -35,16 +35,30 @@ final class ModuleRegistry
     private ?array $fullDependencyGraph = null;
 
     /**
+     * @var array<string>|null Cached topological order
+     */
+    private ?array $topologicalOrder;
+
+    private ?string $signature;
+
+    /**
      * `$modules` is a scan already made — by {@see ModuleRegistryCache} — to answer from
-     * instead of scanning; null scans on first use.
+     * instead of scanning; null scans on first use. `$topologicalOrder` is their order as the
+     * cache computed it; null computes it on first use. `$signature` identifies both, as the
+     * cache wrote it; see {@see signature()}.
      *
      * @param  array<string, array{name: string, path: string, composer: array<string, mixed>}>|null  $modules
+     * @param  array<string>|null  $topologicalOrder
      */
     public function __construct(
         private readonly string $appModulesPath,
         ?array $modules = null,
+        ?array $topologicalOrder = null,
+        ?string $signature = null,
     ) {
         $this->modules = $modules;
+        $this->topologicalOrder = $topologicalOrder;
+        $this->signature = $signature;
     }
 
     /**
@@ -56,8 +70,28 @@ final class ModuleRegistry
     public static function make(): self
     {
         $appModulesPath = base_path(Application::getModulesDirectory());
+        $cached = ModuleRegistryCache::make()->load($appModulesPath);
 
-        return new self($appModulesPath, ModuleRegistryCache::make()->modules($appModulesPath));
+        return new self(
+            $appModulesPath,
+            $cached['modules'] ?? null,
+            $cached['topological_order'] ?? null,
+            $cached['signature'] ?? null,
+        );
+    }
+
+    /**
+     * What identifies these modules and their order, for a caller that keeps something it
+     * derived from them for as long as the process lives — the provider sorter keeps the order
+     * it put the providers in, which a process booting the application again and again (a test
+     * suite boots one per test) would otherwise work out on every boot.
+     *
+     * Only the module cache vouches for it, so it is null for modules that were scanned, and
+     * after {@see clearCache()}: nothing says two scans found the same modules.
+     */
+    public function signature(): ?string
+    {
+        return $this->signature;
     }
 
     /**
@@ -292,13 +326,17 @@ final class ModuleRegistry
      */
     public function getTopologicalOrder(): array
     {
+        if ($this->topologicalOrder !== null) {
+            return $this->topologicalOrder;
+        }
+
         $order = TopologicalSort::order($this->getDependencyGraph());
 
         if ($order === null) {
             throw new CircularDependencyException($this->detectCircularDependencies());
         }
 
-        return $order;
+        return $this->topologicalOrder = $order;
     }
 
     /**
@@ -363,5 +401,7 @@ final class ModuleRegistry
         $this->modules = null;
         $this->dependencyGraph = null;
         $this->fullDependencyGraph = null;
+        $this->topologicalOrder = null;
+        $this->signature = null;
     }
 }
