@@ -1,9 +1,10 @@
 # True Modular for Laravel
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://banners.beyondco.de/Laravel%20True%20Modular.png?theme=dark&packageManager=composer+require&packageName=happenv-com%2Flaravel-true-modular&pattern=architect&style=style_1&description=Make+your+Laravel+architecture+explicit%2C+deterministic+and+analyzable&md=1&showWatermark=0&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg">
-  <img alt="Laravel True Modular" src="https://banners.beyondco.de/Laravel%20True%20Modular.png?theme=light&packageManager=composer+require&packageName=happenv-com%2Flaravel-true-modular&pattern=architect&style=style_1&description=Make+your+Laravel+architecture+explicit%2C+deterministic+and+analyzable&md=1&showWatermark=0&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg">
-</picture>
+<div class="filament-hidden">
+
+![Laravel True Modular](art/banner.png)
+
+</div>
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/happenv-com/laravel-true-modular.svg?style=flat-square)](https://packagist.org/packages/happenv-com/laravel-true-modular)
 [![Total Downloads](https://img.shields.io/packagist/dt/happenv-com/laravel-true-modular.svg?style=flat-square)](https://packagist.org/packages/happenv-com/laravel-true-modular)
