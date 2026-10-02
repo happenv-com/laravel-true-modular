@@ -90,7 +90,7 @@ final readonly class ModuleFileFinder
                 ...$item,
                 'class' => $this->resolveClassName($item['file'], $item['module'], $namespaceSegment),
             ])
-            ->filter(fn (array $item): bool => class_exists($item['class']));
+            ->filter(static fn (array $item): bool => class_exists($item['class']));
     }
 
     /**
@@ -112,7 +112,7 @@ final readonly class ModuleFileFinder
                 ...$item,
                 'class' => $this->resolveClassName($item['file'], $item['module'], $namespaceSegment),
             ])
-            ->filter(fn (array $item): bool => class_exists($item['class']));
+            ->filter(static fn (array $item): bool => class_exists($item['class']));
     }
 
     /**
@@ -137,7 +137,7 @@ final readonly class ModuleFileFinder
 
                 return [$moduleName => array_column($files, 'file')];
             })
-            ->filter(fn (array $files): bool => $files !== []);
+            ->filter(static fn (array $files): bool => $files !== []);
     }
 
     /**
@@ -165,7 +165,7 @@ final readonly class ModuleFileFinder
         $files = glob($fullPath.'/'.$pattern);
 
         return array_map(
-            fn (string $file): array => [
+            static fn (string $file): array => [
                 'class' => null,
                 'file' => $file,
                 'module' => $moduleName,

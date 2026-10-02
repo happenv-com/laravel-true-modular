@@ -136,11 +136,11 @@ final class ServiceProviderSorter
         }
 
         // Sort module providers by topological order
-        usort($moduleProviders, fn (array $a, array $b): int => $a['order'] <=> $b['order']);
+        usort($moduleProviders, static fn (array $a, array $b): int => $a['order'] <=> $b['order']);
 
         // Extract sorted providers
         $sortedModuleProviders = array_map(
-            fn (array $item): ServiceProvider => $item['provider'],
+            static fn (array $item): ServiceProvider => $item['provider'],
             $moduleProviders
         );
 

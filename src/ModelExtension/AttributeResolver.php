@@ -20,7 +20,7 @@ class AttributeResolver
 
         if ($firstExtensionForModel) {
             $model::handleMissingAttributeViolationUsing(
-                fn (Model $modelInstance, string $key): mixed => AttributeResolversBag::resolve($modelInstance, $key)
+                static fn (Model $modelInstance, string $key): mixed => AttributeResolversBag::resolve($modelInstance, $key)
             );
         }
     }

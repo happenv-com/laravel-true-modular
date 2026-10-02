@@ -8,3 +8,4 @@
 /phpstan.neon.dist export-ignore
 /rector.php   export-ignore
 /pint.json    export-ignore
+/structarmed.php export-ignore
