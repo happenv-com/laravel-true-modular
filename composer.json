@@ -22,7 +22,8 @@
         "thecodingmachine/phpstan-safe-rule": "^1.2",
         "rector/rector": "^2.5",
         "larastan/larastan": "^3.10",
-        "livewire/livewire": "^3.0"
+        "livewire/livewire": "^3.0",
+        "boundwize/structarmed": "^0.18"
     },
     "suggest": {
         "happenv-com/laravel-access-control": "Laravel Access Control for managing permissions and roles in modular applications",

@@ -31,7 +31,7 @@ class DynamicRelations
 
             $model::resolveRelationUsing(
                 $methodName,
-                fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
+                static fn ($modelInstance) => new $extension($modelInstance)->{$methodName}()
             );
         }
     }

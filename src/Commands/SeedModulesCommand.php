@@ -132,7 +132,7 @@ class SeedModulesCommand extends Command
     {
         $seeders = $this->fileFinder
             ->findClasses('database/seeders', 'Database\Seeders')
-            ->filter(fn (array $item): bool => $item['module'] === $moduleName)
+            ->filter(static fn (array $item): bool => $item['module'] === $moduleName)
             ->pluck('class')
             ->toArray();
 
@@ -173,7 +173,7 @@ class SeedModulesCommand extends Command
 
         if ($specificClass !== null) {
             $allSeeders = $allSeeders->filter(
-                fn (array $item): bool => $item['class'] === $specificClass
+                static fn (array $item): bool => $item['class'] === $specificClass
             );
         }
 
