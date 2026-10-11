@@ -22,7 +22,7 @@
         "thecodingmachine/phpstan-safe-rule": "^1.2",
         "rector/rector": "^2.5",
         "larastan/larastan": "^3.10",
-        "livewire/livewire": "^3.0",
+        "livewire/livewire": "^3.0 || ^4.0",
         "boundwize/structarmed": "^0.18"
     },
     "suggest": {
