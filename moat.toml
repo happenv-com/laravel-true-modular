@@ -1,0 +1,7 @@
+# Settings for Laravel Moat (https://github.com/laravel/moat), the GitHub security-posture review.
+
+[checks]
+# Write permissions are granted per job on purpose (auto-merge of Dependabot PRs, changelog and
+# release commits, package/image publishing, deploys, cache pruning). The workflow-level default is
+# read-only. The check flags every `write` grant, so it cannot tell a needed one from an accidental one.
+repositories_workflow_permissions_are_restricted = "off"
