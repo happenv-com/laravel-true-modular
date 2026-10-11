@@ -1,0 +1,42 @@
+# Weekly updates, one grouped PR per ecosystem for minor and patch bumps.
+# Majors arrive on their own so each one can be reviewed separately.
+#
+# `cooldown` 7 days: a freshly published version waits a week before Dependabot
+# proposes it, which is usually enough for a compromised or broken release to be
+# pulled before it reaches us.
+version: 2
+
+updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
+    labels:
+      - 'dependencies'
+    groups:
+      github-actions:
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  - package-ecosystem: 'composer'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
+    labels:
+      - 'dependencies'
+    groups:
+      composer:
+        update-types:
+          - 'minor'
+          - 'patch'
