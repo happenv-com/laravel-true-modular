@@ -23,7 +23,7 @@
         "rector/rector": "^2.5",
         "larastan/larastan": "^3.10",
         "livewire/livewire": "^3.0 || ^4.0",
-        "boundwize/structarmed": "^0.18"
+        "boundwize/structarmed": "^0.18 || ^0.19"
     },
     "suggest": {
         "happenv-com/laravel-access-control": "Laravel Access Control for managing permissions and roles in modular applications",
