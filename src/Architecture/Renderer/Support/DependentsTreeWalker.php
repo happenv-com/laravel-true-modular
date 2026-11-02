@@ -17,6 +17,42 @@ final readonly class DependentsTreeWalker
     public function __construct(private array $dependents) {}
 
     /**
+     * A walker that visits every reachable node exactly once.
+     *
+     * The full walk repeats a node under every path that reaches it, which grows
+     * with the number of paths, not nodes — one module deep in a wide graph can be
+     * printed thousands of times. This keeps a spanning tree instead: each node sits
+     * under the parent that reaches it first breadth-first, i.e. along a shortest
+     * path from a root (ties go to the parent visited first, roots in order, children
+     * in their sorted order). A root reachable from another root stays a root.
+     *
+     * @param  array<string>  $roots
+     * @param  array<string, array<string>>  $dependents  node => sorted dependents
+     */
+    public static function eachNodeOnce(array $roots, array $dependents): self
+    {
+        $placed = array_fill_keys($roots, true);
+        $children = [];
+        $queue = array_values($roots);
+
+        while ($queue !== []) {
+            $node = array_shift($queue);
+
+            foreach ($dependents[$node] ?? [] as $child) {
+                if (isset($placed[$child])) {
+                    continue;
+                }
+
+                $placed[$child] = true;
+                $children[$node][] = $child;
+                $queue[] = $child;
+            }
+        }
+
+        return new self($children);
+    }
+
+    /**
      * Visit every node reachable from each root (roots included), pre-order.
      *
      * The visitor receives the node, the list of "is last child" flags for the

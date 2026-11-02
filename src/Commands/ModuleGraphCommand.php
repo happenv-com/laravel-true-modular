@@ -18,6 +18,7 @@ final class ModuleGraphCommand extends AbstractArchitectureCommand
                             {--root= : Restrict the graph to this module subtree}
                             {--format= : Output format (tree, mermaid, dot, json)}
                             {--with-vendor : Show full vendor/name even for local modules}
+                            {--once : List every module once, under its shortest path (tree, text)}
                             {--schema-version=1 : Machine API schema version}';
 
     protected $description = 'Render the module dependency graph (tree, mermaid, dot, json)';

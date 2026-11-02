@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Happenv\LaravelTrueModular\Architecture\Renderer\DotRenderer;
+use Happenv\LaravelTrueModular\Architecture\Renderer\GraphTextRenderer;
 use Happenv\LaravelTrueModular\Architecture\Renderer\MermaidRenderer;
 use Happenv\LaravelTrueModular\Architecture\Renderer\RenderContext;
 use Happenv\LaravelTrueModular\Architecture\Renderer\TreeRenderer;
@@ -77,4 +78,52 @@ it('mermaid shortens default-vendor nodes and keeps external full', function ():
     expect($out)->toContain('core --> product')
         ->and($out)->toContain('core --> acme/catalog')
         ->and($out)->not->toContain('happenv/core');
+});
+
+it('lists every module once under its shortest path when asked', function (): void {
+    $report = new GraphReport(
+        roots: ['core'],
+        dependents: [
+            'core' => ['auth', 'product'],
+            'auth' => ['sale'],
+            'product' => ['inventory', 'pricing'],
+            'inventory' => ['sale'],
+            'pricing' => ['sale'],
+            'sale' => ['amazon'],
+            'amazon' => [],
+        ],
+        root: null,
+    );
+
+    $text = (new TreeRenderer)->render($report, new RenderContext('x', eachNodeOnce: true));
+
+    expect($text)->toBe(implode("\n", [
+        'core',
+        '├── auth',
+        '│   └── sale',
+        '│       └── amazon',
+        '└── product',
+        '    ├── inventory',
+        '    └── pricing',
+    ]));
+});
+
+it('keeps a root reachable from another root at the top when listing once', function (): void {
+    $report = new GraphReport(
+        roots: ['core', 'sale'],
+        dependents: ['core' => ['sale', 'pim'], 'pim' => [], 'sale' => ['amazon'], 'amazon' => []],
+        root: null,
+    );
+
+    $text = (new TreeRenderer)->render($report, new RenderContext('x', eachNodeOnce: true));
+
+    expect($text)->toBe(implode("\n", ['core', '└── pim', 'sale', '└── amazon']));
+});
+
+it('lists a cycle once without hanging', function (): void {
+    $report = new GraphReport(roots: ['a'], dependents: ['a' => ['b'], 'b' => ['a']], root: null);
+
+    $text = (new GraphTextRenderer)->render($report, new RenderContext('x', eachNodeOnce: true));
+
+    expect($text)->toBe("a\n  b");
 });

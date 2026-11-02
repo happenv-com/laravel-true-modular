@@ -39,6 +39,12 @@ it('prints the dependency tree by default', function (): void {
         ->expectsOutputToContain('myapp/kernel');
 });
 
+it('prints every module once with --once', function (): void {
+    $this->artisan('module:graph', ['--once' => true])
+        ->assertSuccessful()
+        ->expectsOutputToContain('myapp/kernel');
+});
+
 it('prints mermaid output', function (): void {
     $this->artisan('module:graph', ['--format' => 'mermaid'])
         ->assertSuccessful()

@@ -25,7 +25,11 @@ final class TreeRenderer implements ArchitectureRenderer
         /** @var GraphReport $report */
         $lines = [];
 
-        (new DependentsTreeWalker($report->dependents))->walk(
+        $walker = $context->eachNodeOnce
+            ? DependentsTreeWalker::eachNodeOnce($report->roots, $report->dependents)
+            : new DependentsTreeWalker($report->dependents);
+
+        $walker->walk(
             $report->roots,
             static function (string $node, array $ancestorsAreLast, bool $isRoot) use (&$lines, $context): void {
                 $name = $context->display($node);
