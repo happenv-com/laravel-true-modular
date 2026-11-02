@@ -18,6 +18,7 @@ Render the dependency graph as a tree (default), or for external tooling.
 ```bash
 php artisan module:graph
 php artisan module:graph --root=acme/catalog       # restrict to a subtree
+php artisan module:graph --once                    # every module on exactly one line
 php artisan module:graph --format=mermaid
 php artisan module:graph --format=dot | dot -Tsvg -o graph.svg
 php artisan module:graph --format=json
@@ -27,7 +28,11 @@ php artisan module:graph --format=json
 | --- | --- |
 | `--root=<module>` | Restrict the graph to the subtree rooted at this module. |
 | `--format=<fmt>` | `tree` (default), `text`, `mermaid`, `dot`, `json`. |
+| `--once` | `tree` / `text` only: list every module once, under the parent on its shortest path from a root, instead of under every path that reaches it. The full tree grows with the number of paths; this one has one line per module. |
 | `--schema-version=<n>` | Machine API schema version (default `1`). |
+
+The same spanning tree is available to code rendering its own `GraphReport`:
+`new RenderContext($vendor, eachNodeOnce: true)`.
 
 ### `module:impact`
 

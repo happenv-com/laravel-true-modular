@@ -39,6 +39,20 @@ it('prints the dependency tree by default', function (): void {
         ->expectsOutputToContain('myapp/kernel');
 });
 
+it('prints every module once with --once', function (): void {
+    // `sale` stands on `core` and on `pim`; the default tree prints it (and `amazon`)
+    // under both, the spanning tree once — under `core`, the shorter path.
+    Artisan::call('module:graph', ['--once' => true]);
+
+    expect(trim(Artisan::output()))->toBe(implode("\n", [
+        'myapp/kernel',
+        '└── myapp/core',
+        '    ├── myapp/pim',
+        '    └── myapp/sale',
+        '        └── myapp/amazon',
+    ]));
+});
+
 it('prints mermaid output', function (): void {
     $this->artisan('module:graph', ['--format' => 'mermaid'])
         ->assertSuccessful()

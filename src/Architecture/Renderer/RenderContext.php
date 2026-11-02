@@ -7,13 +7,16 @@ namespace Happenv\LaravelTrueModular\Architecture\Renderer;
 /**
  * Per-invocation rendering options. Owns the display rule: default-vendor
  * modules show their short name; external modules (and everything under
- * --with-vendor) show their full vendor/name.
+ * --with-vendor) show their full vendor/name. `eachNodeOnce` asks the tree
+ * renderers for a spanning tree — every module on one line — instead of
+ * repeating a module under each path that reaches it.
  */
 final readonly class RenderContext
 {
     public function __construct(
         public string $defaultVendor,
         public bool $withVendor = false,
+        public bool $eachNodeOnce = false,
     ) {}
 
     public function display(string $fullName): string

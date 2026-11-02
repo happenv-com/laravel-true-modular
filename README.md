@@ -129,6 +129,22 @@ core
             └── ebay
 ```
 
+On a wide graph that repetition adds up quickly. `--once` keeps one line per module, each under
+the parent on its shortest path from a root:
+
+```
+php artisan module:graph --once
+
+core
+├── auth
+│   └── sale
+│       ├── amazon
+│       └── ebay
+└── product
+    ├── inventory
+    └── pricing
+```
+
 `module:list` flattens it into the **deterministic execution order** - the exact, numbered sequence
 in which providers `register()`, `initialize()`, and `boot()`, dependencies first:
 
@@ -154,6 +170,7 @@ race condition. Other views of the same graph:
 php artisan module:graph --format=mermaid # paste straight into a doc
 php artisan module:graph --format=dot     # pipe into Graphviz
 php artisan module:graph --root=sale      # restrict to one subtree
+php artisan module:graph --once           # every module on exactly one line
 php artisan module:why amazon core        # shortest path: why does Amazon depend on Core?
 ```
 
