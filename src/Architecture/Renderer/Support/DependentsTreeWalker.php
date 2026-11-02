@@ -35,8 +35,9 @@ final readonly class DependentsTreeWalker
         $children = [];
         $queue = array_values($roots);
 
-        while ($queue !== []) {
-            $node = array_shift($queue);
+        // A cursor, not array_shift(): shifting reindexes the queue on every step.
+        for ($next = 0; $next < count($queue); $next++) {
+            $node = $queue[$next];
 
             foreach ($dependents[$node] ?? [] as $child) {
                 if (isset($placed[$child])) {
