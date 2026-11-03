@@ -70,9 +70,11 @@ final class ModularApplication
     /**
      * Hand off to the standard Laravel application builder, having applied the
      * module settings above to the custom {@see Application}.
+     *
+     * @param  class-string<Application>  $application  a subclass of the modular application to build instead
      */
-    public function configure(?string $basePath = null): ApplicationBuilder
+    public function configure(?string $basePath = null, string $application = Application::class): ApplicationBuilder
     {
-        return Application::configure($basePath);
+        return $application::configure($basePath);
     }
 }

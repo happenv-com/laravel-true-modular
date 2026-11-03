@@ -35,3 +35,15 @@ it('hands off to the standard Laravel application builder', function (): void {
 
     expect($builder)->toBeInstanceOf(ApplicationBuilder::class);
 });
+
+it('builds a subclass of the modular application when one is given', function (): void {
+    $app = (new ModularApplication)
+        ->composerType('acme-module')
+        ->configure(basePath: sys_get_temp_dir(), application: ExtendedModularApplicationStub::class)
+        ->create();
+
+    expect($app)->toBeInstanceOf(ExtendedModularApplicationStub::class)
+        ->and(ExtendedModularApplicationStub::getModuleComposerType())->toBe('acme-module');
+});
+
+final class ExtendedModularApplicationStub extends Application {}
