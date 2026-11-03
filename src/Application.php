@@ -23,7 +23,12 @@ use Safe\Exceptions\FilesystemException;
 use Safe\Exceptions\JsonException;
 use TypeError;
 
-final class Application extends FoundationApplication
+/**
+ * Open for extension, so an application can override container or lifecycle behaviour of its own
+ * (hand the subclass to {@see ModularApplication::configure()}). The module settings below are
+ * class-wide statics, so a subclass shares them with this class.
+ */
+class Application extends FoundationApplication
 {
     /** Default Composer package `type` used to identify modules. */
     public const string DEFAULT_COMPOSER_TYPE = 'true-module';
