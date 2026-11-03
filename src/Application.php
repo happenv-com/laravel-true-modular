@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\LaravelTrueModular;
 
+use Closure;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleActivation;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleAwarePackageManifest;
 use Happenv\LaravelTrueModular\ModuleSystem\ModuleName;
@@ -53,6 +54,63 @@ final class Application extends FoundationApplication
      * @var callable[]
      */
     private $initializedCallbacks = [];
+
+    /**
+     * The before resolving callback types that apply to each resolved abstract.
+     *
+     * @var array<string, list<string>>
+     */
+    private array $beforeResolvingTypesFor = [];
+
+    /**
+     * Register a new before resolving callback, forgetting which types apply to
+     * which abstract — a new type may apply to an abstract resolved before.
+     *
+     * @param  Closure|string  $abstract
+     */
+    #[Override]
+    public function beforeResolving($abstract, ?Closure $callback = null): void
+    {
+        parent::beforeResolving($abstract, $callback);
+
+        $this->beforeResolvingTypesFor = [];
+    }
+
+    /**
+     * Fire the before resolving callbacks of every type the abstract is or extends.
+     *
+     * The parent asks `is_subclass_of($abstract, $type)` for every registered type
+     * on every resolution, and for an abstract that is not a class — `config`,
+     * `request`, `translator` — that call runs the whole autoloader chain each
+     * time, because a class that failed to load is never remembered. A single
+     * `beforeResolving(SomeClass::class, …)` anywhere in the application (e.g.
+     * spatie/laravel-data registers one) therefore turns every `config()` into a
+     * failed autoload. Which types apply to an abstract cannot change while the
+     * callbacks stay the same, so it is worked out once per abstract.
+     *
+     * Remove once laravel/framework ships the same fix in the container.
+     *
+     * @param  string  $abstract
+     * @param  array<array-key, mixed>  $parameters
+     */
+    #[Override]
+    protected function fireBeforeResolvingCallbacks($abstract, $parameters = []): void
+    {
+        $this->fireBeforeCallbackArray($abstract, $parameters, $this->globalBeforeResolvingCallbacks);
+
+        if ($this->beforeResolvingCallbacks === []) {
+            return;
+        }
+
+        $types = $this->beforeResolvingTypesFor[$abstract] ??= array_values(array_filter(
+            array_keys($this->beforeResolvingCallbacks),
+            static fn (string $type): bool => $type === $abstract || is_subclass_of($abstract, $type),
+        ));
+
+        foreach ($types as $type) {
+            $this->fireBeforeCallbackArray($abstract, $parameters, $this->beforeResolvingCallbacks[$type]);
+        }
+    }
 
     /**
      * Register a service provider with the application.
