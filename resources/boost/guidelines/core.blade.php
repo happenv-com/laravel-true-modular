@@ -25,11 +25,11 @@ class CatalogServiceProvider extends ModuleProvider
     public function configureModule(Module $module): void
     {
         $module
-            ->name('acme/catalog')      // required
+            ->name('catalog')           // required; prefixes config('catalog::...'), views, translations
             ->hasConfig('catalog')
             ->hasRoutes('web', 'api')
             ->hasViews()
-            ->hasMigrations()
+            ->discoversMigrations()     // hasMigrations() needs file names; without any it registers nothing
             ->runsMigrations();
     }
 }

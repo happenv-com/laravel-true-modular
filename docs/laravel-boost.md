@@ -16,8 +16,14 @@ detects and installs them automatically — no configuration required.
   monolith, modules live under `app-modules/`, providers extend `ModuleProvider`, declare features via
   the `Module` builder, and respect the register → initialize → boot lifecycle.
 - The **skill** (`modular-monolith-development`) is activated on demand when the agent works on module
-  code. It contains the detailed patterns: module anatomy, the declarative builder API, lifecycle phase
-  placement, model extensions, config merging, dependency analysis, and the do/don't list.
+  code. It contains the detailed patterns: module anatomy and scaffolding, the declarative builder API
+  and what it does not do for you (the module name as a prefix, morph aliases, migrations, route
+  middleware, seeders), lifecycle phase placement, `bootstrap/app.php`, model extensions, config
+  merging, dependency analysis, switching modules off, the module cache on deploy, and the do/don't list.
+
+The companion packages ship their own skills, offered only when they are installed:
+`true-modular-phpstan-development` (happenv-com/laravel-true-modular-phpstan) and
+`true-modular-health-development` (happenv-com/laravel-true-modular-health).
 
 Both point agents at the full docs under `vendor/happenv-com/laravel-true-modular/docs/`.
 
