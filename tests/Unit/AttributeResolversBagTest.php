@@ -67,3 +67,37 @@ it('still asks every extension of a model, in the order they first registered', 
     expect(AttributeResolversBag::resolve($model, 'colour'))->toBe('red')
         ->and(AttributeResolversBag::resolve($model, 'size'))->toBe('large');
 });
+
+it('lists the extensions of a model in the order they first registered', function (): void {
+    AttributeResolversBag::addExtension(AttributeResolversBagTestModel::class, AttributeResolversBagSecondExtension::class);
+    AttributeResolversBag::addExtension(AttributeResolversBagTestModel::class, AttributeResolversBagCountingExtension::class);
+    AttributeResolversBag::addExtension(AttributeResolversBagTestModel::class, AttributeResolversBagSecondExtension::class);
+
+    expect(AttributeResolversBag::extensionsFor(AttributeResolversBagTestModel::class))->toBe([
+        AttributeResolversBagSecondExtension::class,
+        AttributeResolversBagCountingExtension::class,
+    ]);
+});
+
+it('lists no extensions for a model nothing extends, nor after a flush', function (): void {
+    expect(AttributeResolversBag::extensionsFor(AttributeResolversBagTestModel::class))->toBe([]);
+
+    AttributeResolversBag::addExtension(AttributeResolversBagTestModel::class, AttributeResolversBagCountingExtension::class);
+    AttributeResolversBag::flush();
+
+    expect(AttributeResolversBag::extensionsFor(AttributeResolversBagTestModel::class))->toBe([]);
+});
+
+it('lists first the extension that resolve() answers with', function (array $registrationOrder): void {
+    foreach ($registrationOrder as $extension) {
+        AttributeResolversBag::addExtension(AttributeResolversBagTestModel::class, $extension);
+    }
+
+    $model = new AttributeResolversBagTestModel;
+    $first = AttributeResolversBag::extensionsFor(AttributeResolversBagTestModel::class)[0];
+
+    expect(AttributeResolversBag::resolve($model, 'colour'))->toBe((new $first($model))->getColourAttribute());
+})->with([
+    'counting extension first' => [[AttributeResolversBagCountingExtension::class, AttributeResolversBagSecondExtension::class]],
+    'second extension first' => [[AttributeResolversBagSecondExtension::class, AttributeResolversBagCountingExtension::class]],
+]);

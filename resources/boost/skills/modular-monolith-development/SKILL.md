@@ -237,7 +237,9 @@ final class ProductBillingExtension extends ModelExtension
 `$product->formatted_price` and `$product->invoices` then work as if defined on `Product`. Model
 extensions are wired in the `initialize` phase. A method becomes a relation only if it is public,
 declared on the extension class itself (not inherited) and has a **native return type** that is a
-`Relation` subclass; a docblock-only or union return type is silently ignored.
+`Relation` subclass; a docblock-only or union return type is silently ignored. If two extensions of
+one model provide the same attribute, the one registered first (module dependency order) answers;
+`AttributeResolversBag::extensionsFor(Product::class)` lists that order.
 
 Query methods for another module's builder: `hasModelBuilderExtensions([ProductBuilder::class =>
 ProductBillingQueries::class])` mixes the class into the builder (`Builder::mixin()`), so its methods
