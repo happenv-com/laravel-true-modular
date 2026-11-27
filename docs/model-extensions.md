@@ -64,7 +64,11 @@ registers two mechanisms:
   asked for a `get{Studly}Attribute` method; the first that has one wins. A unique sentinel object
   distinguishes "resolved to `null`" from "not provided" — comparing against `null` would conflate
   the two. The registry (`AttributeResolversBag`) is static because Eloquent's hook has no container
-  access.
+  access. Extensions are asked in the order they were first registered, which is the order the
+  module providers initialise in (module dependency order).
+  `AttributeResolversBag::extensionsFor(Product::class)` returns that order. When two extensions
+  provide the same attribute, the first one listed answers; static analysis tools use it to type the
+  attribute from the accessor that really runs.
 
 - **Relations** — `DynamicRelations::register()` reflects over the extension's public methods and,
   for each one whose return type is an Eloquent `Relation`, calls `Model::resolveRelationUsing()`.

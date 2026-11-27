@@ -45,6 +45,21 @@ class AttributeResolversBag
         return isset(self::$resolvers[$model]);
     }
 
+    /**
+     * The extensions registered for $model, in the order {@see resolve()} asks them.
+     *
+     * When more than one of them provides an attribute, the first one listed is the
+     * one that answers. A repeated registration keeps the extension's first position.
+     * Static analysis reads this to type an attribute from the accessor that really runs.
+     *
+     * @param  class-string  $model
+     * @return list<class-string>
+     */
+    public static function extensionsFor(string $model): array
+    {
+        return array_keys(self::$resolvers[$model] ?? []);
+    }
+
     public static function resolve(Model $model, string $key): mixed
     {
         $sentinel = self::sentinel();
